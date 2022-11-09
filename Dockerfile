@@ -1,7 +1,7 @@
 FROM ubuntu:22.10
 WORKDIR /usr/src/ffickle
 COPY . .
-RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl make -y
 # Install Rust
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && chmod +x /tmp/rustup-init.sh \
@@ -16,3 +16,4 @@ RUN ~/.cargo/bin/cargo install cargo-dylint dylint-link
 RUN (cd early && ~/.cargo/bin/cargo build)
 RUN (cd late && ~/.cargo/bin/cargo build)
 ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/early/target/debug/:/usr/src/ffickle/late/target/debug/"
+RUN mkdir /results

@@ -3,6 +3,7 @@ RED='\033[1;31m'
 GREEN='\033[1;32m'
 NC='\033[0m'
 make clean && make all
+mkdir -p "$2"
 mkdir -p "$2/$1"
 mkdir -p "$2/$1/early"
 mkdir -p "$2/$1/late"
@@ -15,11 +16,15 @@ fi
 while IFS=, read name version; 
 do 
     if (cargo-download -x "$name==$version" --output ./test 1> /dev/null); then 
-        if ! (cd test && cargo dylint --all); then
+        if ! (cd test && cargo dylint --all 1> /dev/null); then
+            echo "Writing failure to $2/$1/failed.csv"
             echo "$name,$version" >> "$2/$1/failed.csv"
         fi
+        echo "Writing visit to $2/$1/failed.csv"
         echo "$name,$version" >> "$2/$1/visited.csv"
+        echo "Copying analysis output to $2/$1/early/$name.json"
         [ ! -f ./test/ffickle_early.json ] || mv ./test/ffickle_early.json "$2/$1/early/$name.json"
+        echo "Copying analysis output to $2/$1/late/$name.json"
         [ ! -f ./test/ffickle_late.json ] || mv ./test/ffickle_late.json "$2/$1/late/$name.json"
     else
         echo "${RED}DOWNLOAD FAILED${NC} $name\n"
