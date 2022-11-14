@@ -18,9 +18,9 @@ fi
 while IFS=, read name version; 
 do 
     if (cargo-download -x "$name==$version" --output ./test 1> /dev/null); then 
-        if ! (cd test && cargo dylint --all 1> /dev/null); then
+	    if ! (cd test && (timeout 5m cargo dylint --all 1> /dev/null)); then
             echo "Writing failure to $2/$1/failed.csv"
-            echo "$name,$version" >> "$2/$1/failed.csv"
+            echo "$name,$version,$?" >> "$2/$1/failed.csv"
         fi
         echo "Writing visit to $2/$1/failed.csv"
         echo "$name,$version" >> "$2/$1/visited.csv"
