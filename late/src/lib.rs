@@ -18,6 +18,7 @@ extern crate rustc_parse;
 extern crate rustc_span;
 extern crate rustc_target;
 extern crate rustc_trait_selection;
+extern crate rustc_type_ir;
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::fluent;
@@ -28,7 +29,6 @@ use rustc_middle::ty::subst::SubstsRef;
 use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable};
 use rustc_span::symbol::sym;
 use rustc_span::Span;
-use rustc_span::DUMMY_SP;
 use rustc_target::abi::{Abi, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
@@ -36,6 +36,8 @@ use std::collections::HashSet;
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
+use rustc_middle::ty::TyKind;
+use rustc_span::DUMMY_SP;
 
 dylint_linting::impl_late_lint! {
     pub FFICKLE_LATE,
@@ -46,10 +48,17 @@ dylint_linting::impl_late_lint! {
 
 use rustc_lint::LateContext;
 use rustc_lint::LateLintPass;
+#[derive(PartialEq)]
+#[derive(Eq, Default, Serialize, Deserialize, Hash)]
+struct ObservedImproperType {
+    discriminant: usize,
+    str_rep: String
+}
+
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleLate {
-    errors_defn: HashSet<String>,
-    errors_decl: HashSet<String>,
+    errors_defn: HashSet<ObservedImproperType>,
+    errors_decl: HashSet<ObservedImproperType>,
 }
 
 #[derive(Clone, Copy)]
@@ -57,10 +66,11 @@ pub(crate) enum CItemKind {
     Declaration,
     Definition,
 }
+
 struct ImproperCTypesVisitor<'a, 'tcx> {
     cx: &'a LateContext<'tcx>,
     mode: CItemKind,
-    errors: &'a mut Vec<String>,
+    errors: &'a mut Vec<ObservedImproperType>,
 }
 
 enum FfiResult<'tcx> {
@@ -79,6 +89,7 @@ pub(crate) fn nonnull_optimization_guaranteed<'tcx>(
 ) -> bool {
     tcx.has_attr(def.did(), sym::rustc_nonnull_optimization_guaranteed)
 }
+
 /// `repr(transparent)` structs can have a single non-ZST field, this function returns that
 /// field.
 pub fn transparent_newtype_field<'a, 'tcx>(
@@ -161,6 +172,7 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
         // We should only ever reach this case if ty_is_known_nonnull is extended
         // to other types.
         ref _unhandled => {
+
             return None;
         }
     })
@@ -194,8 +206,7 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
         // being applied (and we've got a problem somewhere).
         let compute_size_skeleton = |t| SizeSkeleton::compute(t, cx.tcx, cx.param_env).unwrap();
         if !compute_size_skeleton(ty).same_size(compute_size_skeleton(field_ty)) {
-            println!("CRITICAL ERROR;");
-            std::process::exit(1);
+            panic!("improper_ctypes: Option nonnull optimization not applied?");
         }
 
         // Return the nullable type this Option-like enum can be safely represented with.
@@ -558,10 +569,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             | ty::Generator(..)
             | ty::GeneratorWitness(..)
             | ty::Placeholder(..)
-            | ty::FnDef(..) => {
-                println!("CRITICAL ERROR;");
-                std::process::exit(1);
-            }
+            | ty::FnDef(..) => panic!("unexpected type in foreign function: {:?}", ty),
         }
     }
 
@@ -572,7 +580,13 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         _note: DiagnosticMessage,
         _help: Option<DiagnosticMessage>,
     ) {
-        self.errors.append(&mut vec![format!("{}", ty).to_string()]);
+        let kind: &'tcx TyKind<'tcx> = ty.kind();
+        let discriminant = tykind_discriminant(kind);
+        let obj_rep = ObservedImproperType {
+            discriminant: discriminant,
+            str_rep: format!("{}_{}", discriminant, ty).to_string(),
+        };
+        self.errors.append(&mut vec![obj_rep]);
     }
 
     fn check_for_opaque_ty(&mut self, sp: Span, ty: Ty<'tcx>) -> bool {
@@ -777,4 +791,39 @@ fn ui() {
         env!("CARGO_PKG_NAME"),
         &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("ui"),
     );
+}
+
+
+
+
+const fn tykind_discriminant<I: rustc_type_ir::Interner>(value: & rustc_type_ir::TyKind<I>) -> usize {
+    match value {
+        rustc_type_ir::TyKind::Bool => 0,
+        rustc_type_ir::TyKind::Char => 1,
+        rustc_type_ir::TyKind::Int(_) => 2,
+        rustc_type_ir::TyKind::Uint(_) => 3,
+        rustc_type_ir::TyKind::Float(_) => 4,
+        rustc_type_ir::TyKind::Adt(_, _) => 5,
+        rustc_type_ir::TyKind::Foreign(_) => 6,
+        rustc_type_ir::TyKind::Str => 7,
+        rustc_type_ir::TyKind::Array(_, _) => 8,
+        rustc_type_ir::TyKind::Slice(_) => 9,
+        rustc_type_ir::TyKind::RawPtr(_) => 10,
+        rustc_type_ir::TyKind::Ref(_, _, _) => 11,
+        rustc_type_ir::TyKind::FnDef(_, _) => 12,
+        rustc_type_ir::TyKind::FnPtr(_) => 13,
+        rustc_type_ir::TyKind::Dynamic(..) => 14,
+        rustc_type_ir::TyKind::Closure(_, _) => 15,
+        rustc_type_ir::TyKind::Generator(_, _, _) => 16,
+        rustc_type_ir::TyKind::GeneratorWitness(_) => 17,
+        rustc_type_ir::TyKind::Never => 18,
+        rustc_type_ir::TyKind::Tuple(_) => 19,
+        rustc_type_ir::TyKind::Projection(_) => 20,
+        rustc_type_ir::TyKind::Opaque(_, _) => 21,
+        rustc_type_ir::TyKind::Param(_) => 22,
+        rustc_type_ir::TyKind::Bound(_, _) => 23,
+        rustc_type_ir::TyKind::Placeholder(_) => 24,
+        rustc_type_ir::TyKind::Infer(_) => 25,
+        rustc_type_ir::TyKind::Error(_) => 26,
+    }
 }
