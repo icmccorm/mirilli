@@ -39,7 +39,8 @@ use rustc_lint::{EarlyContext, EarlyLintPass};
 
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleEarly {
-    abis: HashSet<String>,
+    decl_abis: HashSet<String>,
+    defn_abis: HashSet<String>,
     decl_lint_blocked: bool,
     defn_lint_blocked: bool,
 }
@@ -78,7 +79,7 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         match kind {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
                 Explicit(sl, _) => {
-                    self.abis.insert(sl.symbol_unescaped.as_str().to_string());
+                    self.defn_abis.insert(sl.symbol_unescaped.as_str().to_string());
                 }
                 _ => {}
             },
@@ -92,7 +93,7 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                 let fm: &ast::ForeignMod = fm;
                 match fm.abi {
                     Some(abi) => {
-                        self.abis.insert(abi.symbol_unescaped.as_str().to_string());
+                        self.decl_abis.insert(abi.symbol_unescaped.as_str().to_string());
                     }
                     None => {}
                 }
@@ -101,7 +102,7 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         }
     }
     fn check_crate_post(&mut self, _: &EarlyContext<'_>, _: &ast::Crate) {
-        if self.abis.len() > 0 {
+        if self.decl_abis.len() > 0 || self.defn_abis.len() > 0 || self.decl_lint_blocked || self.defn_lint_blocked {
             match serde_json::to_string(&self) {
                 Ok(serialized) => match std::fs::File::create("ffickle_early.json") {
                     Ok(mut fl) => match fl.write_all(serialized.as_bytes()) {
