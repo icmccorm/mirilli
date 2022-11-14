@@ -22,7 +22,7 @@ do
             echo "Writing failure to $2/$1/failed.csv"
             echo "$name,$version,$?" >> "$2/$1/failed.csv"
         fi
-        echo "Writing visit to $2/$1/failed.csv"
+        echo "Writing visit to $2/$1/visited.csv"
         echo "$name,$version" >> "$2/$1/visited.csv"
         echo "Copying analysis output to $2/$1/early/$name.json"
         [ ! -f ./test/ffickle_early.json ] || mv ./test/ffickle_early.json "$2/$1/early/$name.json"
