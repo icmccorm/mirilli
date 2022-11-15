@@ -1,6 +1,4 @@
 #![feature(rustc_private)]
-#![allow(unused_extern_crates)]
-
 
 extern crate rustc_arena;
 extern crate rustc_ast;
@@ -28,7 +26,7 @@ use rustc_ast::NestedMetaItem::MetaItem;
 use rustc_span::symbol::sym;
 use rustc_span::Span;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::HashMap;
 dylint_linting::impl_early_lint! {
     pub FFICKLE_EARLY,
     Warn,
@@ -39,15 +37,14 @@ use rustc_lint::{EarlyContext, EarlyLintPass};
 
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleEarly {
-    decl_abis: HashSet<String>,
-    defn_abis: HashSet<String>,
+    decl_abis: HashMap<String, usize>,
+    defn_abis: HashMap<String, usize>,
     decl_lint_blocked: bool,
     defn_lint_blocked: bool,
 }
 
 impl<'tcx> EarlyLintPass for FfickleEarly {
     fn enter_lint_attrs(&mut self, _: &EarlyContext<'_>, attrs: &[ast::Attribute]) {
-
         for attr in attrs {
             if attr.has_name(sym::allow) {
                 match attr.meta_item_list() {
@@ -57,13 +54,12 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                             match item {
                                 MetaItem(mi) => match mi.ident() {
                                     Some(id) => {
-                                    if id.name.as_str().eq("improper_ctypes_definitions"){
-                                        self.defn_lint_blocked = true;
-
-                                    } else if id.name.as_str().eq("improper_ctypes") {
-                                        self.decl_lint_blocked = true;
+                                        if id.name.as_str().eq("improper_ctypes_definitions") {
+                                            self.defn_lint_blocked = true;
+                                        } else if id.name.as_str().eq("improper_ctypes") {
+                                            self.decl_lint_blocked = true;
+                                        }
                                     }
-                                },
                                     None => {}
                                 },
                                 _ => {}
@@ -79,7 +75,15 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         match kind {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
                 Explicit(sl, _) => {
-                    self.defn_abis.insert(sl.symbol_unescaped.as_str().to_string());
+                    let abi_string = sl.symbol_unescaped.as_str().to_string();
+                    match self.defn_abis.get(&abi_string) {
+                        Some(c) => {
+                            self.defn_abis.insert(abi_string, *c + 1);
+                        }
+                        None => {
+                            self.defn_abis.insert(abi_string, 0);
+                        }
+                    }
                 }
                 _ => {}
             },
@@ -93,7 +97,15 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                 let fm: &ast::ForeignMod = fm;
                 match fm.abi {
                     Some(abi) => {
-                        self.decl_abis.insert(abi.symbol_unescaped.as_str().to_string());
+                        let abi_string = abi.symbol_unescaped.as_str().to_string();
+                        match self.decl_abis.get(&abi_string) {
+                            Some(c) => {
+                                self.decl_abis.insert(abi_string, *c + 1);
+                            }
+                            None => {
+                                self.decl_abis.insert(abi_string, 0);
+                            }
+                        }
                     }
                     None => {}
                 }
@@ -101,26 +113,25 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
             _ => {}
         }
     }
+
     fn check_crate_post(&mut self, _: &EarlyContext<'_>, _: &ast::Crate) {
-        if self.decl_abis.len() > 0 || self.defn_abis.len() > 0 || self.decl_lint_blocked || self.defn_lint_blocked {
-            match serde_json::to_string(&self) {
-                Ok(serialized) => match std::fs::File::create("ffickle_early.json") {
-                    Ok(mut fl) => match fl.write_all(serialized.as_bytes()) {
-                        Ok(..) => {}
-                        Err(e) => {
-                            println!("Failed to write to ffickle.json: {}", e.to_string());
-                            std::process::exit(1);
-                        }
-                    },
+        match serde_json::to_string(&self) {
+            Ok(serialized) => match std::fs::File::create("ffickle_early.json") {
+                Ok(mut fl) => match fl.write_all(serialized.as_bytes()) {
+                    Ok(..) => {}
                     Err(e) => {
-                        println!("Failed to open file to store analysis: {}", e.to_string());
+                        println!("Failed to write to ffickle.json: {}", e.to_string());
                         std::process::exit(1);
                     }
                 },
                 Err(e) => {
-                    println!("Failed to serialize analysis results: {}", e.to_string());
+                    println!("Failed to open file to store analysis: {}", e.to_string());
                     std::process::exit(1);
                 }
+            },
+            Err(e) => {
+                println!("Failed to serialize analysis results: {}", e.to_string());
+                std::process::exit(1);
             }
         }
     }
