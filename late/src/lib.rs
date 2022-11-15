@@ -34,7 +34,7 @@ use rustc_span::DUMMY_SP;
 use rustc_target::abi::{Abi, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
@@ -56,8 +56,8 @@ struct ObservedImproperType {
 
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleLate {
-    errors_defn: HashMap<ObservedImproperType, usize>,
-    errors_decl: HashMap<ObservedImproperType, usize>,
+    errors_defn: HashMap<String, HashMap<ObservedImproperType, usize>>,
+    errors_decl: HashMap<String, HashMap<ObservedImproperType, usize>>,
 }
 
 #[derive(Clone, Copy)]
@@ -733,14 +733,19 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         if !vis.is_internal_abi(abi) {
             vis.check_foreign_fn(hir_id, decl);
         }
+        let abi_string = abi.to_string();
+        let curr_abi_error_map = self
+            .errors_decl
+            .entry(abi_string)
+            .or_insert(HashMap::<ObservedImproperType, usize>::new());
         for err in error_collection {
-            let curr_count = self.errors_decl.get(&err);
+            let curr_count = (curr_abi_error_map).get(&err);
             match curr_count {
                 Some(c) => {
-                    self.errors_decl.insert(err, *c + 1);
+                    (curr_abi_error_map).insert(err, *c + 1);
                 }
                 None => {
-                    self.errors_decl.insert(err, 0);
+                    (curr_abi_error_map).insert(err, 0);
                 }
             }
         }
@@ -753,7 +758,6 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
             errors: &mut error_collection,
         };
         let abi = cx.tcx.hir().get_foreign_abi(it.hir_id());
-
         if !vis.is_internal_abi(abi) {
             match it.kind {
                 hir::ForeignItemKind::Fn(ref decl, _, _) => {
@@ -765,14 +769,19 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 hir::ForeignItemKind::Type => (),
             }
         }
+        let abi_string = abi.to_string();
+        let curr_abi_error_map = self
+            .errors_defn
+            .entry(abi_string)
+            .or_insert(HashMap::<ObservedImproperType, usize>::new());
         for err in error_collection {
-            let curr_count = self.errors_defn.get(&err);
+            let curr_count = (curr_abi_error_map).get(&err);
             match curr_count {
                 Some(c) => {
-                    self.errors_defn.insert(err, *c + 1);
+                    (curr_abi_error_map).insert(err, *c + 1);
                 }
                 None => {
-                    self.errors_defn.insert(err, 0);
+                    (curr_abi_error_map).insert(err, 0);
                 }
             }
         }
