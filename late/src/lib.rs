@@ -719,7 +719,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
     ) {
         use hir::intravisit::FnKind;
 
-        let abi = match kind {
+        let abi:rustc_target::spec::abi::Abi = match kind {
             FnKind::ItemFn(_, _, header, ..) => header.abi,
             FnKind::Method(_, sig, ..) => sig.header.abi,
             _ => return,
@@ -733,7 +733,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         if !vis.is_internal_abi(abi) {
             vis.check_foreign_fn(hir_id, decl);
         }
-        let abi_string = abi.to_string();
+        let abi_string = format!("{}", abi);
         let curr_abi_error_map = self
             .errors_decl
             .entry(abi_string)
@@ -769,7 +769,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 hir::ForeignItemKind::Type => (),
             }
         }
-        let abi_string = abi.to_string();
+        let abi_string = format!("{}", abi);
         let curr_abi_error_map = self
             .errors_defn
             .entry(abi_string)
