@@ -26,18 +26,18 @@ use rustc_errors::DiagnosticMessage;
 use rustc_hir as hir;
 use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
 use rustc_middle::ty::subst::SubstsRef;
+use rustc_middle::ty::TyKind;
 use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable};
 use rustc_span::symbol::sym;
 use rustc_span::Span;
+use rustc_span::DUMMY_SP;
 use rustc_target::abi::{Abi, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashMap};
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
-use rustc_middle::ty::TyKind;
-use rustc_span::DUMMY_SP;
 
 dylint_linting::impl_late_lint! {
     pub FFICKLE_LATE,
@@ -48,17 +48,16 @@ dylint_linting::impl_late_lint! {
 
 use rustc_lint::LateContext;
 use rustc_lint::LateLintPass;
-#[derive(PartialEq)]
-#[derive(Eq, Default, Serialize, Deserialize, Hash)]
+#[derive(PartialEq, Eq, Default, Serialize, Deserialize, Hash)]
 struct ObservedImproperType {
     discriminant: usize,
-    str_rep: String
+    str_rep: String,
 }
 
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleLate {
-    errors_defn: HashSet<ObservedImproperType>,
-    errors_decl: HashSet<ObservedImproperType>,
+    errors_defn: HashMap<ObservedImproperType, usize>,
+    errors_decl: HashMap<ObservedImproperType, usize>,
 }
 
 #[derive(Clone, Copy)]
@@ -172,7 +171,6 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
         // We should only ever reach this case if ty_is_known_nonnull is extended
         // to other types.
         ref _unhandled => {
-
             return None;
         }
     })
@@ -735,7 +733,17 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         if !vis.is_internal_abi(abi) {
             vis.check_foreign_fn(hir_id, decl);
         }
-        self.errors_defn.extend(error_collection);
+        for err in error_collection {
+            let curr_count = self.errors_decl.get(&err);
+            match curr_count {
+                Some(c) => {
+                    self.errors_decl.insert(err, *c + 1);
+                }
+                None => {
+                    self.errors_decl.insert(err, 0);
+                }
+            }
+        }
     }
     fn check_foreign_item(&mut self, cx: &LateContext<'_>, it: &hir::ForeignItem<'_>) {
         let mut error_collection = vec![];
@@ -757,29 +765,37 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 hir::ForeignItemKind::Type => (),
             }
         }
-        self.errors_decl.extend(error_collection);
+        for err in error_collection {
+            let curr_count = self.errors_defn.get(&err);
+            match curr_count {
+                Some(c) => {
+                    self.errors_defn.insert(err, *c + 1);
+                }
+                None => {
+                    self.errors_defn.insert(err, 0);
+                }
+            }
+        }
     }
 
     fn check_crate_post(&mut self, _: &LateContext<'tcx>) {
-        if self.errors_decl.len() > 0 || self.errors_defn.len() > 0 {
-            match serde_json::to_string(&self) {
-                Ok(serialized) => match std::fs::File::create("ffickle_late.json") {
-                    Ok(mut fl) => match fl.write_all(serialized.as_bytes()) {
-                        Ok(..) => {}
-                        Err(e) => {
-                            println!("Failed to write to ffickle.json: {}", e.to_string());
-                            std::process::exit(1);
-                        }
-                    },
+        match serde_json::to_string(&self) {
+            Ok(serialized) => match std::fs::File::create("ffickle_late.json") {
+                Ok(mut fl) => match fl.write_all(serialized.as_bytes()) {
+                    Ok(..) => {}
                     Err(e) => {
-                        println!("Failed to open file to store analysis: {}", e.to_string());
+                        println!("Failed to write to ffickle.json: {}", e.to_string());
                         std::process::exit(1);
                     }
                 },
                 Err(e) => {
-                    println!("Failed to serialize analysis results: {}", e.to_string());
+                    println!("Failed to open file to store analysis: {}", e.to_string());
                     std::process::exit(1);
                 }
+            },
+            Err(e) => {
+                println!("Failed to serialize analysis results: {}", e.to_string());
+                std::process::exit(1);
             }
         }
     }
@@ -793,10 +809,9 @@ fn ui() {
     );
 }
 
-
-
-
-const fn tykind_discriminant<I: rustc_type_ir::Interner>(value: & rustc_type_ir::TyKind<I>) -> usize {
+const fn tykind_discriminant<I: rustc_type_ir::Interner>(
+    value: &rustc_type_ir::TyKind<I>,
+) -> usize {
     match value {
         rustc_type_ir::TyKind::Bool => 0,
         rustc_type_ir::TyKind::Char => 1,
