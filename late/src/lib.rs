@@ -79,7 +79,7 @@ struct FfickleLate {
 #[derive(Default, Serialize, Deserialize)]
 struct ErrorCount {
     total_items: usize,
-    errored: HashMap<usize, usize>,
+    item_error_counts: Vec<HashMap<usize, usize>>,
 }
 
 trait ErrorIDStore {
@@ -103,6 +103,7 @@ impl ErrorIDStore for FfickleLate {
             ForeignItemType::StaticItem => &mut self.static_items,
         };
         (*store).total_items += 1;
+        let mut err_counts = HashMap::<usize, usize>::new();
 
         for err in errors {
             let foreign_err = ForeignTypeError {
@@ -124,9 +125,10 @@ impl ErrorIDStore for FfickleLate {
                     self.error_id_count - 1
                 }
             };
-            let count = (*store).errored.entry(id).or_insert(0);
+            let count = (err_counts).entry(id).or_insert(0);
             *count += 1;
         }
+        (*store).item_error_counts.extend(vec![err_counts]);
     }
 }
 
