@@ -54,10 +54,80 @@ struct ObservedImproperType {
     str_rep: String,
 }
 
+#[derive(PartialEq, Eq, Default, Serialize, Deserialize, Hash)]
+struct ForeignTypeError {
+    improper: ObservedImproperType,
+    abi: String,
+}
+
+#[derive(Serialize, Deserialize, Eq, PartialEq, Hash)]
+enum ForeignItemType {
+    RustFn,
+    ForeignFn,
+    StaticItem,
+}
+
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleLate {
-    errors_defn: HashMap<String, HashMap<ObservedImproperType, usize>>,
-    errors_decl: HashMap<String, HashMap<ObservedImproperType, usize>>,
+    error_id_count: usize,
+    error_id_map: HashMap<usize, ForeignTypeError>,
+    foreign_functions: ErrorCount,
+    static_items: ErrorCount,
+    rust_functions: ErrorCount,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+struct ErrorCount {
+    total_items: usize,
+    errored: HashMap<usize, usize>,
+}
+
+trait ErrorIDStore {
+    fn record_errors(
+        &mut self,
+        errors: Vec<ObservedImproperType>,
+        abi_string: &str,
+        item_type: ForeignItemType,
+    ) -> ();
+}
+impl ErrorIDStore for FfickleLate {
+    fn record_errors(
+        &mut self,
+        errors: Vec<ObservedImproperType>,
+        abi_string: &str,
+        item_type: ForeignItemType,
+    ) -> () {
+        let store = match item_type {
+            ForeignItemType::RustFn => &mut self.rust_functions,
+            ForeignItemType::ForeignFn => &mut self.foreign_functions,
+            ForeignItemType::StaticItem => &mut self.static_items,
+        };
+        (*store).total_items += 1;
+
+        for err in errors {
+            let foreign_err = ForeignTypeError {
+                improper: (err),
+                abi: abi_string.to_string().replace("\"", ""),
+            };
+            let id_opt = self.error_id_map.iter().find_map(|(key, val)| {
+                if val.eq(&foreign_err) {
+                    Some(key)
+                } else {
+                    None
+                }
+            });
+            let id = match id_opt {
+                Some(i) => *i,
+                None => {
+                    self.error_id_map.insert(self.error_id_count, foreign_err);
+                    self.error_id_count += 1;
+                    self.error_id_count - 1
+                }
+            };
+            let count = (*store).errored.entry(id).or_insert(0);
+            *count += 1;
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -582,7 +652,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         let discriminant = tykind_discriminant(kind);
         let obj_rep = ObservedImproperType {
             discriminant: discriminant,
-            str_rep: format!("{}_{}", discriminant, ty).to_string(),
+            str_rep: format!("{}", ty).to_string(),
         };
         self.errors.append(&mut vec![obj_rep]);
     }
@@ -719,7 +789,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
     ) {
         use hir::intravisit::FnKind;
 
-        let abi:rustc_target::spec::abi::Abi = match kind {
+        let abi: rustc_target::spec::abi::Abi = match kind {
             FnKind::ItemFn(_, _, header, ..) => header.abi,
             FnKind::Method(_, sig, ..) => sig.header.abi,
             _ => return,
@@ -732,22 +802,11 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         };
         if !vis.is_internal_abi(abi) {
             vis.check_foreign_fn(hir_id, decl);
-        }
-        let abi_string = format!("{}", abi);
-        let curr_abi_error_map = self
-            .errors_decl
-            .entry(abi_string)
-            .or_insert(HashMap::<ObservedImproperType, usize>::new());
-        for err in error_collection {
-            let curr_count = (curr_abi_error_map).get(&err);
-            match curr_count {
-                Some(c) => {
-                    (curr_abi_error_map).insert(err, *c + 1);
-                }
-                None => {
-                    (curr_abi_error_map).insert(err, 0);
-                }
-            }
+            self.record_errors(
+                error_collection,
+                format!("{}", abi).as_str(),
+                ForeignItemType::RustFn,
+            );
         }
     }
     fn check_foreign_item(&mut self, cx: &LateContext<'_>, it: &hir::ForeignItem<'_>) {
@@ -759,30 +818,23 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         };
         let abi = cx.tcx.hir().get_foreign_abi(it.hir_id());
         if !vis.is_internal_abi(abi) {
-            match it.kind {
+            let item_type = match it.kind {
                 hir::ForeignItemKind::Fn(ref decl, _, _) => {
                     vis.check_foreign_fn(it.hir_id(), decl);
+                    Some(ForeignItemType::ForeignFn)
                 }
                 hir::ForeignItemKind::Static(ref ty, _) => {
                     vis.check_foreign_static(it.hir_id(), ty.span);
+                    Some(ForeignItemType::StaticItem)
                 }
-                hir::ForeignItemKind::Type => (),
-            }
-        }
-        let abi_string = format!("{}", abi);
-        let curr_abi_error_map = self
-            .errors_defn
-            .entry(abi_string)
-            .or_insert(HashMap::<ObservedImproperType, usize>::new());
-        for err in error_collection {
-            let curr_count = (curr_abi_error_map).get(&err);
-            match curr_count {
-                Some(c) => {
-                    (curr_abi_error_map).insert(err, *c + 1);
+                hir::ForeignItemKind::Type => None,
+            };
+
+            match item_type {
+                Some(tp) => {
+                    self.record_errors(error_collection, format!("{}", abi).as_str(), tp);
                 }
-                None => {
-                    (curr_abi_error_map).insert(err, 0);
-                }
+                None => {}
             }
         }
     }
@@ -803,7 +855,10 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 }
             },
             Err(e) => {
-                println!("Failed to serialize analysis results: {}", e.to_string());
+                println!(
+                    "Failed to serialize Late analysis results: {}",
+                    e.to_string()
+                );
                 std::process::exit(1);
             }
         }

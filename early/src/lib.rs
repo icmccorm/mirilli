@@ -36,11 +36,12 @@ dylint_linting::impl_early_lint! {
 use rustc_lint::{EarlyContext, EarlyLintPass};
 
 #[derive(Default, Serialize, Deserialize)]
+
 struct FfickleEarly {
-    decl_abis: HashMap<String, usize>,
-    defn_abis: HashMap<String, usize>,
-    decl_lint_blocked: bool,
-    defn_lint_blocked: bool,
+    foreign_module_abis: HashMap<String, usize>,
+    rust_function_abis: HashMap<String, usize>,
+    foreign_module_lint_blocked: bool,
+    rust_function_lint_blocked: bool,
 }
 
 impl<'tcx> EarlyLintPass for FfickleEarly {
@@ -55,9 +56,9 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                                 MetaItem(mi) => match mi.ident() {
                                     Some(id) => {
                                         if id.name.as_str().eq("improper_ctypes_definitions") {
-                                            self.defn_lint_blocked = true;
+                                            self.rust_function_lint_blocked = true;
                                         } else if id.name.as_str().eq("improper_ctypes") {
-                                            self.decl_lint_blocked = true;
+                                            self.foreign_module_lint_blocked = true;
                                         }
                                     }
                                     None => {}
@@ -75,13 +76,13 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         match kind {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
                 Explicit(sl, _) => {
-                    let abi_string = sl.symbol_unescaped.as_str().to_string();
-                    match self.defn_abis.get(&abi_string) {
+                    let abi_string = sl.symbol_unescaped.as_str().to_string().replace("\"", "");
+                    match self.rust_function_abis.get(&abi_string) {
                         Some(c) => {
-                            self.defn_abis.insert(abi_string, *c + 1);
+                            self.rust_function_abis.insert(abi_string, *c + 1);
                         }
                         None => {
-                            self.defn_abis.insert(abi_string, 0);
+                            self.rust_function_abis.insert(abi_string, 0);
                         }
                     }
                 }
@@ -97,13 +98,13 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                 let fm: &ast::ForeignMod = fm;
                 match fm.abi {
                     Some(abi) => {
-                        let abi_string = abi.symbol_unescaped.as_str().to_string();
-                        match self.decl_abis.get(&abi_string) {
+                        let abi_string = abi.symbol_unescaped.as_str().to_string().replace("\"", "");
+                        match self.foreign_module_abis.get(&abi_string) {
                             Some(c) => {
-                                self.decl_abis.insert(abi_string, *c + 1);
+                                self.foreign_module_abis.insert(abi_string, *c + 1);
                             }
                             None => {
-                                self.decl_abis.insert(abi_string, 0);
+                                self.foreign_module_abis.insert(abi_string, 0);
                             }
                         }
                     }
