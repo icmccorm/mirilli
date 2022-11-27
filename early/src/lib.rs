@@ -82,7 +82,7 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                             self.rust_function_abis.insert(abi_string, *c + 1);
                         }
                         None => {
-                            self.rust_function_abis.insert(abi_string, 0);
+                            self.rust_function_abis.insert(abi_string, 1);
                         }
                     }
                 }
@@ -104,7 +104,7 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                                 self.foreign_module_abis.insert(abi_string, *c + 1);
                             }
                             None => {
-                                self.foreign_module_abis.insert(abi_string, 0);
+                                self.foreign_module_abis.insert(abi_string, 1);
                             }
                         }
                     }
