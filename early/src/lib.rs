@@ -99,12 +99,13 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                 match fm.abi {
                     Some(abi) => {
                         let abi_string = abi.symbol_unescaped.as_str().to_string().replace("\"", "");
+                        let count_of_items = fm.items.len();
                         match self.foreign_module_abis.get(&abi_string) {
                             Some(c) => {
-                                self.foreign_module_abis.insert(abi_string, *c + 1);
+                                self.foreign_module_abis.insert(abi_string, *c + count_of_items);
                             }
                             None => {
-                                self.foreign_module_abis.insert(abi_string, 1);
+                                self.foreign_module_abis.insert(abi_string, count_of_items);
                             }
                         }
                     }
