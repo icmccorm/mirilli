@@ -3,15 +3,16 @@ import os
 import sys
 
 walk_dir = sys.argv[1]
-
-foreign_module_abis = ""
-rust_function_abis = ""
+foreign_module_abis = "name,abi,count\n"
+rust_function_abis = "name,abi,count\n"
 
 defn_types = ""
 decl_types = ""
 disabled_decl = ""
 disabled_defn = ""
 
+finished_early = "name\n"
+finished_late = "name\n"
 base_column_names = "crate_name,category,"
 error_category_counts = base_column_names + "item_index,abi,discriminant,count"
 error_string_counts = base_column_names + "discriminant,text,count"
@@ -59,7 +60,6 @@ def process_error_category(category, json):
         "by_str_rep": str_rep_entries,
     }
 
-
 for partition in os.listdir(walk_dir):
     f = os.path.join(walk_dir, partition)
     for dir in os.listdir(f):
@@ -69,6 +69,7 @@ for partition in os.listdir(walk_dir):
                 path_to_early_result = os.path.join(early, early_result)
                 name, early_result_json = read_json(path_to_early_result, early_result)
                 print(f"{name}-early")
+                finished_early += f"{name}\n"
                 for abi, count in early_result_json["foreign_module_abis"].items():
                     foreign_module_abis += f"{name},{abi},{count+1}\n"
                 for abi, count in early_result_json["rust_function_abis"].items():
@@ -89,6 +90,7 @@ for partition in os.listdir(walk_dir):
                 path_to_late_result = os.path.join(late, late_result)
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
+                finished_late += f"{name}\n"
                 if late_result_json["error_id_count"] != 0:
                     print(f"{name}-late")
                     foreign_data = process_error_category(
@@ -111,7 +113,8 @@ for partition in os.listdir(walk_dir):
                     error_category_counts += rust_data["by_category"]
                     error_relative_counts += rust_data["by_count"]
                     error_string_counts += rust_data["by_str_rep"]
-
+dump(finished_early, "./data/finished_early.csv")
+dump(finished_late, "./data/finished_late.csv")
 dump(error_string_counts, "./data/string_error_counts.csv")
 dump(error_relative_counts, "./data/item_error_counts.csv")
 dump(error_category_counts, "./data/category_error_counts.csv")
