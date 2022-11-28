@@ -1,3 +1,4 @@
+name,abi,count
 rust-libretro,Rust,1
 ord-liblmdb-sys,C,1
 nativeshell_core,C,2

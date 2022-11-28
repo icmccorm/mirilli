@@ -1,3 +1,4 @@
+name,abi,count
 rust-libretro,C,50
 detour,C,1
 simple-voter,C,1
