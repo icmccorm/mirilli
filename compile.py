@@ -62,57 +62,58 @@ def process_error_category(category, json):
 
 for partition in os.listdir(walk_dir):
     f = os.path.join(walk_dir, partition)
-    for dir in os.listdir(f):
-        if dir == "early":
-            early = os.path.join(f, dir)
-            for early_result in os.listdir(early):
-                path_to_early_result = os.path.join(early, early_result)
-                name, early_result_json = read_json(path_to_early_result, early_result)
-                print(f"{name}-early")
-                finished_early += f"{name}\n"
-                for abi, count in early_result_json["foreign_module_abis"].items():
-                    foreign_module_abis += f"{name},{abi},{count+1}\n"
-                for abi, count in early_result_json["rust_function_abis"].items():
-                    rust_function_abis += f"{name},{abi},{count+1}\n"
-                if (
-                    "foreign_module_lint_blocked" in early_result_json
-                    and early_result_json["foreign_module_lint_blocked"]
-                ):
-                    disabled_decl += f"{name}\n"
-                if (
-                    "rust_function_lint_blocked" in early_result_json
-                    and early_result_json["rust_function_lint_blocked"]
-                ):
-                    disabled_defn += f"{name}\n"
-        if dir == "late":
-            late = os.path.join(f, dir)
-            for late_result in os.listdir(late):
-                path_to_late_result = os.path.join(late, late_result)
-                name, late_result_json = read_json(
-                    path_to_late_result, late_result)
-                finished_late += f"{name}\n"
-                if late_result_json["error_id_count"] != 0:
-                    print(f"{name}-late")
-                    foreign_data = process_error_category(
-                        "foreign_functions", late_result_json
-                    )
-                    error_category_counts += foreign_data["by_category"]
-                    error_relative_counts += foreign_data["by_count"]
-                    error_string_counts += foreign_data["by_str_rep"]
+    if(os.path.isdir(f)):
+        for dir in os.listdir(f):
+            if dir == "early":
+                early = os.path.join(f, dir)
+                for early_result in os.listdir(early):
+                    path_to_early_result = os.path.join(early, early_result)
+                    name, early_result_json = read_json(path_to_early_result, early_result)
+                    print(f"{name}-early")
+                    finished_early += f"{name}\n"
+                    for abi, count in early_result_json["foreign_module_abis"].items():
+                        foreign_module_abis += f"{name},{abi},{count+1}\n"
+                    for abi, count in early_result_json["rust_function_abis"].items():
+                        rust_function_abis += f"{name},{abi},{count+1}\n"
+                    if (
+                        "foreign_module_lint_blocked" in early_result_json
+                        and early_result_json["foreign_module_lint_blocked"]
+                    ):
+                        disabled_decl += f"{name}\n"
+                    if (
+                        "rust_function_lint_blocked" in early_result_json
+                        and early_result_json["rust_function_lint_blocked"]
+                    ):
+                        disabled_defn += f"{name}\n"
+            if dir == "late":
+                late = os.path.join(f, dir)
+                for late_result in os.listdir(late):
+                    path_to_late_result = os.path.join(late, late_result)
+                    name, late_result_json = read_json(
+                        path_to_late_result, late_result)
+                    finished_late += f"{name}\n"
+                    if late_result_json["error_id_count"] != 0:
+                        print(f"{name}-late")
+                        foreign_data = process_error_category(
+                            "foreign_functions", late_result_json
+                        )
+                        error_category_counts += foreign_data["by_category"]
+                        error_relative_counts += foreign_data["by_count"]
+                        error_string_counts += foreign_data["by_str_rep"]
 
-                    static_data = process_error_category(
-                        "static_items", late_result_json
-                    )
-                    error_category_counts += static_data["by_category"]
-                    error_relative_counts += static_data["by_count"]
-                    error_string_counts += static_data["by_str_rep"]
+                        static_data = process_error_category(
+                            "static_items", late_result_json
+                        )
+                        error_category_counts += static_data["by_category"]
+                        error_relative_counts += static_data["by_count"]
+                        error_string_counts += static_data["by_str_rep"]
 
-                    rust_data = process_error_category(
-                        "rust_functions", late_result_json
-                    )
-                    error_category_counts += rust_data["by_category"]
-                    error_relative_counts += rust_data["by_count"]
-                    error_string_counts += rust_data["by_str_rep"]
+                        rust_data = process_error_category(
+                            "rust_functions", late_result_json
+                        )
+                        error_category_counts += rust_data["by_category"]
+                        error_relative_counts += rust_data["by_count"]
+                        error_string_counts += rust_data["by_str_rep"]
 dump(finished_early, "./data/finished_early.csv")
 dump(finished_late, "./data/finished_late.csv")
 dump(error_string_counts, "./data/string_error_counts.csv")
