@@ -34,10 +34,11 @@ foreign_abis <- read_csv(
     show_col_types = FALSE
 ) %>% filter(abi == "C")
 
-early_downloads <- finished_early %>% inner_join(downloads, by=c("name")) %>% inner_join(foreign_abis, by=c("name"))
+early_downloads <- finished_early %>% 
+    inner_join(downloads, by=c("name")) %>% 
+    inner_join(foreign_abis, by=c("name")) %>% 
+    arrange(desc(num_downloads)) %>% 
+    slice(1:20) %>% select(name, count)
 
-early_downloads
-top3 <- early_downloads %>%
-  arrange(desc(num_downloads)) %>% 
-  slice(1:3)
-top3
+coding_sample_path <- file.path("coding/sample.csv")
+early_downloads %>% write_csv(coding_sample_path)
