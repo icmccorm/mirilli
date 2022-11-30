@@ -1,0 +1,28 @@
+---
+title: "Distribution of ABIs"
+output: html_notebook
+---
+
+```{r setup, include = FALSE}
+library(dplyr)
+library(readr)
+library(tidyr)
+options(dplyr.summarise.inform = FALSE)
+foreign_abis_path <- file.path("../foreign_module_abis.csv")
+foreign_abis <- read_csv(
+    foreign_abis_path,
+    show_col_types = FALSE
+) %>% select(name, abi)
+```
+
+
+The maximum number of ABIs defined in a single file.
+```{r}
+by_count <- foreign_abis %>% group_by(name) %>% summarize(n=n())
+print(max(by_count$n))
+```
+
+The number of ABI occurrences in files. 
+
+
+

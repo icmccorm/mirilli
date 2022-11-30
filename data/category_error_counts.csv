@@ -1,4 +1,5 @@
-crate_name,category,item_index,abi,discriminant,countwascc-s3,rust_functions,0,C,14,1
+crate_name,category,item_index,abi,id,count
+wascc-s3,rust_functions,0,C,14,1
 xcb,foreign_functions,31,C,13,1
 rusfuse,foreign_functions,0,C,5,1
 rusfuse,foreign_functions,0,C,13,1

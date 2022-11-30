@@ -1,4 +1,5 @@
-crate_name,category,item_index,num_errorswascc-s3,rust_functions,0,1
+crate_name,category,item_index,num_errors
+wascc-s3,rust_functions,0,1
 xcb,foreign_functions,0,0
 xcb,foreign_functions,1,0
 xcb,foreign_functions,2,0

@@ -34,7 +34,7 @@ use rustc_span::DUMMY_SP;
 use rustc_target::abi::{Abi, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
@@ -52,11 +52,13 @@ use rustc_lint::LateLintPass;
 struct ObservedImproperType {
     discriminant: usize,
     str_rep: String,
+    location: String,
 }
 
 #[derive(PartialEq, Eq, Default, Serialize, Deserialize, Hash)]
 struct ForeignTypeError {
-    improper: ObservedImproperType,
+    discriminant: usize,
+    str_rep: String,
     abi: String,
 }
 
@@ -69,6 +71,7 @@ enum ForeignItemType {
 
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleLate {
+    error_locations: HashMap<usize, HashSet<String>>,
     error_id_count: usize,
     error_id_map: HashMap<usize, ForeignTypeError>,
     foreign_functions: ErrorCount,
@@ -107,7 +110,8 @@ impl ErrorIDStore for FfickleLate {
 
         for err in errors {
             let foreign_err = ForeignTypeError {
-                improper: (err),
+                discriminant: err.discriminant,
+                str_rep: err.str_rep,
                 abi: abi_string.to_string().replace("\"", ""),
             };
             let id_opt = self.error_id_map.iter().find_map(|(key, val)| {
@@ -125,6 +129,7 @@ impl ErrorIDStore for FfickleLate {
                     self.error_id_count - 1
                 }
             };
+            self.error_locations.entry(id).or_default().insert(err.location);
             let count = (err_counts).entry(id).or_insert(0);
             *count += 1;
         }
@@ -303,6 +308,7 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
 impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     /// Check if the type is array and emit an unsafe type lint.
     fn check_for_array_ty(&mut self, sp: Span, ty: Ty<'tcx>) -> bool {
+        
         if let ty::Array(..) = ty.kind() {
             self.emit_ffi_unsafe_type_lint(
                 ty,
@@ -646,15 +652,20 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     fn emit_ffi_unsafe_type_lint(
         &mut self,
         ty: Ty<'tcx>,
-        _sp: Span,
+        sp: Span,
         _note: DiagnosticMessage,
         _help: Option<DiagnosticMessage>,
     ) {
         let kind: &'tcx TyKind<'tcx> = ty.kind();
         let discriminant = tykind_discriminant(kind);
+        let tyctx = self.cx.tcx;
+        let sess = tyctx.sess;
+        let parse_sess = &sess.parse_sess;
+        let source_map = &(*parse_sess).source_map();
         let obj_rep = ObservedImproperType {
             discriminant: discriminant,
             str_rep: format!("{}", ty).to_string(),
+            location: source_map.span_to_diagnostic_string(sp)
         };
         self.errors.append(&mut vec![obj_rep]);
     }

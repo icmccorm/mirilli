@@ -14,9 +14,9 @@ disabled_defn = ""
 finished_early = "name\n"
 finished_late = "name\n"
 base_column_names = "crate_name,category,"
-error_category_counts = base_column_names + "item_index,abi,discriminant,count"
-error_string_counts = base_column_names + "discriminant,text,count"
-error_relative_counts = base_column_names + "item_index,num_errors"
+error_category_counts = base_column_names + "item_index,abi,id,count\n"
+error_string_counts = base_column_names + "text,id,count\n"
+error_relative_counts = base_column_names + "item_index,num_errors\n"
 
 def read_json(path, name):
     fd = open(path, "r")
@@ -53,7 +53,7 @@ def process_error_category(category, json):
             category_entries += f'{name},{category},{entry_index},{error_entry["abi"]},{discriminant},{entry[error_type]}\n'
         count_entries += f"{name},{category},{entry_index},{error_count}\n"
     for key in error_str.keys():
-        str_rep_entries += f'{name},{category},{key[0]},{key[1]},"{error_str[key]}"\n'
+        str_rep_entries += f'{name},{category},"{key[0]}",{key[1]},{error_str[key]}\n'
     return {
         "by_category": category_entries,
         "by_count": count_entries,

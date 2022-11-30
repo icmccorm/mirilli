@@ -1,0 +1,75 @@
+---
+title: "Improper Type Errors"
+output: html_notebook
+---
+
+```{r setup, include = FALSE}
+library(dplyr)
+library(readr)
+library(tidyr)
+options(dplyr.summarise.inform = FALSE)
+discriminant_counts_path <- file.path("../category_error_counts.csv")
+discriminant_counts <- read_csv(
+    discriminant_counts_path,
+    show_col_types = FALSE
+)
+discriminmant_names_path <- file.path("../discriminants.csv")
+discriminmant_names <- read_csv(
+    discriminmant_names_path,
+    show_col_types = FALSE
+)
+named_counts <- discriminant_counts %>% inner_join(discriminmant_names, by=c("id"))
+decls <- named_counts %>% filter(category %in% c("foreign_functions"))
+defns <- named_counts %>% filter(category %in% c("rust_functions"))
+defns_items <- named_counts %>% filter(category %in% c("static_items"))
+```
+## Declarations: Foreign Static Items
+```{r echo=FALSE}
+
+print(defns_items %>% group_by(name) %>% summarize(s = sum(count)))
+
+```
+
+```{r}
+by_name <-defns_items %>% group_by(crate_name) %>% summarize(s = sum(count))
+print(paste("mean: ", mean(by_name$s)))
+print(paste("stdev: ", sd(by_name$s)))
+print(paste("max: ", max(by_name$s)))
+print(paste("min: ", min(by_name$s)))
+print(by_name)
+```
+
+## Declarations: Foreign Functions
+Error counts under each ABI category:
+```{r echo=FALSE}
+
+print(decls %>% group_by(name) %>% summarize(s = sum(count)))
+
+```
+Number of unique repositories in which errors were observed, and the error counts for each
+```{r}
+by_name <-decls %>% group_by(crate_name) %>% summarize(s = sum(count))
+print(paste("mean: ", mean(by_name$s)))
+print(paste("stdev: ", sd(by_name$s)))
+print(paste("max: ", max(by_name$s)))
+print(paste("min: ", min(by_name$s)))
+print(by_name)
+```
+## Definitions: Rust Functions
+
+Error counts under each ABI category:
+```{r echo=FALSE}
+
+print(defns %>% group_by(name) %>% summarize(s = sum(count)))
+
+```
+
+Number of unique repositories in which errors were observed, and the error counts for each
+```{r}
+by_name <-defns %>% group_by(crate_name) %>% summarize(s = sum(count))
+print(paste("mean: ", mean(by_name$s)))
+print(paste("stdev: ", sd(by_name$s)))
+print(paste("max: ", max(by_name$s)))
+print(paste("min: ", min(by_name$s)))
+print(by_name)
+```
