@@ -79,11 +79,19 @@ struct FfickleLate {
     rust_functions: ErrorCount,
 }
 
+
+#[derive(Default, Serialize, Deserialize)]
+struct ItemErrorCounts {
+    counts: HashMap<usize, usize>,
+    index: usize
+}
+
 #[derive(Default, Serialize, Deserialize)]
 struct ErrorCount {
     total_items: usize,
-    item_error_counts: Vec<HashMap<usize, usize>>,
+    item_error_counts: Vec<ItemErrorCounts>,
 }
+
 
 trait ErrorIDStore {
     fn record_errors(
@@ -105,9 +113,9 @@ impl ErrorIDStore for FfickleLate {
             ForeignItemType::ForeignFn => &mut self.foreign_functions,
             ForeignItemType::StaticItem => &mut self.static_items,
         };
+        let mut err_counts = ItemErrorCounts::default();
+        err_counts.index = (*store).total_items;
         (*store).total_items += 1;
-        let mut err_counts = HashMap::<usize, usize>::new();
-
         for err in errors {
             let foreign_err = ForeignTypeError {
                 discriminant: err.discriminant,
@@ -130,10 +138,12 @@ impl ErrorIDStore for FfickleLate {
                 }
             };
             self.error_locations.entry(id).or_default().insert(err.location);
-            let count = (err_counts).entry(id).or_insert(0);
+            let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }
-        (*store).item_error_counts.extend(vec![err_counts]);
+        if ! err_counts.counts.is_empty() {
+            (*store).item_error_counts.extend(vec![err_counts]);
+        }
     }
 }
 
