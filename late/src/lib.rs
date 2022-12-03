@@ -71,7 +71,6 @@ enum ForeignItemType {
 
 #[derive(Default, Serialize, Deserialize)]
 struct FfickleLate {
-    error_locations: HashMap<usize, HashSet<String>>,
     error_id_count: usize,
     error_id_map: HashMap<usize, ForeignTypeError>,
     foreign_functions: ErrorCount,
@@ -90,6 +89,7 @@ struct ItemErrorCounts {
 struct ErrorCount {
     total_items: usize,
     item_error_counts: Vec<ItemErrorCounts>,
+    error_locations: HashMap<usize, HashSet<String>>,
 }
 
 
@@ -137,7 +137,7 @@ impl ErrorIDStore for FfickleLate {
                     self.error_id_count - 1
                 }
             };
-            self.error_locations.entry(id).or_default().insert(err.location);
+            store.error_locations.entry(id).or_default().insert(err.location);
             let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }

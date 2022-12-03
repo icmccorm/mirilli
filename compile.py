@@ -13,14 +13,12 @@ defn_types = ""
 decl_types = ""
 disabled_decl = ""
 disabled_defn = ""
-
 finished_early = "name\n"
 finished_late = "name\n"
-base_column_names = "crate_name,category,"
-error_category_counts = base_column_names + "item_index,abi,id,count,err_id\n"
-error_string_counts = base_column_names + "text,id,count\n"
-error_relative_counts = base_column_names + "item_index,num_errors\n"
-error_locations = base_column_names + "crate_name,err_id,location"
+error_category_counts = "crate_name,category,item_index,err_id,count\n"
+err_info = "crate_name,abi,discriminant,err_id,err_text\n"
+err_locations = "crate_name,err_id,category,file,start_line,start_col,end_line,end_col\n"
+
 def read_json(path, name):
     fd = open(path, "r")
     json_obj = json.loads(fd.read())
@@ -33,41 +31,43 @@ def dump(contents, path):
     fd.writelines(contents)
     fd.close()
 
-def process_error_locations(json, name):
-    entries = ""
-    location_map = json["error_locations"]
-    for k in location_map:
-        for loc in location_map[k]:
-            entries += f'{name},{k},"{loc}"\n'
-    return entries
+def process_error_info(name, json):
+    info_entries = ""
+    error_map = json["error_id_map"]
+    for err_id in error_map:
+        e_entry = error_map[err_id]
+        e_text = e_entry["str_rep"]
+        e_abi = e_entry["abi"]
+        e_discr = e_entry["discriminant"]
+        info_entries += f'{name},{e_abi},{e_discr},{err_id},"{e_text}"\n'
+    info_entries
 
 def process_error_category(category, json, name):
     category_entries = ""
-    count_entries = ""
-    str_rep_entries = ""
     item_error_counts = json[category]["item_error_counts"]
-    error_str = {}
     for entry in item_error_counts:
-        error_count = 0
-        for error_type in entry:
-            error_entry = json["error_id_map"][error_type]
-            discriminant = int(error_entry["discriminant"])
-            str_rep = error_entry["str_rep"]
-            if (str_rep, discriminant) not in error_entry:
-                error_str[(str_rep, discriminant)] = 1
-            else:
-                error_str[(str_rep, discriminant)] += 1
-            error_count += entry[error_type]
-            category_entries += f'{name},{category},{0},{error_entry["abi"]},{discriminant},{entry[error_type]},{error_type}\n'
-        count_entries += f"{name},{category},{0},{error_count}\n"
-    for key in error_str.keys():
-        str_rep_entries += f'{name},{category},"{key[0]}",{key[1]},{error_str[key]}\n'
+        for err_id in entry["counts"]:
+            category_entries += f'{name},{category},{0},{err_id},{entry["counts"][err_id]}\n'
+    loc_entries = ""
+    location_map = json["error_locations"]
+    for err_id in location_map:
+        e_entry = json["error_id_map"][err_id]
+        e_text = e_entry["str_rep"]
+        e_abi = e_entry["abi"]
+        e_discr = e_entry["discriminant"]
+        info_entries += f'{name},{e_abi},{e_discr},{err_id},"{e_text}"\n'
+        for loc in location_map[err_id]:
+            items = list(map(str.strip, loc.split(':')))
+            file = items[0]
+            start_line = items[1]
+            start_col = items[2]
+            end_line = items[3]
+            end_col = items[4]
+            loc_entries += f'{name},{err_id},{category}"{file}",{start_line},{start_col},{end_line},{end_col}\n'
     return {
-        "by_category": category_entries,
-        "by_count": count_entries,
-        "by_str_rep": str_rep_entries,
+        "category": category_entries,
+        "locations": loc_entries
     }
-
 
 if(os.path.isdir(walk_dir)):
     for dir in os.listdir(walk_dir):
@@ -101,36 +101,34 @@ if(os.path.isdir(walk_dir)):
                 finished_late += f"{name}\n"
                 if late_result_json["error_id_count"] != 0:
                     print(f"{name}-late")
-                    error_locations += process_error_locations(late_result_json, name)
+
+                    err_info += process_error_info(name, late_result_json)
+
                     foreign_data = process_error_category(
-                        "foreign_functions", late_result_json, name
+                        name, "foreign_functions", late_result_json
                     )
-                    error_category_counts += foreign_data["by_category"]
-                    error_relative_counts += foreign_data["by_count"]
-                    error_string_counts += foreign_data["by_str_rep"]
+                    error_category_counts += foreign_data["category"]
+                    err_locations += foreign_data["locations"]
 
                     static_data = process_error_category(
-                        "static_items", late_result_json, name
+                        name, "static_items", late_result_json
                     )
-                    error_category_counts += static_data["by_category"]
-                    error_relative_counts += static_data["by_count"]
-                    error_string_counts += static_data["by_str_rep"]
-
+                    error_category_counts += static_data["category"]
+                    err_locations += static_data["locations"]
+                    
                     rust_data = process_error_category(
-                        "rust_functions", late_result_json, name
+                        name, "rust_functions", late_result_json
                     )
-                    error_category_counts += rust_data["by_category"]
-                    error_relative_counts += rust_data["by_count"]
-                    error_string_counts += rust_data["by_str_rep"]
+                    error_category_counts += rust_data["category"]
+                    err_locations += static_data["locations"]
     dump(finished_early, os.path.join(out_dir,"finished_early.csv"))
     dump(finished_late, os.path.join(out_dir, "finished_late.csv"))
-    dump(error_string_counts, os.path.join(out_dir, "string_error_counts.csv"))
-    dump(error_relative_counts, os.path.join(out_dir, "item_error_counts.csv"))
     dump(error_category_counts, os.path.join(out_dir, "category_error_counts.csv"))
     dump(foreign_module_abis, os.path.join(out_dir, "foreign_module_abis.csv"))
     dump(rust_function_abis, os.path.join(out_dir, "rust_function_abis.csv"))
     dump(disabled_decl, os.path.join(out_dir, "disabled_decl.csv"))
     dump(disabled_defn, os.path.join(out_dir, "disabled_defn.csv"))
-    dump(error_locations, os.path.join(out_dir, "error_locations.csv"))
+    dump(err_locations, os.path.join(out_dir, "error_locations.csv"))
+    dump(err_info, os.path.join(out_dir, "error_info.csv"))
 else:
     print("Invalid input directory.")
