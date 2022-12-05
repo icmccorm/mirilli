@@ -19,7 +19,6 @@ extern crate rustc_span;
 extern crate rustc_target;
 extern crate rustc_trait_selection;
 extern crate rustc_type_ir;
-
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::fluent;
 use rustc_errors::DiagnosticMessage;
@@ -38,7 +37,7 @@ use std::collections::{HashMap, HashSet};
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
-
+use crate::rustc_lint::LintContext;
 dylint_linting::impl_late_lint! {
     pub FFICKLE_LATE,
     Warn,
@@ -76,22 +75,27 @@ struct FfickleLate {
     foreign_functions: ErrorCount,
     static_items: ErrorCount,
     rust_functions: ErrorCount,
+    decl_lint_disabled_for_crate: bool,
+    defn_lint_disabled_for_crate: bool
 }
-
 
 #[derive(Default, Serialize, Deserialize)]
 struct ItemErrorCounts {
     counts: HashMap<usize, usize>,
     index: usize
 }
+#[derive(Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
+struct ErrorLocation{
+    str_rep: String,
+    ignored: bool
+}
 
 #[derive(Default, Serialize, Deserialize)]
 struct ErrorCount {
     total_items: usize,
     item_error_counts: Vec<ItemErrorCounts>,
-    error_locations: HashMap<usize, HashSet<String>>,
+    error_locations: HashMap<usize, HashSet<ErrorLocation>>,
 }
-
 
 trait ErrorIDStore {
     fn record_errors(
@@ -99,14 +103,16 @@ trait ErrorIDStore {
         errors: Vec<ObservedImproperType>,
         abi_string: &str,
         item_type: ForeignItemType,
+        were_ignored: bool
     ) -> ();
 }
 impl ErrorIDStore for FfickleLate {
-    fn record_errors(
+    fn record_errors<'tcx>(
         &mut self,
         errors: Vec<ObservedImproperType>,
         abi_string: &str,
         item_type: ForeignItemType,
+        were_ignored: bool
     ) -> () {
         let store = match item_type {
             ForeignItemType::RustFn => &mut self.rust_functions,
@@ -137,7 +143,11 @@ impl ErrorIDStore for FfickleLate {
                     self.error_id_count - 1
                 }
             };
-            store.error_locations.entry(id).or_default().insert(err.location);
+            let location_metadata = ErrorLocation{
+                ignored: were_ignored,
+                str_rep: err.location
+            };
+            store.error_locations.entry(id).or_default().insert(location_metadata);
             let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }
@@ -316,6 +326,7 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
 }
 
 impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
+    
     /// Check if the type is array and emit an unsafe type lint.
     fn check_for_array_ty(&mut self, sp: Span, ty: Ty<'tcx>) -> bool {
         
@@ -779,7 +790,6 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         for (input_ty, input_hir) in iter::zip(sig.inputs(), decl.inputs) {
             self.check_type_for_ffi_and_report_errors(input_hir.span, *input_ty, false, false);
         }
-
         if let hir::FnRetTy::Return(ref ret_hir) = decl.output {
             let ret_ty = sig.output();
             self.check_type_for_ffi_and_report_errors(ret_hir.span, ret_ty, false, true);
@@ -800,7 +810,18 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     }
 }
 
+fn lint_disabled<'tcx>(cx:&LateContext<'tcx>, name:&str) -> bool {
+    let lint_store = cx.lint_store;
+    let all_lints = lint_store.get_lints();
+    let lint = (*all_lints).iter().find(|l| l.name == name).unwrap();
+    cx.get_lint_level(lint).eq(&rustc_lint::Level::Allow)
+}
+
 impl<'tcx> LateLintPass<'tcx> for FfickleLate {
+    fn check_crate(&mut self, cx:&LateContext<'tcx>) {
+        self.decl_lint_disabled_for_crate = lint_disabled(cx, "IMPROPER_CTYPES");
+        self.defn_lint_disabled_for_crate = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS")
+    }
     fn check_fn(
         &mut self,
         cx: &LateContext<'tcx>,
@@ -825,11 +846,15 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         };
         if !vis.is_internal_abi(abi) {
             vis.check_foreign_fn(hir_id, decl);
-            self.record_errors(
-                error_collection,
-                format!("{}", abi).as_str(),
-                ForeignItemType::RustFn,
-            );
+            if error_collection.len() > 0 {
+                let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS");
+                self.record_errors(
+                    error_collection,
+                    format!("{}", abi).as_str(),
+                    ForeignItemType::RustFn,
+                    were_ignored
+                );
+            }
         }
     }
     fn check_foreign_item(&mut self, cx: &LateContext<'_>, it: &hir::ForeignItem<'_>) {
@@ -855,7 +880,8 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
 
             match item_type {
                 Some(tp) => {
-                    self.record_errors(error_collection, format!("{}", abi).as_str(), tp);
+                    let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES");
+                    self.record_errors(error_collection, format!("{}", abi).as_str(), tp, were_ignored);
                 }
                 None => {}
             }
