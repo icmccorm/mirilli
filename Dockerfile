@@ -16,4 +16,3 @@ RUN ~/.cargo/bin/cargo install cargo-download cargo-dylint dylint-link
 RUN (cd early && ~/.cargo/bin/cargo build)
 RUN (cd late && ~/.cargo/bin/cargo build)
 ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/early/target/debug/:/usr/src/ffickle/late/target/debug/"
-RUN mkdir /results
