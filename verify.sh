@@ -10,10 +10,10 @@ mkdir -p "$2/$1/late"
 TO_VISIT=""
 if test -f "$2/$1/visited.csv"; then
     cat "$2/$1/visited.csv" | sort > ./visited_sorted.csv;
-    cat "./data/partitions/partition$1.csv" | sort > ./all_sorted.csv;
+    cat "./data/partitions/p$1.csv" | sort > ./all_sorted.csv;
     TO_VISIT=$(comm -23 "./all_sorted.csv" "./visited_sorted.csv")
 else
-    TO_VISIT=$(cat ./data/partitions/partition$1.csv)
+    TO_VISIT=$(cat ./data/partitions/p$1.csv)
 fi
 while IFS=, read name version; 
 do 
