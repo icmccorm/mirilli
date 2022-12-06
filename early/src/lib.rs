@@ -37,7 +37,8 @@ use rustc_lint::{EarlyContext, EarlyLintPass};
 #[derive(Default, Serialize, Deserialize)]
 
 struct FfickleEarly {
-    foreign_module_abis: HashMap<String, usize>,
+    foreign_function_abis: HashMap<String, usize>,
+    static_item_abis: HashMap<String, usize>,
     rust_function_abis: HashMap<String, usize>,
 }
 
@@ -47,14 +48,10 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
                 Explicit(sl, _) => {
                     let abi_string = sl.symbol_unescaped.as_str().to_string().replace("\"", "");
-                    match self.rust_function_abis.get(&abi_string) {
-                        Some(c) => {
-                            self.rust_function_abis.insert(abi_string, *c + 1);
-                        }
-                        None => {
-                            self.rust_function_abis.insert(abi_string, 1);
-                        }
-                    }
+                    self.rust_function_abis
+                        .entry(abi_string.to_string())
+                        .and_modify(|e| *e += 1)
+                        .or_insert(1);
                 }
                 _ => {}
             },
@@ -66,20 +63,27 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         match &it.kind {
             ast::ItemKind::ForeignMod(fm) => {
                 let fm: &ast::ForeignMod = fm;
-                match fm.abi {
-                    Some(abi) => {
-                        let abi_string = abi.symbol_unescaped.as_str().to_string().replace("\"", "");
-                        let count_of_items = fm.items.len();
-                        match self.foreign_module_abis.get(&abi_string) {
-                            Some(c) => {
-                                self.foreign_module_abis.insert(abi_string, *c + count_of_items);
-                            }
-                            None => {
-                                self.foreign_module_abis.insert(abi_string, count_of_items);
-                            }
+                let abi_string = match fm.abi {
+                    Some(abi) => abi.symbol_unescaped.as_str().to_string().replace("\"", ""),
+                    None => "C".to_string(),
+                };
+                let items: &Vec<rustc_ast::ptr::P<rustc_ast::ast::ForeignItem>> = &fm.items;
+                for item in items {
+                    match item.kind {
+                        rustc_ast::ast::ForeignItemKind::Fn(_) => {
+                            self.foreign_function_abis
+                                .entry(abi_string.to_string())
+                                .and_modify(|e| *e += 1)
+                                .or_insert(1);
                         }
+                        rustc_ast::ast::ForeignItemKind::Static(_, _, _) => {
+                            self.static_item_abis
+                                .entry(abi_string.to_string())
+                                .and_modify(|e| *e += 1)
+                                .or_insert(1);
+                        }
+                        _ => {}
                     }
-                    None => {}
                 }
             }
             _ => {}
