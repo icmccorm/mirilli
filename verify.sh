@@ -1,7 +1,8 @@
 #!/bin/bash
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-NC='\033[0m'
+source "$HOME/.cargo/env"
+RED='\e[1;31m'
+GREEN='\e[1;32m'
+NC='\e[1;0m'
 make clean && make all
 mkdir -p "$2"
 mkdir -p "$2/$1"
