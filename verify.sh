@@ -19,9 +19,9 @@ fi
 while IFS=, read name version; 
 do 
     if (cargo-download -x "$name==$version" --output ./test 1> /dev/null); then 
-	    if ! (cd test && (timeout 5m cargo dylint --all 1> /dev/null)); then
-            echo "Writing failure to $2/$1/failed.csv"
-            echo "$name,$version,$?" >> "$2/$1/failed.csv"
+	if ! (cd test && (timeout 5m cargo dylint --all 1> /dev/null)); then
+            echo "Writing failure to $2/$1/failed_compilation.csv"
+            echo "$name,$version,$?" >> "$2/$1/failed_compilation.csv"
         fi
         echo "Writing visit to $2/$1/visited.csv"
         echo "$name,$version" >> "$2/$1/visited.csv"
@@ -31,6 +31,7 @@ do
         [ ! -f ./test/ffickle_late.json ] || mv ./test/ffickle_late.json "$2/$1/late/$name.json"
     else
         echo "${RED}DOWNLOAD FAILED${NC} $name\n"
+    	echo "$name,$version,$?" >> "$2/$1/failed_download.csv"
     fi
     rm -rf ./test
 done <<< "$TO_VISIT"
