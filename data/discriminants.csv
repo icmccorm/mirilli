@@ -1,4 +1,4 @@
-id,name
+discriminant,type_name
 0,Bool
 1,Char
 2,Int
