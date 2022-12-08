@@ -39,34 +39,39 @@ def process_error_info(name, json):
         e_text = e_entry["str_rep"]
         e_abi = e_entry["abi"]
         e_discr = e_entry["discriminant"]
-        info_entries += f'{name},{e_abi},{e_discr},{err_id},"{e_text}"\n'
-    info_entries
+        info_entries += f'{name},{e_abi},{str(e_discr)},{err_id},"{e_text}"\n'
+    return info_entries
 
-def process_error_category(category, json, name):
+def missing_location_error(err_id, name):
+    print(f"Unable to resolve location for error ID {err_id} of crate {name}")
+    exit(1)
+
+def process_error_category(name, category, json):
     category_entries = ""
     item_error_counts = json[category]["item_error_counts"]
+    loc_entries = ""
+    location_map = json[category]["error_locations"]
+
     for entry in item_error_counts:
         for err_id in entry["counts"]:
-            category_entries += f'{name},{category},{0},{err_id},{entry["counts"][err_id]}\n'
-    loc_entries = ""
-    location_map = json["error_locations"]
+            category_entries += f'{name},{category},{entry["index"]},{err_id},{entry["counts"][err_id]}\n'
+            if err_id not in json[category]["error_locations"]:
+                missing_location_error(err_id, name)
     for err_id in location_map:
-        e_entry = json["error_id_map"][err_id]
-        e_text = e_entry["str_rep"]
-        e_abi = e_entry["abi"]
-        e_discr = e_entry["discriminant"]
-        info_entries += f'{name},{e_abi},{e_discr},{err_id},"{e_text}"\n'
-        for loc in location_map[err_id]:
-            items = list(map(str.strip, loc.split(':')))
-            file = items[0]
-            start_line = items[1]
-            start_col = items[2]
-            end_line = items[3]
-            end_col = items[4]
-            loc_entries += f'{name},{err_id},{category}"{file}",{start_line},{start_col},{end_line},{end_col}\n'
+        if len(location_map[err_id]) == 0 :
+            missing_location_error(err_id, name)
+        else:
+            for loc in location_map[err_id]:
+                items = list(map(str.strip, loc["str_rep"].split(':')))
+                file = items[0]
+                start_line = items[1]
+                start_col = items[2]
+                end_line = items[3]
+                end_col = items[4]
+                loc_entries = f'{name},{err_id},{category},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
     return {
         "category": category_entries,
-        "locations": loc_entries
+        "locations": loc_entries,
     }
 
 if(os.path.isdir(walk_dir)):

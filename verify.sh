@@ -31,8 +31,8 @@ do
         [ ! -f ./test/ffickle_late.json ] || mv ./test/ffickle_late.json "$2/$1/late/$name.json"
     else
         echo "${RED}DOWNLOAD FAILED${NC} $name\n"
-    	echo "$name,$version,$?" >> "$2/$1/failed_download.csv"
+        echo "$name,$version,$?" >> "$2/$1/failed_download.csv"
     fi
     rm -rf ./test
 done <<< "$TO_VISIT"
-echo "${GREEN}FINISHED!${NC} $name\n"
+echo "${GREEN} FINISHED! ${NC} $name\n"

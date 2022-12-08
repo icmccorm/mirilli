@@ -5,3 +5,4 @@ late/target
 *.tar.gz
 data/results
 redo
+*.nb.html
