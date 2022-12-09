@@ -13,7 +13,7 @@ disabled_defn = ""
 finished_early = "name\n"
 finished_late = "name\n"
 error_category_counts = "crate_name,category,item_index,err_id,count\n"
-err_info = "crate_name,abi,discriminant,err_id,err_text\n"
+err_info = "crate_name,abi,discriminant,reason,err_id,err_text\n"
 err_locations = "crate_name,err_id,category,file,start_line,start_col,end_line,end_col\n"
 
 
@@ -41,7 +41,8 @@ def process_error_info(name, json):
         e_text = e_entry["str_rep"]
         e_abi = e_entry["abi"]
         e_discr = e_entry["discriminant"]
-        info_entries += f'{name},{e_abi},{str(e_discr)},{err_id},"{e_text}"\n'
+        e_reason = e_entry["reason"]
+        info_entries += f'{name},{e_abi},{e_discr},{e_reason}{err_id},"{e_text}"\n'
     return info_entries
 
 def process_error_category(name, category, json):
