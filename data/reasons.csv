@@ -1,9 +1,9 @@
-err_case_name,err_case_id
+reason_name,reason
 Opaque,0
 FnPtr,1
 Tuple,2
 Str,3
-Dyn,4
+Dynamic,4
 Slice,5
 Bit128,6
 Char,7

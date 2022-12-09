@@ -23,17 +23,17 @@ discrim <- read_csv(
     discrim_path,
     show_col_types = FALSE
 )
-
-einfo %>% select(crate_name, err_id) %>% unique %>% nrow
-eloc %>% select(crate_name, err_id) %>% unique %>% nrow
-
+ninfo <- einfo %>% select(crate_name, err_id) %>% unique %>% nrow
+nloc <- eloc %>% select(crate_name, err_id) %>% unique %>% nrow
+if (ninfo != nloc) {
+    stop("Mismatching number of unique errors in info and locations tables.")
+}
 errors <- einfo %>%
     inner_join(eloc, by = c("err_id", "crate_name")) %>%
     inner_join(discrim, by = c("discriminant")) %>%
     filter(type_name == "Adt")
-
 sample <- errors %>%
     group_by(err_text, category) %>%
     slice_sample(n = 1) %>%
     ungroup()
-sample
+sample %>% write_csv(file.path("./coding/samples/improper_types.csv"))

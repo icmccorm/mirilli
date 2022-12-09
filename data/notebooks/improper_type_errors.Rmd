@@ -8,6 +8,8 @@ output: html_notebook
 library(dplyr)
 library(readr)
 library(tidyr)  
+library(xtable)
+
 options(dplyr.summarise.inform = FALSE)
 
 all_path <- file.path("../all.csv")
@@ -26,28 +28,42 @@ finished_late <- read_csv(
     finished_late_path,
     show_col_types = FALSE
 )
+
 foreign_abis_path <- file.path("../locations/foreign_module_abis.csv")
 foreign_abis <- read_csv(
     foreign_abis_path,
     show_col_types = FALSE
 ) %>% filter(abi == "C")
+
 einfo_path <- file.path("../locations/error_info.csv")
 einfo <- read_csv(
     einfo_path,
     show_col_types = FALSE
 )
+
+eloc_path <- file.path("../locations/error_locations.csv")
+eloc <- read_csv(
+    eloc_path,
+    show_col_types = FALSE
+)
+
 discriminant_counts_path <- file.path("../locations/category_error_counts.csv")
 discriminant_counts <- read_csv(
     discriminant_counts_path,
     show_col_types = FALSE
 ) %>% inner_join(einfo, by = c("err_id", "crate_name"))
 
-discriminmant_names_path <- file.path("../discriminants.csv")
+discriminant_names_path <- file.path("../discriminants.csv")
 discriminant_names <- read_csv(
-    discriminmant_names_path,
+    discriminant_names_path,
     show_col_types = FALSE
 )
 
+reasons_path <- file.path("../reasons.csv")
+reasons <- read_csv(
+    reasons_path,
+    show_col_types = FALSE
+)
 ```
 ```{r include = FALSE}
 discriminant_counts %>%
@@ -69,40 +85,69 @@ unique_errors <- einfo %>%
 We observed `r sum(discriminant_counts$count)` type errors in foreign bindings. There were `r unique_errors` unique errors.
 
 ```{r echo = FALSE}
-named_counts <- discriminant_counts %>% inner_join(discriminant_names, by=c("discriminant"))
+named_counts <- discriminant_counts %>% 
+  inner_join(discriminant_names, by=c("discriminant")) 
+
 decls <- named_counts %>% filter(category %in% c("foreign_functions"))
 defns <- named_counts %>% filter(category %in% c("rust_functions"))
 decls_items <- named_counts %>% filter(category %in% c("static_items"))
 
 discrim_counts <- einfo %>% 
-  select(discriminant, err_text) %>% 
+  select(reason, discriminant, err_text) %>% 
   unique %>% 
-  group_by(discriminant) %>% 
+  group_by(reason, discriminant) %>% 
   summarize(n_unique=n())
 
 decls_items_counts <- 
   decls_items %>% 
-  group_by(type_name) %>% 
+  group_by(reason, type_name) %>% 
   summarize(fi_count = sum(count)) %>% 
   unique
 
 decls_counts <- decls %>% 
-  group_by(type_name) %>% 
+  group_by(reason, type_name) %>% 
   summarize(ff_count = sum(count)) %>% 
   unique
 
 defns_counts <- defns %>% 
-  group_by(type_name) %>% 
+  group_by(reason, type_name) %>% 
   summarize(ef_count = sum(count)) %>% 
   unique
 
 final <- discriminant_names %>% 
   left_join(decls_counts, by=c("type_name")) %>% 
-  left_join(decls_items_counts, by=c("type_name")) %>% 
-  left_join(defns_counts, by=c("type_name")) %>% 
-  left_join(discrim_counts, by=c("discriminant")) %>% 
-  mutate(across(where(is.numeric), ~ replace_na(.x, 0)))
+  left_join(decls_items_counts, by=c("type_name","reason")) %>% 
+  left_join(defns_counts, by=c("type_name", "reason")) %>% 
+  left_join(discrim_counts, by=c("discriminant", "reason")) %>% 
+  inner_join(reasons, by=c("reason")) %>%
+  mutate(across(where(is.numeric), ~ replace_na(.x, 0))) %>% 
+  select(type_name, reason_name, n_unique, ff_count, fi_count, ef_count)
 
 final$total_occurrences <- final$ff_count + final$fi_count + final$ef_count
-final %>% filter(total_occurrences > 0) %>% arrange(type_name)
+filtered <- final %>% filter(total_occurrences > 0) %>% arrange(type_name)
+
+colnames(filtered) <- c("Type", "Error", "Foreign Functions", "Foreign Items", "Rust Functions", "Total", "Unique")
+
+filtered
+
+```
+
+```{r}
+addtorow <- list()
+addtorow$pos <- list(0, 0)
+addtorow$command <- c("& & & \\multicolumn{4}{c}{# Error Occurrences} \\\\\n",
+"Type & Error & # Unique & Foreign Functions & Foreign Items & Rust Functions & Total \\\\\n")
+large <- function(x){
+  paste0('{\\bfseries ', x, '}')
+}
+xt <- xtable(filtered, type = "latex", digits=c(0,0,0,0,0,0,0,0))
+align(xt) <- "lllccccc"
+print(xt, 
+      include.rownames = FALSE,
+      add.to.row = addtorow, 
+      file = "../latex/err_counts.tex",
+      include.colnames = FALSE,
+      sanitize.colnames.function = large,
+  )
+
 ```
