@@ -5,10 +5,7 @@ import sys
 walk_dir = sys.argv[1]
 out_dir = sys.argv[2]
 if(out_dir is None): out_dir = "./data"
-
-foreign_module_abis = "name,abi,count\n"
-rust_function_abis = "name,abi,count\n"
-
+abis = "crate_name,abi,category,count\n"
 defn_types = ""
 decl_types = ""
 disabled_decl = ""
@@ -18,6 +15,11 @@ finished_late = "name\n"
 error_category_counts = "crate_name,category,item_index,err_id,count\n"
 err_info = "crate_name,abi,discriminant,err_id,err_text\n"
 err_locations = "crate_name,err_id,category,file,start_line,start_col,end_line,end_col\n"
+
+
+CAT_FOREIGN_FN = "foreign_functions"
+CAT_STATIC_ITEM = "static_items"
+CAT_RUST_FN = "rust_functions"
 
 def read_json(path, name):
     fd = open(path, "r")
@@ -42,38 +44,30 @@ def process_error_info(name, json):
         info_entries += f'{name},{e_abi},{str(e_discr)},{err_id},"{e_text}"\n'
     return info_entries
 
-def missing_location_error(err_id, name):
-    print(f"Unable to resolve location for error ID {err_id} of crate {name}")
-    exit(1)
-
 def process_error_category(name, category, json):
     category_entries = ""
     item_error_counts = json[category]["item_error_counts"]
     loc_entries = ""
     location_map = json[category]["error_locations"]
-
     for entry in item_error_counts:
         for err_id in entry["counts"]:
             category_entries += f'{name},{category},{entry["index"]},{err_id},{entry["counts"][err_id]}\n'
-            if err_id not in json[category]["error_locations"]:
-                missing_location_error(err_id, name)
+            if err_id not in json[category]["error_locations"] or len(json[category]["error_locations"]) == 0:
+                print(f"Unable to resolve location for error ID {err_id} of crate {name}")
+                exit(1)            
     for err_id in location_map:
-        if len(location_map[err_id]) == 0 :
-            missing_location_error(err_id, name)
-        else:
-            for loc in location_map[err_id]:
-                items = list(map(str.strip, loc["str_rep"].split(':')))
-                file = items[0]
-                start_line = items[1]
-                start_col = items[2]
-                end_line = items[3]
-                end_col = items[4]
-                loc_entries = f'{name},{err_id},{category},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
+        for loc in location_map[err_id]:
+            items = list(map(str.strip, loc["str_rep"].split(':')))
+            file = items[0]
+            start_line = items[1]
+            start_col = items[2]
+            end_line = items[3]
+            end_col = items[4]
+            loc_entries += f'{name},{err_id},{category},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
     return {
         "category": category_entries,
         "locations": loc_entries,
     }
-
 if(os.path.isdir(walk_dir)):
     for dir in os.listdir(walk_dir):
         if dir == "early":
@@ -83,20 +77,12 @@ if(os.path.isdir(walk_dir)):
                 name, early_result_json = read_json(path_to_early_result, early_result)
                 print(f"{name}-early")
                 finished_early += f"{name}\n"
-                for abi, count in early_result_json["foreign_module_abis"].items():
-                    foreign_module_abis += f"{name},{abi},{count+1}\n"
+                for abi, count in early_result_json["foreign_function_abis"].items():
+                    abis += f"{name},{abi},{CAT_FOREIGN_FN},{count}\n"
                 for abi, count in early_result_json["rust_function_abis"].items():
-                    rust_function_abis += f"{name},{abi},{count+1}\n"
-                if (
-                    "foreign_module_lint_blocked" in early_result_json
-                    and early_result_json["foreign_module_lint_blocked"]
-                ):
-                    disabled_decl += f"{name}\n"
-                if (
-                    "rust_function_lint_blocked" in early_result_json
-                    and early_result_json["rust_function_lint_blocked"]
-                ):
-                    disabled_defn += f"{name}\n"
+                    abis += f"{name},{abi},{CAT_STATIC_ITEM},{count}\n"
+                for abi, count in early_result_json["static_item_abis"].items():
+                    abis += f"{name},{abi},{CAT_RUST_FN},{count}\n"
         if dir == "late":
             late = os.path.join(walk_dir, dir)
             for late_result in os.listdir(late):
@@ -110,27 +96,27 @@ if(os.path.isdir(walk_dir)):
                     err_info += process_error_info(name, late_result_json)
 
                     foreign_data = process_error_category(
-                        name, "foreign_functions", late_result_json
+                        name, CAT_FOREIGN_FN, late_result_json
                     )
                     error_category_counts += foreign_data["category"]
                     err_locations += foreign_data["locations"]
 
                     static_data = process_error_category(
-                        name, "static_items", late_result_json
+                        name, CAT_STATIC_ITEM, late_result_json
                     )
                     error_category_counts += static_data["category"]
                     err_locations += static_data["locations"]
                     
                     rust_data = process_error_category(
-                        name, "rust_functions", late_result_json
+                        name, CAT_RUST_FN, late_result_json
                     )
                     error_category_counts += rust_data["category"]
-                    err_locations += static_data["locations"]
+                    err_locations += rust_data["locations"]
+                    
     dump(finished_early, os.path.join(out_dir,"finished_early.csv"))
     dump(finished_late, os.path.join(out_dir, "finished_late.csv"))
     dump(error_category_counts, os.path.join(out_dir, "category_error_counts.csv"))
-    dump(foreign_module_abis, os.path.join(out_dir, "foreign_module_abis.csv"))
-    dump(rust_function_abis, os.path.join(out_dir, "rust_function_abis.csv"))
+    dump(abis, os.path.join(out_dir, "abis.csv"))
     dump(disabled_decl, os.path.join(out_dir, "disabled_decl.csv"))
     dump(disabled_defn, os.path.join(out_dir, "disabled_defn.csv"))
     dump(err_locations, os.path.join(out_dir, "error_locations.csv"))
