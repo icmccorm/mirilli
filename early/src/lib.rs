@@ -18,7 +18,8 @@ extern crate rustc_span;
 extern crate rustc_target;
 extern crate rustc_trait_selection;
 use std::io::Write;
-
+use rustc_ast::NestedMetaItem::MetaItem;
+use rustc_span::symbol::sym;
 use rustc_ast::ast;
 use rustc_ast::visit::FnKind;
 use rustc_ast::Extern::Explicit;
@@ -40,9 +41,37 @@ struct FfickleEarly {
     foreign_function_abis: HashMap<String, usize>,
     static_item_abis: HashMap<String, usize>,
     rust_function_abis: HashMap<String, usize>,
+    foreign_module_lint_blocked: bool,
+    rust_function_lint_blocked: bool,
 }
 
 impl<'tcx> EarlyLintPass for FfickleEarly {
+    fn enter_lint_attrs(&mut self, _: &EarlyContext<'_>, attrs: &[ast::Attribute]) {
+        for attr in attrs {
+            if attr.has_name(sym::allow) {
+                match attr.meta_item_list() {
+                    None => {}
+                    Some(l) => {
+                        for item in l {
+                            match item {
+                                MetaItem(mi) => match mi.ident() {
+                                    Some(id) => {
+                                        if id.name.as_str().eq("improper_ctypes_definitions") {
+                                            self.rust_function_lint_blocked = true;
+                                        } else if id.name.as_str().eq("improper_ctypes") {
+                                            self.foreign_module_lint_blocked = true;
+                                        }
+                                    }
+                                    None => {}
+                                },
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     fn check_fn(&mut self, _: &EarlyContext<'_>, kind: FnKind<'_>, _: Span, _: ast::NodeId) {
         match kind {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
