@@ -32,7 +32,7 @@ use rustc_span::DUMMY_SP;
 use rustc_target::abi::{Abi, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
@@ -82,9 +82,11 @@ struct FfickleLate {
     rust_function_abis: HashMap<String, usize>,
 }
 
+
 #[derive(Default, Serialize, Deserialize)]
 struct ItemErrorCounts {
     counts: HashMap<usize, usize>,
+    locations: HashMap<usize, Vec<String>>,
     index: usize,
     ignored: bool,
 }
@@ -99,7 +101,6 @@ struct ErrorLocation {
 struct ErrorCount {
     total_items: usize,
     item_error_counts: Vec<ItemErrorCounts>,
-    error_locations: HashMap<usize, HashSet<ErrorLocation>>,
 }
 
 trait ErrorIDStore {
@@ -111,6 +112,8 @@ trait ErrorIDStore {
         were_ignored: bool,
     ) -> ();
 }
+
+
 impl ErrorIDStore for FfickleLate {
     fn record_errors<'tcx>(
         &mut self,
@@ -151,17 +154,7 @@ impl ErrorIDStore for FfickleLate {
                     self.error_id_count - 1
                 }
             };
-            let location_metadata = ErrorLocation {
-                ignored: were_ignored,
-                str_rep: err.location,
-            };
-
-            store
-                .error_locations
-                .entry(id)
-                .or_default()
-                .insert(location_metadata);
-                
+            err_counts.locations.entry(id).or_default().extend(vec![err.location]);                
             let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }

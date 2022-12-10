@@ -12,10 +12,9 @@ disabled_decl = ""
 disabled_defn = ""
 finished_early = "name\n"
 finished_late = "name\n"
-error_category_counts = "crate_name,category,item_index,err_id,count\n"
+error_category_counts = "crate_name,category,item_index,err_id,count,count_ignored\n"
 err_info = "crate_name,abi,discriminant,reason,err_id,err_text\n"
-err_locations = "crate_name,err_id,category,file,start_line,start_col,end_line,end_col\n"
-
+err_locations = "crate_name,err_id,category,ignored,file,start_line,start_col,end_line,end_col\n"
 
 CAT_FOREIGN_FN = "foreign_functions"
 CAT_STATIC_ITEM = "static_items"
@@ -42,10 +41,10 @@ def process_error_info(name, json):
         e_abi = e_entry["abi"]
         e_discr = e_entry["discriminant"]
         e_reason = e_entry["reason"]
-        info_entries += f'{name},{e_abi},{e_discr},{e_reason}{err_id},"{e_text}"\n'
+        info_entries += f'{name},{e_abi},{e_discr},{e_reason},{err_id},"{e_text}"\n'
     return info_entries
 
-def process_error_category(name, category, json):
+def process_error_category(name, category, ignored, json):
     category_entries = ""
     item_error_counts = json[category]["item_error_counts"]
     loc_entries = ""
@@ -55,16 +54,16 @@ def process_error_category(name, category, json):
             category_entries += f'{name},{category},{entry["index"]},{err_id},{entry["counts"][err_id]}\n'
             if err_id not in json[category]["error_locations"] or len(json[category]["error_locations"]) == 0:
                 print(f"Unable to resolve location for error ID {err_id} of crate {name}")
-                exit(1)            
-    for err_id in location_map:
-        for loc in location_map[err_id]:
-            items = list(map(str.strip, loc["str_rep"].split(':')))
+                exit(1) 
+        for loc in entry["locations"]:
+            loc_ignored = entry["ignored"] or ignored
+            items = list(map(str.strip, loc.split(':')))
             file = items[0]
             start_line = items[1]
             start_col = items[2]
             end_line = items[3]
             end_col = items[4]
-            loc_entries += f'{name},{err_id},{category},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
+            loc_entries += f'{name},{err_id},{category},{str(loc_ignored).lower()},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
     return {
         "category": category_entries,
         "locations": loc_entries,
@@ -91,25 +90,29 @@ if(os.path.isdir(walk_dir)):
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
                 finished_late += f"{name}\n"
+                
                 if late_result_json["error_id_count"] != 0:
+                    
                     print(f"{name}-late")
+                    defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
+                    decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
 
                     err_info += process_error_info(name, late_result_json)
 
                     foreign_data = process_error_category(
-                        name, CAT_FOREIGN_FN, late_result_json
+                        name, CAT_FOREIGN_FN, decl_lint_disabled, late_result_json
                     )
                     error_category_counts += foreign_data["category"]
                     err_locations += foreign_data["locations"]
 
                     static_data = process_error_category(
-                        name, CAT_STATIC_ITEM, late_result_json
+                        name, CAT_STATIC_ITEM, decl_lint_disabled, late_result_json
                     )
                     error_category_counts += static_data["category"]
                     err_locations += static_data["locations"]
                     
                     rust_data = process_error_category(
-                        name, CAT_RUST_FN, late_result_json
+                        name, CAT_RUST_FN, defn_lint_disabled, late_result_json
                     )
                     error_category_counts += rust_data["category"]
                     err_locations += rust_data["locations"]
