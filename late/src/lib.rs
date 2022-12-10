@@ -86,11 +86,13 @@ struct FfickleLate {
 struct ItemErrorCounts {
     counts: HashMap<usize, usize>,
     index: usize,
+    ignored: bool,
 }
+
 #[derive(Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
 struct ErrorLocation {
     str_rep: String,
-    ignored: bool,
+    ignored: bool
 }
 
 #[derive(Default, Serialize, Deserialize)]
@@ -124,7 +126,9 @@ impl ErrorIDStore for FfickleLate {
         };
         let mut err_counts = ItemErrorCounts::default();
         err_counts.index = (*store).total_items;
+        err_counts.ignored = were_ignored;
         (*store).total_items += 1;
+        
         for err in errors {
             let foreign_err = ForeignTypeError {
                 discriminant: err.discriminant,
@@ -151,11 +155,13 @@ impl ErrorIDStore for FfickleLate {
                 ignored: were_ignored,
                 str_rep: err.location,
             };
+
             store
                 .error_locations
                 .entry(id)
                 .or_default()
                 .insert(location_metadata);
+                
             let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }
