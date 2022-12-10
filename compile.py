@@ -48,7 +48,6 @@ def process_error_category(name, category, ignored, json):
     category_entries = ""
     item_error_counts = json[category]["item_error_counts"]
     loc_entries = ""
-    location_map = json[category]["error_locations"]
     for entry in item_error_counts:
         for err_id in entry["counts"]:
             category_entries += f'{name},{category},{entry["index"]},{err_id},{entry["counts"][err_id]}\n'
