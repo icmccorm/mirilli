@@ -6,3 +6,4 @@ late/target
 data/results
 redo
 *.nb.html
+.vscode
