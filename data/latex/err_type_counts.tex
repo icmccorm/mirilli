@@ -1,27 +1,25 @@
-% latex table generated in R 4.2.1 by xtable 1.8-4 package
-% Sun Dec 11 12:07:42 2022
-\begin{table}[ht]
-\centering
-\begin{tabular}{llccccc}
+% latex table generated in R 4.2.2 by xtable 1.8-4 package
+% Wed Dec 14 15:31:59 2022
+\begin{tabular}{llc|cccc}
   \hline
-  & & & \multicolumn{4}{c}{# Hidden Occurrences} \\
- Type & Error & # Unique & Foreign Functions & Foreign Items & Rust Functions & Total \\
+  & & & \multicolumn{4}{c}{\# Hidden Occurrences} \\
+ Error Category & Error & \# Unique & Foreign Functions & Foreign Items & Rust Functions & Total \\
  \hline
-Adt & EnumNonExhaustive & 1 & 4 & 0 & 0 & 4 \\ 
-  Adt & EnumNoRepresentation & 33 & 28 & 7 & 21 & 56 \\ 
-  Adt & StructFieldless & 271 & 7639 & 161 & 7 & 7807 \\ 
+Adt & EnumNonExhaustive & 2 & 4 & 0 & 0 & 4 \\ 
+  Adt & EnumNoRepresentation & 48 & 28 & 7 & 21 & 56 \\ 
+  Adt & StructFieldless & 352 & 7639 & 161 & 7 & 7807 \\ 
   Adt & StructNonExhaustive & 1 & 2 & 0 & 0 & 2 \\ 
-  Adt & StructNoRepresentation & 80 & 897 & 2 & 7 & 906 \\ 
+  Adt & StructNoRepresentation & 88 & 897 & 2 & 7 & 906 \\ 
   Adt & OnlyPhantomData & 1 & 1 & 0 & 0 & 1 \\ 
-  Array & Array & 25 & 5 & 0 & 0 & 5 \\ 
-  Char & Char & 1 & 19 & 0 & 0 & 19 \\ 
-  Dynamic & Dynamic & 10 & 3 & 0 & 4 & 7 \\ 
-  FnPtr & FnPtr & 8 & 4 & 0 & 0 & 4 \\ 
-  Int & Bit128 & 1 & 1 & 0 & 66 & 67 \\ 
-  Tuple & Tuple & 14 & 7 & 0 & 23 & 30 \\ 
-  Uint & Bit128 & 1 & 3443 & 0 & 58 & 3501 \\ 
+  Array & -- & 36 & 5 & 0 & 0 & 5 \\ 
+  Char & -- & 7 & 19 & 0 & 0 & 19 \\ 
+  Dynamic & -- & 32 & 3 & 0 & 4 & 7 \\ 
+  FnPtr & -- & 9 & 4 & 0 & 0 & 4 \\ 
+  Int & 128Bit & 2 & 1 & 0 & 66 & 67 \\ 
+  Slice & -- & 26 & 0 & 0 & 1 & 1 \\ 
+  Str & -- & 6 & 0 & 0 & 3 & 3 \\ 
+  Tuple & -- & 14 & 7 & 0 & 23 & 30 \\ 
+  Uint & 128Bit & 35 & 3443 & 0 & 58 & 3501 \\ 
+  All & -- & 659 & 12053 & 170 & 190 & 12413 \\ 
    \hline
 \end{tabular}
-\caption{Summary of hidden improper type errors for each data type.} 
-\label{table:error_type_counts}
-\end{table}

@@ -59,6 +59,11 @@ reasons <- read_csv(
     reasons_path,
     show_col_types = FALSE
 )
+lint_info_path <- file.path("../locations/lint_info.csv")
+lint_info <- read_csv(
+  lint_info_path,
+  show_col_types = FALSE
+)
 ```
 ```{r include = FALSE}
 discriminant_counts %>%
@@ -77,8 +82,33 @@ unique_errors <- einfo %>%
   select(discriminant, err_text) %>% 
   unique %>% 
   nrow
+
+unique_crates <- einfo %>% select(crate_name) %>% unique %>% nrow
 ```
-We observed `r sum(discriminant_counts$count)` type errors in foreign bindings. There were `r unique_errors` unique errors.
+We observed `r sum(discriminant_counts$count)` type errors in foreign bindings. There were `r unique_errors` unique errors which occurred for `r unique_crates` unique crates.
+
+```{r echo = FALSE}
+decl_disabled <- lint_info %>% filter(decl_disabled == TRUE) %>% select(crate_name) %>% unique
+defn_disabled <- lint_info %>% filter(defn_disabled == TRUE) %>% select(crate_name) %>% unique
+both_disabled <- lint_info %>% filter(defn_disabled == TRUE) %>% filter(decl_disabled == TRUE) %>% select(crate_name) %>% unique
+
+g_decl_disabled <- decl_disabled %>% nrow # 40
+g_defn_disabled <- defn_disabled %>% nrow # 11
+g_both_disabled <- both_disabled %>% nrow # 10
+
+partial <- discriminant_counts %>% select(crate_name, category, ignored)
+partial <- partial %>% mutate(category = ifelse(as.character(category) %in% c('static_items','foreign_functions'), "decl", as.character(category)))
+partial_defn <- partial %>% filter(category == 'rust_functions') %>% filter(ignored == TRUE) %>% select(crate_name) %>% unique # 12
+partial_decl <- partial %>% filter(category == 'decl') %>% filter(ignored == TRUE) %>% select(crate_name) %>% unique #76
+partial_both <- partial %>% filter(ignored == TRUE) %>% select(crate_name, category) %>% group_by(crate_name) %>% unique %>% summarize(n = n()) %>% filter(n == 2) %>% select(crate_name)
+
+p_decl_disabled <- union(decl_disabled, partial_decl) %>% nrow # 80
+p_defn_disabled <- union(defn_disabled, partial_defn) %>% nrow # 19
+p_both_disabled <- union(both_disabled, partial_both) %>% nrow # 88
+```
+There were `r g_decl_disabled` crates that disabled the `improper_ctypes` lint. There were `r g_defn_disabled` crates that disabled the `improper_types_definitions` lint. There were `r g_both_disabled` crates that disabled both lints.
+
+When we include crates that have lints disabled per-item, we have `r p_decl_disabled` crates that disabled `improper_ctypes` lint, we have `r p_defn_disabled` crates that disabled the `improper_types_definitions` lint, and `r p_both_disabled` crates that disabled both lints.
 ```{r echo = FALSE}
 
 process_counts <- function(df) {
@@ -98,9 +128,9 @@ count_summary_all <- discriminant_counts %>%
   )
 
 unique_all <- discriminant_counts %>% select(crate_name, category, discriminant, reason, abi, err_text, ignored) %>%
-  group_by(category) %>% unique %>% summarize(n_unique_all=n())
+  group_by(category) %>% distinct(crate_name, category, discriminant, reason, abi, err_text) %>% summarize(n_unique_all=n())
 unique_ignored <- discriminant_counts %>% select(crate_name, category, discriminant, reason, abi, err_text, ignored) %>%
-  group_by(category) %>% filter(ignored == TRUE) %>% unique %>% summarize(n_unique_ign=n())
+  group_by(category) %>% filter(ignored == TRUE) %>% distinct(crate_name, category, discriminant, reason, abi, err_text) %>% summarize(n_unique_ign=n())
 
 count_summary_ign <-discriminant_counts %>% 
   filter(ignored == TRUE) %>%
@@ -112,6 +142,7 @@ count_summary_ign <-discriminant_counts %>%
     stdev_errs_ign = round(sd(num_errors), 1),
     max_errs_ign = max(num_errors)
   )
+
 count_summary <- count_summary_all %>% inner_join(count_summary_ign, by=("category"))
 count_summary$n_crates <- paste(count_summary_all$n_crates_all, "/", count_summary_ign$n_crates_ign)
 count_summary$n_errs <- paste(count_summary_all$errs_all, "/", count_summary_ign$errs_ign)
@@ -124,8 +155,35 @@ count_summary <- count_summary %>% inner_join(unique_ignored, by=("category"))
 count_summary$n_unique <- paste(count_summary$n_unique_all, "/", count_summary$n_unique_ign)
 
 count_summary <- count_summary %>% select(category, n_crates, n_unique, n_errs, mean_errs, stdev_errs, max_errs)
+count_summary <- count_summary %>% mutate(category = ifelse(as.character(category) == "rust_functions", "Rust Functions", as.character(category)))
+count_summary <- count_summary %>% mutate(category = ifelse(as.character(category) == "foreign_functions", "Foreign Functions", as.character(category)))
+count_summary <- count_summary %>% mutate(category = ifelse(as.character(category) == "static_items", "Static Items", as.character(category)))
 
+all_counts <- discriminant_counts %>% group_by(crate_name) %>%
+    summarize(num_errors = sum(count))
+
+all_counts_ign <- discriminant_counts %>% group_by(crate_name) %>%
+  filter(ignored == TRUE) %>%
+  summarize(num_errors = sum(count))
+
+unique_ungrouped <- discriminant_counts %>% select(crate_name, category, discriminant, reason, abi, err_text, ignored) %>%
+  distinct(crate_name, category, discriminant, reason, abi, err_text) %>% nrow
+
+unique_ungrouped_ign <- discriminant_counts %>% select(crate_name, category, discriminant, reason, abi, err_text, ignored) %>%
+  filter(ignored == TRUE) %>%
+  distinct(crate_name, category, discriminant, reason, abi, err_text) %>% nrow
+
+count_summary[nrow(count_summary) + 1,] <- list(
+  'All', # Category
+  paste(all_counts %>% nrow, '/', all_counts_ign %>% nrow), # Crates
+  paste(unique_ungrouped, '/', unique_ungrouped_ign), # Crates
+  paste(sum(all_counts$num_errors), '/', sum(all_counts_ign$num_errors)), # Unique Errors
+  paste(round(mean(all_counts$num_errors), 1), '/', round(mean(all_counts_ign$num_errors), 1)), # Mean
+  paste(round(sd(all_counts$num_errors), 1), '/', round(sd(all_counts_ign$num_errors), 1)), # St.Dev
+  paste(max(all_counts$num_errors), '/', max(all_counts_ign$num_errors)) # Max
+)
 colnames(count_summary) <- c("Category", "# Crates", "# Unique Errors", "Total", "Mean", "St.Dev", "Max")
+
 count_summary
 ```
 
@@ -138,42 +196,51 @@ decls <- named_counts %>% filter(category %in% c("foreign_functions"))
 defns <- named_counts %>% filter(category %in% c("rust_functions"))
 decls_items <- named_counts %>% filter(category %in% c("static_items"))
 
-discrim_counts <- einfo %>% 
-  select(reason, discriminant, err_text) %>% 
-  unique %>% 
+discrim_counts <- discriminant_counts %>% 
+  select(crate_name, category, discriminant, reason, abi, err_text, ignored) %>% 
+  distinct(crate_name, category, discriminant, reason, abi, err_text) %>% 
   group_by(reason, discriminant) %>% 
   summarize(n_unique=n())
 
-decls_items_counts <- 
-  decls_items %>% 
-  group_by(reason, type_name) %>% 
-  summarize(fi_count = sum(count)) %>% 
-  unique
+decls_items_counts <- decls_items %>%
+  group_by(reason, discriminant) %>% 
+  summarize(fi_count = sum(count))
 
 decls_counts <- decls %>% 
-  group_by(reason, type_name) %>% 
-  summarize(ff_count = sum(count)) %>% 
-  unique
+  group_by(reason, discriminant) %>% 
+  summarize(ff_count = sum(count))
 
 defns_counts <- defns %>% 
-  group_by(reason, type_name) %>% 
-  summarize(ef_count = sum(count)) %>% 
-  unique
+  group_by(reason, discriminant) %>% 
+  summarize(ef_count = sum(count))
 
-final <- discriminant_names %>% 
-  left_join(decls_counts, by=c("type_name")) %>% 
-  left_join(decls_items_counts, by=c("type_name","reason")) %>% 
-  left_join(defns_counts, by=c("type_name", "reason")) %>% 
-  left_join(discrim_counts, by=c("discriminant", "reason")) %>% 
+sum(defns_counts$ef_count) + sum(decls_counts$ff_count) + sum(decls_items_counts$fi_count)
+
+
+final <- decls_counts %>%
+  full_join(decls_items_counts, by=c("discriminant","reason")) %>% 
+  full_join(defns_counts, by=c("discriminant", "reason")) %>%
+  full_join(discrim_counts, by=c("discriminant", "reason")) %>%
   inner_join(reasons, by=c("reason")) %>%
-  mutate(across(where(is.numeric), ~ replace_na(.x, 0))) %>% 
+  inner_join(discriminant_names, by=c("discriminant")) %>%
+  mutate(across(where(is.numeric), ~ replace_na(.x, 0))) %>%
+  ungroup() %>%
   select(type_name, reason_name, n_unique, ff_count, fi_count, ef_count)
 
 final$total_occurrences <- final$ff_count + final$fi_count + final$ef_count
 filtered <- final %>% filter(total_occurrences > 0) %>% arrange(type_name)
 
-colnames(filtered) <- c("Type", "Error", "Foreign Functions", "Foreign Items", "Rust Functions", "Total", "Unique")
-
+filtered[nrow(filtered) + 1,] <- list(
+  'All', 
+  'All',
+  sum(filtered$n_unique),
+  sum(filtered$ff_count),
+  sum(filtered$fi_count),
+  sum(filtered$ef_count),
+  sum(filtered$total_occurrences)
+)
+filtered <- filtered %>% mutate(reason_name = ifelse(as.character(type_name) == as.character(reason_name), "--", as.character(reason_name)))
+colnames(filtered) <- c("Type", "Error", "Unique", "Foreign Functions", "Foreign Items", "Rust Functions", "Total")
 filtered
 
 ```
@@ -181,47 +248,50 @@ filtered
 ```{r}
 
 large <- function(x){
-  paste0('{\\bfseries ', x, '}')
+  paste0('\textbf{', x, '}')
 }
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& & & \\multicolumn{4}{c}{# Occurrences} \\\\\n",
-"Category & # Crates & # Unique & Total & Mean & St.Dev. & Max \\\\\n")
+addtorow$command <- c("& & & \\multicolumn{4}{c}{\\# Occurrences} \\\\\n",
+"Category & \\# Crates & \\# Unique & Total & Mean & St.Dev. & Max \\\\\n")
 xt_counts = xtable(
   count_summary, 
   type = "latex", 
   digits=c(0,0,0,0,0,1,1,0),
-  caption= "Summary statistics for improper type error occurrences. The number to the left of the '/' corresponds to all error occurrences, while the number to the right corresponds to hidden error occurrences.",
-  label = "table:error_summary"
+
 )
 
-align(xt_counts) <- "llcccccc"
+align(xt_counts) <- "llcc|cccc"
 print(xt_counts, 
       include.rownames = FALSE,
       add.to.row = addtorow, 
       file = "../latex/err_counts.tex",
       include.colnames = FALSE,
-      sanitize.colnames.function = large
+      sanitize.colnames.function = large,
+      floating=FALSE,
+      latex.environments=NULL
 )
 
 addtorow <- list()
 addtorow$pos <- list(0, 0)
-addtorow$command <- c("& & & \\multicolumn{4}{c}{# Hidden Occurrences} \\\\\n",
-"Type & Error & # Unique & Foreign Functions & Foreign Items & Rust Functions & Total \\\\\n")
+addtorow$command <- c("& & & \\multicolumn{4}{c}{\\# Hidden Occurrences} \\\\\n",
+"Error Category & Error & \\# Unique & Foreign Functions & Foreign Items & Rust Functions & Total \\\\\n")
 xt_type_counts <- xtable(
   filtered, 
   type = "latex", 
   digits=c(0,0,0,0,0,0,0,0),
-  caption= "Summary of hidden improper type errors for each data type.",
-  label = "table:error_type_counts"
+  floating=FALSE,
+  latex.environments=NULL
 )
-align(xt_type_counts) <- "lllccccc"
+align(xt_type_counts) <- "lllc|cccc"
 print(xt_type_counts, 
       include.rownames = FALSE,
       add.to.row = addtorow, 
       file = "../latex/err_type_counts.tex",
       include.colnames = FALSE,
-      sanitize.colnames.function = large
+      sanitize.colnames.function = large,
+      floating=FALSE,
+      latex.environments=NULL
     )
 
 

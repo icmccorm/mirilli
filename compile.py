@@ -12,9 +12,11 @@ disabled_decl = ""
 disabled_defn = ""
 finished_early = "name\n"
 finished_late = "name\n"
-error_category_counts = "crate_name,category,item_index,err_id,count,count_ignored\n"
+error_category_counts = "crate_name,category,item_index,err_id,count,ignored\n"
 err_info = "crate_name,abi,discriminant,reason,err_id,err_text\n"
 err_locations = "crate_name,err_id,category,ignored,file,start_line,start_col,end_line,end_col\n"
+
+lint_status_info = "crate_name,defn_disabled,decl_disabled\n"
 
 CAT_FOREIGN_FN = "foreign_functions"
 CAT_STATIC_ITEM = "static_items"
@@ -49,20 +51,22 @@ def process_error_category(name, category, ignored, json):
     item_error_counts = json[category]["item_error_counts"]
     loc_entries = ""
     for entry in item_error_counts:
+        loc_ignored = entry["ignored"] or ignored
         for err_id in entry["counts"]:
-            category_entries += f'{name},{category},{entry["index"]},{err_id},{entry["counts"][err_id]}\n'
-            if err_id not in json[category]["error_locations"] or len(json[category]["error_locations"]) == 0:
+            count = entry["counts"][err_id]
+            category_entries += f'{name},{category},{entry["index"]},{err_id},{count},{str(loc_ignored).lower()}\n'
+            if err_id not in entry["locations"] or len(entry["locations"][err_id]) == 0:
                 print(f"Unable to resolve location for error ID {err_id} of crate {name}")
                 exit(1) 
-        for loc in entry["locations"]:
-            loc_ignored = entry["ignored"] or ignored
-            items = list(map(str.strip, loc.split(':')))
-            file = items[0]
-            start_line = items[1]
-            start_col = items[2]
-            end_line = items[3]
-            end_col = items[4]
-            loc_entries += f'{name},{err_id},{category},{str(loc_ignored).lower()},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
+        for err_id in entry["locations"]:
+            for loc in entry["locations"][err_id]:
+                items = list(map(str.strip, loc.split(':')))
+                file = items[0]
+                start_line = items[1]
+                start_col = items[2]
+                end_line = items[3]
+                end_col = items[4]
+                loc_entries += f'{name},{err_id},{category},{str(loc_ignored).lower()},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
     return {
         "category": category_entries,
         "locations": loc_entries,
@@ -91,10 +95,10 @@ if(os.path.isdir(walk_dir)):
                 finished_late += f"{name}\n"
                 
                 if late_result_json["error_id_count"] != 0:
-                    
                     print(f"{name}-late")
                     defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
                     decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
+                    lint_status_info += f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n'
 
                     err_info += process_error_info(name, late_result_json)
 
@@ -124,5 +128,6 @@ if(os.path.isdir(walk_dir)):
     dump(disabled_defn, os.path.join(out_dir, "disabled_defn.csv"))
     dump(err_locations, os.path.join(out_dir, "error_locations.csv"))
     dump(err_info, os.path.join(out_dir, "error_info.csv"))
+    dump(lint_status_info, os.path.join(out_dir, "lint_info.csv"))
 else:
     print("Invalid input directory.")

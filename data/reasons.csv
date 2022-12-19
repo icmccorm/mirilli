@@ -5,7 +5,7 @@ Tuple,2
 Str,3
 Dynamic,4
 Slice,5
-Bit128,6
+128Bit,6
 Char,7
 EnumNonExhaustive,8
 EnumNonExhaustiveVariant,9
