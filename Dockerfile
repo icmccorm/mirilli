@@ -13,6 +13,6 @@ RUN ~/.cargo/bin/cargo search
 # Install rust 1.65.0.
 RUN ~/.cargo/bin/rustup install 1.65.0
 RUN ~/.cargo/bin/cargo install cargo-download cargo-dylint dylint-link
-RUN (cd early && ~/.cargo/bin/cargo build)
-RUN (cd late && ~/.cargo/bin/cargo build)
+RUN (cd src/early && ~/.cargo/bin/cargo build)
+RUN (cd src/late && ~/.cargo/bin/cargo build)
 ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
