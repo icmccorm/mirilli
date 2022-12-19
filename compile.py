@@ -15,7 +15,7 @@ finished_late = "name\n"
 error_category_counts = "crate_name,category,item_index,err_id,count,ignored\n"
 err_info = "crate_name,abi,discriminant,reason,err_id,err_text\n"
 err_locations = "crate_name,err_id,category,ignored,file,start_line,start_col,end_line,end_col\n"
-
+late_abi_counts = "crate_name,category,abi,count\n"
 lint_status_info = "crate_name,defn_disabled,decl_disabled\n"
 
 CAT_FOREIGN_FN = "foreign_functions"
@@ -34,6 +34,15 @@ def dump(contents, path):
     fd.writelines(contents)
     fd.close()
 
+def process_abis(name, json):
+    entries = ""
+    for key, value in json["foreign_function_abis"].items():
+        entries += f"{name},{CAT_FOREIGN_FN},{key},{value}\n"
+    for key, value in json["static_item_abis"].items():
+        entries += f"{name},{CAT_STATIC_ITEM},{key},{value}\n"
+    for key, value in json["rust_function_abis"].items():
+        entries += f"{name},{CAT_RUST_FN},{key},{value}\n"
+    return entries
 def process_error_info(name, json):
     info_entries = ""
     error_map = json["error_id_map"]
@@ -51,6 +60,7 @@ def process_error_category(name, category, ignored, json):
     item_error_counts = json[category]["item_error_counts"]
     loc_entries = ""
     for entry in item_error_counts:
+        loc_ignored = ignored
         loc_ignored = entry["ignored"] or ignored
         for err_id in entry["counts"]:
             count = entry["counts"][err_id]
@@ -93,7 +103,7 @@ if(os.path.isdir(walk_dir)):
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
                 finished_late += f"{name}\n"
-                
+                process_abis(name, late_result_json)
                 if late_result_json["error_id_count"] != 0:
                     print(f"{name}-late")
                     defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
@@ -122,6 +132,7 @@ if(os.path.isdir(walk_dir)):
                     
     dump(finished_early, os.path.join(out_dir,"finished_early.csv"))
     dump(finished_late, os.path.join(out_dir, "finished_late.csv"))
+    dump(late_abi_counts, os.path.join(out_dir,"late_abis.csv"))
     dump(error_category_counts, os.path.join(out_dir, "category_error_counts.csv"))
     dump(abis, os.path.join(out_dir, "abis.csv"))
     dump(disabled_decl, os.path.join(out_dir, "disabled_decl.csv"))

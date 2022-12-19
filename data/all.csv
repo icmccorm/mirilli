@@ -1,3 +1,4 @@
+crate_name,version
 rustls-extra,0.15.0
 msctfmonitor-sys,0.0.1
 ctop,0.1.0
