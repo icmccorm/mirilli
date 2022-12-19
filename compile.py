@@ -2,9 +2,17 @@ import json
 import os
 import sys
 
+
+if(len(sys.argv) == 1): 
+    print(f"Usage: python3 compile.py [raw data] [destination dir]")
+    exit(1) 
 walk_dir = sys.argv[1]
-out_dir = sys.argv[2]
-if(out_dir is None): out_dir = "./data"
+
+if (len(sys.argv) < 3):
+    out_dir = "./data/compiled"
+else:
+    out_dir = sys.argv[2]
+
 abis = "crate_name,abi,category,count\n"
 defn_types = ""
 decl_types = ""
