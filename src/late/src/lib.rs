@@ -76,12 +76,8 @@ struct FfickleLate {
     static_items: ErrorCount,
     rust_functions: ErrorCount,
     decl_lint_disabled_for_crate: bool,
-    defn_lint_disabled_for_crate: bool,
-    foreign_function_abis: HashMap<String, usize>,
-    static_item_abis: HashMap<String, usize>,
-    rust_function_abis: HashMap<String, usize>,
+    defn_lint_disabled_for_crate: bool
 }
-
 
 #[derive(Default, Serialize, Deserialize)]
 struct ItemErrorCounts {
@@ -101,6 +97,7 @@ struct ErrorLocation {
 struct ErrorCount {
     total_items: usize,
     item_error_counts: Vec<ItemErrorCounts>,
+    abis: HashMap<String, usize>
 }
 
 trait ErrorIDStore {
@@ -111,10 +108,30 @@ trait ErrorIDStore {
         item_type: ForeignItemType,
         were_ignored: bool,
     ) -> ();
+
+    fn record_abi(
+        &mut self,
+        abi_string: &str,
+        item_type: ForeignItemType
+    ) -> ();
 }
 
 
 impl ErrorIDStore for FfickleLate {
+    fn record_abi<'tcx>(
+        &mut self,
+        abi_string: &str,
+        item_type: ForeignItemType
+    ) -> () {
+        let store = match item_type {
+            ForeignItemType::RustFn => &mut self.rust_functions,
+            ForeignItemType::ForeignFn => &mut self.foreign_functions,
+            ForeignItemType::StaticItem => &mut self.static_items,
+        };
+        (store.abis).entry(abi_string.to_string())
+            .and_modify(|e| *e += 1)
+            .or_insert(1);
+    }
     fn record_errors<'tcx>(
         &mut self,
         errors: Vec<ObservedImproperType>,
@@ -821,11 +838,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
             mode: CItemKind::Definition,
             errors: &mut error_collection,
         };
-
-        self.rust_function_abis
-            .entry(abi.name().to_string())
-            .and_modify(|e| *e += 1)
-            .or_insert(1);
+        self.record_abi(abi.name(), ForeignItemType::RustFn);
 
         if !vis.is_internal_abi(abi) {
             vis.check_foreign_fn(hir_id, decl);
@@ -850,16 +863,10 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         let abi = cx.tcx.hir().get_foreign_abi(it.hir_id());
         match it.kind {
             hir::ForeignItemKind::Fn(_, _, _) => {
-                self.foreign_function_abis
-                    .entry(abi.name().to_string())
-                    .and_modify(|e| *e += 1)
-                    .or_insert(1);
+                self.record_abi(abi.name(), ForeignItemType::ForeignFn);
             }
             hir::ForeignItemKind::Static(_, _) => {
-                self.static_item_abis
-                    .entry(abi.name().to_string())
-                    .and_modify(|e| *e += 1)
-                    .or_insert(1);
+                self.record_abi(abi.name(), ForeignItemType::StaticItem);
             }
             _ => {}
         }
