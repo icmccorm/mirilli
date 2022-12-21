@@ -28,11 +28,10 @@ use rustc_middle::ty::TyKind;
 use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable};
 use rustc_span::symbol::sym;
 use rustc_span::Span;
-use rustc_span::DUMMY_SP;
 use rustc_target::abi::{Abi, WrappingRange};
 use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::io::Write;
 use std::iter;
 use std::ops::ControlFlow;
@@ -50,7 +49,7 @@ struct ObservedImproperType {
     discriminant: usize,
     str_rep: String,
     location: String,
-    reason: i32
+    reason: i32,
 }
 
 #[derive(PartialEq, Eq, Default, Serialize, Deserialize, Hash)]
@@ -58,7 +57,7 @@ struct ForeignTypeError {
     discriminant: usize,
     str_rep: String,
     abi: String,
-    reason: i32
+    reason: i32,
 }
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Hash)]
@@ -76,7 +75,7 @@ struct FfickleLate {
     static_items: ErrorCount,
     rust_functions: ErrorCount,
     decl_lint_disabled_for_crate: bool,
-    defn_lint_disabled_for_crate: bool
+    defn_lint_disabled_for_crate: bool,
 }
 
 #[derive(Default, Serialize, Deserialize)]
@@ -90,14 +89,14 @@ struct ItemErrorCounts {
 #[derive(Default, Serialize, Deserialize, PartialEq, Eq, Hash)]
 struct ErrorLocation {
     str_rep: String,
-    ignored: bool
+    ignored: bool,
 }
 
 #[derive(Default, Serialize, Deserialize)]
 struct ErrorCount {
     total_items: usize,
     item_error_counts: Vec<ItemErrorCounts>,
-    abis: HashMap<String, usize>
+    abis: HashMap<String, usize>,
 }
 
 trait ErrorIDStore {
@@ -109,26 +108,18 @@ trait ErrorIDStore {
         were_ignored: bool,
     ) -> ();
 
-    fn record_abi(
-        &mut self,
-        abi_string: &str,
-        item_type: ForeignItemType
-    ) -> ();
+    fn record_abi(&mut self, abi_string: &str, item_type: ForeignItemType) -> ();
 }
 
-
 impl ErrorIDStore for FfickleLate {
-    fn record_abi<'tcx>(
-        &mut self,
-        abi_string: &str,
-        item_type: ForeignItemType
-    ) -> () {
+    fn record_abi<'tcx>(&mut self, abi_string: &str, item_type: ForeignItemType) -> () {
         let store = match item_type {
             ForeignItemType::RustFn => &mut self.rust_functions,
             ForeignItemType::ForeignFn => &mut self.foreign_functions,
             ForeignItemType::StaticItem => &mut self.static_items,
         };
-        (store.abis).entry(abi_string.to_string())
+        (store.abis)
+            .entry(abi_string.to_string())
             .and_modify(|e| *e += 1)
             .or_insert(1);
     }
@@ -148,13 +139,13 @@ impl ErrorIDStore for FfickleLate {
         err_counts.index = (*store).total_items;
         err_counts.ignored = were_ignored;
         (*store).total_items += 1;
-        
+
         for err in errors {
             let foreign_err = ForeignTypeError {
                 discriminant: err.discriminant,
                 str_rep: err.str_rep,
                 abi: abi_string.to_string().replace("\"", ""),
-                reason: err.reason
+                reason: err.reason,
             };
             let id_opt = self.error_id_map.iter().find_map(|(key, val)| {
                 if val.eq(&foreign_err) {
@@ -171,7 +162,11 @@ impl ErrorIDStore for FfickleLate {
                     self.error_id_count - 1
                 }
             };
-            err_counts.locations.entry(id).or_default().extend(vec![err.location]);                
+            err_counts
+                .locations
+                .entry(id)
+                .or_default()
+                .extend(vec![err.location]);
             let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }
@@ -198,7 +193,7 @@ enum FfiResult<'tcx> {
     FfiPhantom(Ty<'tcx>),
     FfiUnsafe {
         ty: Ty<'tcx>,
-        reason: Reason
+        reason: Reason,
     },
 }
 
@@ -291,6 +286,7 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
         // We should only ever reach this case if ty_is_known_nonnull is extended
         // to other types.
         ref _unhandled => {
+
             return None;
         }
     })
@@ -355,7 +351,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             self.emit_ffi_unsafe_type_lint(
                 ty,
                 sp,
-                Reason::Array
+                Reason::Array,
             );
             true
         } else {
@@ -403,7 +399,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 // like (), which is FFI-unsafe
                 FfiUnsafe {
                     ty,
-                    reason: Reason::StructZeroSized
+                    reason: Reason::StructZeroSized,
                 }
             }
         } else {
@@ -418,7 +414,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                     FfiPhantom(..) if def.is_enum() => {
                         return FfiUnsafe {
                             ty,
-                            reason: Reason::EnumPhantomData,
+                            reason: Reason::EnumPhantomData
                         };
                     }
                     FfiPhantom(..) => {}
@@ -452,12 +448,12 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         match *ty.kind() {
             ty::Adt(def, substs) => {
                 if def.is_box() && matches!(self.mode, CItemKind::Definition) {
-                    if ty.boxed_ty().is_sized(tcx.at(DUMMY_SP), self.cx.param_env) {
+                    if ty.boxed_ty().is_sized(tcx, self.cx.param_env) {
                         return FfiSafe;
                     } else {
                         return FfiUnsafe {
                             ty,
-                            reason: Reason::Box
+                            reason: Reason::Box,
                         };
                     }
                 }
@@ -470,10 +466,10 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             return FfiUnsafe {
                                 ty,
                                 reason: if def.is_struct() {
-                                    Reason::StructNoRepresentation
+                                    Reason::StructLayout
                                 } else {
-                                    Reason::UnionNoRepresentation
-                                },
+                                    Reason::UnionLayout
+                                }
                             };
                         }
 
@@ -525,7 +521,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                         if def.is_variant_list_non_exhaustive() && !def.did().is_local() {
                             return FfiUnsafe {
                                 ty,
-                                reason: Reason::EnumNonExhaustive,
+                                reason: Reason::EnumNonExhaustive
                             };
                         }
 
@@ -557,7 +553,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             ty::Int(ty::IntTy::I128) | ty::Uint(ty::UintTy::U128) => FfiUnsafe {
                 ty,
-                reason: Reason::Bit128
+                reason: Reason::Bit128,
             },
 
             // Primitive types with a stable representation.
@@ -575,18 +571,18 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             ty::Str => FfiUnsafe {
                 ty,
-                reason: Reason::Str
+                reason: Reason::Str,
             },
 
             ty::Tuple(..) => FfiUnsafe {
                 ty,
-                reason: Reason::Tuple
+                reason: Reason::Tuple,
             },
 
             ty::RawPtr(ty::TypeAndMut { ty, .. }) | ty::Ref(_, ty, _)
                 if {
                     matches!(self.mode, CItemKind::Definition)
-                        && ty.is_sized(self.cx.tcx.at(DUMMY_SP), self.cx.param_env)
+                        && ty.is_sized(self.cx.tcx, self.cx.param_env)
                 } =>
             {
                 FfiSafe
@@ -611,7 +607,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 if self.is_internal_abi(sig.abi()) {
                     return FfiUnsafe {
                         ty,
-                        reason: Reason::FnPtr
+                        reason: Reason::FnPtr,
                     };
                 }
 
@@ -641,19 +637,21 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             // While opaque types are checked for earlier, if a projection in a struct field
             // normalizes to an opaque type, then it will reach this branch.
-            ty::Opaque(..) => FfiUnsafe {
+            ty::Alias(ty::Opaque, ..) => FfiUnsafe {
                 ty,
-                reason: Reason::Opaque
+                reason: Reason::Opaque,
             },
 
             // `extern "C" fn` functions can have type parameters, which may or may not be FFI-safe,
             //  so they are currently ignored for the purposes of this lint.
-            ty::Param(..) | ty::Projection(..) if matches!(self.mode, CItemKind::Definition) => {
+            ty::Param(..) | ty::Alias(ty::Projection, ..)
+                if matches!(self.mode, CItemKind::Definition) =>
+            {
                 FfiSafe
             }
 
             ty::Param(..)
-            | ty::Projection(..)
+            | ty::Alias(ty::Projection, ..)
             | ty::Infer(..)
             | ty::Bound(..)
             | ty::Error(_)
@@ -665,12 +663,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
     }
 
-    fn emit_ffi_unsafe_type_lint(
-        &mut self,
-        ty: Ty<'tcx>,
-        sp: Span,
-        reason: Reason
-    ) {
+    fn emit_ffi_unsafe_type_lint(&mut self, ty: Ty<'tcx>, sp: Span, reason: Reason) {
         let kind: &'tcx TyKind<'tcx> = ty.kind();
         let discriminant = tykind_discriminant(kind);
         let tyctx = self.cx.tcx;
@@ -681,42 +674,34 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             discriminant: discriminant,
             str_rep: format!("{}", ty).to_string(),
             location: source_map.span_to_diagnostic_string(sp),
-            reason: reason as i32
+            reason: reason as i32,
         };
         self.errors.append(&mut vec![obj_rep]);
     }
 
     fn check_for_opaque_ty(&mut self, sp: Span, ty: Ty<'tcx>) -> bool {
-        struct ProhibitOpaqueTypes<'a, 'tcx> {
-            cx: &'a LateContext<'tcx>,
-        }
-
-        impl<'a, 'tcx> ty::visit::TypeVisitor<'tcx> for ProhibitOpaqueTypes<'a, 'tcx> {
+        struct ProhibitOpaqueTypes;
+        impl<'tcx> ty::visit::TypeVisitor<'tcx> for ProhibitOpaqueTypes {
             type BreakTy = Ty<'tcx>;
 
             fn visit_ty(&mut self, ty: Ty<'tcx>) -> ControlFlow<Self::BreakTy> {
-                match ty.kind() {
-                    ty::Opaque(..) => ControlFlow::Break(ty),
-                    // Consider opaque types within projections FFI-safe if they do not normalize
-                    // to more opaque types.
-                    ty::Projection(..) => {
-                        let ty = self.cx.tcx.normalize_erasing_regions(self.cx.param_env, ty);
+                if !ty.has_opaque_types() {
+                    return ControlFlow::CONTINUE;
+                }
 
-                        // If `ty` is an opaque type directly then `super_visit_with` won't invoke
-                        // this function again.
-                        if ty.has_opaque_types() {
-                            self.visit_ty(ty)
-                        } else {
-                            ControlFlow::CONTINUE
-                        }
-                    }
-                    _ => ty.super_visit_with(self),
+                if let ty::Alias(ty::Opaque, ..) = ty.kind() {
+                    ControlFlow::Break(ty)
+                } else {
+                    ty.super_visit_with(self)
                 }
             }
         }
 
-        if let Some(ty) = ty
-            .visit_with(&mut ProhibitOpaqueTypes { cx: self.cx })
+        if let Some(ty) = self
+            .cx
+            .tcx
+            .normalize_erasing_regions(self.cx.param_env, ty)
+            .visit_with(&mut ProhibitOpaqueTypes)
             .break_value()
         {
             self.emit_ffi_unsafe_type_lint(ty, sp, Reason::Opaque);
@@ -784,6 +769,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         for (input_ty, input_hir) in iter::zip(sig.inputs(), decl.inputs) {
             self.check_type_for_ffi_and_report_errors(input_hir.span, *input_ty, false, false);
         }
+
         if let hir::FnRetTy::Return(ref ret_hir) = decl.output {
             let ret_ty = sig.output();
             self.check_type_for_ffi_and_report_errors(ret_hir.span, ret_ty, false, true);
@@ -948,45 +934,44 @@ enum Reason {
     UnionFieldless,
     StructNonExhaustive,
     UnionNonExhaustive,
-    StructNoRepresentation,
-    UnionNoRepresentation,
+    UnionLayout,
+    StructLayout,
     Box,
     EnumPhantomData,
     StructZeroSized,
     Array,
-    OnlyPhantomData 
+    OnlyPhantomData,
 }
 
-const fn tykind_discriminant<I: rustc_type_ir::Interner>(
-    value: &rustc_type_ir::TyKind<I>,
+const fn tykind_discriminant(
+    value: &rustc_middle::ty::TyKind,
 ) -> usize {
     match value {
-        rustc_type_ir::TyKind::Bool => 0,
-        rustc_type_ir::TyKind::Char => 1,
-        rustc_type_ir::TyKind::Int(_) => 2,
-        rustc_type_ir::TyKind::Uint(_) => 3,
-        rustc_type_ir::TyKind::Float(_) => 4,
-        rustc_type_ir::TyKind::Adt(_, _) => 5,
-        rustc_type_ir::TyKind::Foreign(_) => 6,
-        rustc_type_ir::TyKind::Str => 7,
-        rustc_type_ir::TyKind::Array(_, _) => 8,
-        rustc_type_ir::TyKind::Slice(_) => 9,
-        rustc_type_ir::TyKind::RawPtr(_) => 10,
-        rustc_type_ir::TyKind::Ref(_, _, _) => 11,
-        rustc_type_ir::TyKind::FnDef(_, _) => 12,
-        rustc_type_ir::TyKind::FnPtr(_) => 13,
-        rustc_type_ir::TyKind::Dynamic(..) => 14,
-        rustc_type_ir::TyKind::Closure(_, _) => 15,
-        rustc_type_ir::TyKind::Generator(_, _, _) => 16,
-        rustc_type_ir::TyKind::GeneratorWitness(_) => 17,
-        rustc_type_ir::TyKind::Never => 18,
-        rustc_type_ir::TyKind::Tuple(_) => 19,
-        rustc_type_ir::TyKind::Projection(_) => 20,
-        rustc_type_ir::TyKind::Opaque(_, _) => 21,
-        rustc_type_ir::TyKind::Param(_) => 22,
-        rustc_type_ir::TyKind::Bound(_, _) => 23,
-        rustc_type_ir::TyKind::Placeholder(_) => 24,
-        rustc_type_ir::TyKind::Infer(_) => 25,
-        rustc_type_ir::TyKind::Error(_) => 26,
+        rustc_middle::ty::TyKind::Bool => 0,
+        rustc_middle::ty::TyKind::Char => 1,
+        rustc_middle::ty::TyKind::Int(_) => 2,
+        rustc_middle::ty::TyKind::Uint(_) => 3,
+        rustc_middle::ty::TyKind::Float(_) => 4,
+        rustc_middle::ty::TyKind::Adt(_, _) => 5,
+        rustc_middle::ty::TyKind::Foreign(_) => 6,
+        rustc_middle::ty::TyKind::Str => 7,
+        rustc_middle::ty::TyKind::Array(_, _) => 8,
+        rustc_middle::ty::TyKind::Slice(_) => 9,
+        rustc_middle::ty::TyKind::RawPtr(_) => 10,
+        rustc_middle::ty::TyKind::Ref(_, _, _) => 11,
+        rustc_middle::ty::TyKind::FnDef(_, _) => 12,
+        rustc_middle::ty::TyKind::FnPtr(_) => 13,
+        rustc_middle::ty::TyKind::Dynamic(_, _, _) => 14,
+        rustc_middle::ty::TyKind::Closure(_, _) => 15,
+        rustc_middle::ty::TyKind::Generator(_, _, _) => 16,
+        rustc_middle::ty::TyKind::GeneratorWitness(_) => 17,
+        rustc_middle::ty::TyKind::Never => 18,
+        rustc_middle::ty::TyKind::Tuple(_) => 19,
+        rustc_middle::ty::TyKind::Param(_) => 20,
+        rustc_middle::ty::TyKind::Bound(_, _) => 21,
+        rustc_middle::ty::TyKind::Placeholder(_) => 22,
+        rustc_middle::ty::TyKind::Infer(_) => 23,
+        rustc_middle::ty::TyKind::Error(_) => 24,
+        rustc_type_ir::TyKind::Alias(_, _) => 25
     }
 }

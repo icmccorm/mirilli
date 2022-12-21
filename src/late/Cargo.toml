@@ -10,7 +10,7 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-clippy_utils = { git = "https://github.com/rust-lang/rust-clippy", rev = "e43f5a17d4d9263616ae6fc28a7c5353e80d8a12" }
+clippy_utils = { git = "https://github.com/rust-lang/rust-clippy", rev = "7198989d45e4e47ccc30077c522468cac172766c" }
 dylint_linting = "2.0.13"
 if_chain = "1.0.2"
 serde = { version = "1.0.147", features = ["derive"] }
