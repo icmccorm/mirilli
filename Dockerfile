@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 WORKDIR /usr/src/ffickle
 COPY . .
-RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev copenssl gcc curl clang llvm make -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm make -y
 # Install Rust
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && chmod +x /tmp/rustup-init.sh \
