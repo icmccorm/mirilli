@@ -19,10 +19,9 @@ discriminant,type_name
 17,GeneratorWitness
 18,Never
 19,Tuple
-20,Projection
-21,Opaque
-22,Param
-23,Bound
-24,Placeholder
-25,Infer
-26,Error
+20,Param
+21,Bound
+22,Placeholder
+23,Infer
+24,Error
+25,Alias
