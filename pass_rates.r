@@ -9,17 +9,17 @@ all <- read_csv(
     show_col_types = FALSE
 )
 
-early_path <- file.path("./data/finished_early.csv")
+early_path <- file.path("./data/compiled/finished_early.csv")
 early <- read_csv(
     early_path,
     show_col_types = FALSE
 )
-late_path <- file.path("./data/finished_late.csv")
+late_path <- file.path("./data/compiled/finished_late.csv")
 late <- read_csv(
     late_path,
     show_col_types = FALSE
 )
-failed_path <- file.path("./data/failed_compilation.csv")
+failed_path <- file.path("./data/compiled/failed_compilation.csv")
 failed <- read_csv(
     failed_path,
     show_col_types = FALSE

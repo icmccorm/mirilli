@@ -8,12 +8,12 @@ all <- read_csv(
     all_path,
     show_col_types = FALSE
 )
-einfo_path <- file.path("./data/locations/error_info.csv")
+einfo_path <- file.path("./data/compiled/error_info.csv")
 einfo <- read_csv(
     einfo_path,
     show_col_types = FALSE
 )
-eloc_path <- file.path("./data/locations/error_locations.csv")
+eloc_path <- file.path("./data/compiled/error_locations.csv")
 eloc <- read_csv(
     eloc_path,
     show_col_types = FALSE

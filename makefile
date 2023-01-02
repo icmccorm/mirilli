@@ -12,8 +12,8 @@ clean: clean-compile
 clean-cache:
 	@(cargo install cargo-cache 1> /dev/null)
 	@(cargo cache -a 1> /dev/null)
-	@(./clean.sh)
+	@(./scripts/clean.sh)
 clean-compile:
 	@(rm -f ./data/compiled/* 1> /dev/null)
 compile: clean-compile
-	@(python3 compile.py ./data/results ./data/compiled)
+	@(python3 ./scripts/compile.py ./data/results ./data/compiled)
