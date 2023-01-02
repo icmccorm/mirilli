@@ -5,11 +5,15 @@ all:
 	@(cd src/early && cargo build)
 	@(cd src/late && cargo build)
 	@(cargo dylint list)
-clean:
+clean: clean-compile
 	@(rm -rf ./test > /dev/null)
 	@(rm -f all_sorted.csv)
 	@(rm -f visited_sorted.csv)
-cache-clean:
+clean-cache:
 	@(cargo install cargo-cache 1> /dev/null)
 	@(cargo cache -a 1> /dev/null)
 	@(./clean.sh)
+clean-compile:
+	@(rm -f ./data/compiled/* 1> /dev/null)
+compile: clean-compile
+	@(python3 compile.py ./data/results ./data/compiled)
