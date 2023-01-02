@@ -5,7 +5,7 @@ all:
 	@(cd src/early && cargo build)
 	@(cd src/late && cargo build)
 	@(cargo dylint list)
-clean: clean-compile
+clean:
 	@(rm -rf ./test > /dev/null)
 	@(rm -f all_sorted.csv)
 	@(rm -f visited_sorted.csv)
@@ -17,3 +17,9 @@ clean-compile:
 	@(rm -f ./data/compiled/* 1> /dev/null)
 compile: clean-compile
 	@(python3 ./scripts/compile.py ./data/results ./data/compiled)
+rates:
+	@(Rscript ./data/pass_rates.r)
+clean-sample:
+	@(rm -f ./data/coding/samples/* 1> /dev/null)
+sample: clean-sample
+	@(Rscript ./data/sample.r)

@@ -36,4 +36,4 @@ sample <- errors %>%
     group_by(err_text, category) %>%
     slice_sample(n = 1) %>%
     ungroup()
-sample %>% write_csv(file.path("./coding/samples/improper_types.csv"))
+sample %>% write_csv(file.path("./data/coding/samples/improper_types.csv"))

@@ -17,8 +17,6 @@ early_abis = "crate_name,abi,category,count\n"
 late_abis = "crate_name,abi,category,count\n"
 defn_types = ""
 decl_types = ""
-disabled_decl = ""
-disabled_defn = ""
 finished_early = "name\n"
 finished_late = "name\n"
 error_category_counts = "crate_name,category,item_index,err_id,count,ignored\n"
@@ -142,8 +140,6 @@ if (os.path.isdir(walk_dir)):
     dump(error_category_counts, os.path.join(
         out_dir, "category_error_counts.csv"))
     dump(early_abis, os.path.join(out_dir, "early_abis.csv"))
-    dump(disabled_decl, os.path.join(out_dir, "disabled_decl.csv"))
-    dump(disabled_defn, os.path.join(out_dir, "disabled_defn.csv"))
     dump(err_locations, os.path.join(out_dir, "error_locations.csv"))
     dump(err_info, os.path.join(out_dir, "error_info.csv"))
     dump(lint_status_info, os.path.join(out_dir, "lint_info.csv"))

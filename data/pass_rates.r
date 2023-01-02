@@ -19,12 +19,11 @@ late <- read_csv(
     late_path,
     show_col_types = FALSE
 )
-failed_path <- file.path("./data/compiled/failed_compilation.csv")
+failed_path <- file.path("./data/results/failed_compilation.csv")
 failed <- read_csv(
     failed_path,
     show_col_types = FALSE
 )
-
 total <- all %>% nrow
 passed_early <- early %>% nrow
 failed_early <- total - passed_early
