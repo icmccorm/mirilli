@@ -11,3 +11,4 @@ src/early/target
 src/late/target
 sandbox.r
 data/archives
+.Rproj.user

@@ -1,0 +1,17 @@
+# Sampling
+```{r echo=FALSE}
+total <- all %>% nrow
+passed_early <- finished_early %>% nrow
+failed_early <- total - passed_early
+passed_late <- finished_late %>% nrow
+failed_late <- passed_early - passed_late
+compiled <- total - (failed_compilation %>% nrow)
+
+
+
+fc <-function(n) {
+  format(round(as.numeric(n), 0), nsmall=0, big.mark=",")
+} 
+```
+
+We began with a snapshot of the crates.io database taken on 12/20/2022, which contained `r fc(total)` crates. From this population, `r fc(passed_early)` passed the early linting stage, while `r fc(failed_early)` failed. Of those that passed the early linting stage, `r fc(passed_late)` passed the late linting stage, while `r fc(failed_late)` failed. After removing crates without valid versions from the late linting stage, we are left with

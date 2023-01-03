@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Improper Type Errors | Audit</title>
+  <meta name="description" content="An audit trail for all data collection and analysis." />
+  <meta name="generator" content="bookdown 0.31 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Improper Type Errors | Audit" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="An audit trail for all data collection and analysis." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Improper Type Errors | Audit" />
+  
+  <meta name="twitter:description" content="An audit trail for all data collection and analysis." />
+  
+
+<meta name="author" content="Ian McCormack" />
+
+
+<meta name="date" content="2023-01-03" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="abi-distribution.html"/>
+<link rel="next" href="sampling.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">A Minimal Book Example</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
+<li class="chapter" data-level="2" data-path="abi-distribution.html"><a href="abi-distribution.html"><i class="fa fa-check"></i><b>2</b> ABI Distribution</a></li>
+<li class="chapter" data-level="3" data-path="improper-type-errors.html"><a href="improper-type-errors.html"><i class="fa fa-check"></i><b>3</b> Improper Type Errors</a></li>
+<li class="chapter" data-level="4" data-path="sampling.html"><a href="sampling.html"><i class="fa fa-check"></i><b>4</b> Sampling</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Audit</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="improper-type-errors" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Improper Type Errors<a href="improper-type-errors.html#improper-type-errors" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>We observed 1.6951^{4} type errors in foreign bindings. There were 483 unique errors which occurred for 236 unique crates.</p>
+<p>There were 47 crates that disabled the <code>improper_ctypes</code> lint. There were 12 crates that disabled the <code>improper_types_definitions</code> lint. There were 10 crates that disabled both lints.</p>
+<p>When we include crates that have lints disabled per-item, we have 100 crates that disabled <code>improper_ctypes</code> lint, we have 21 crates that disabled the <code>improper_types_definitions</code> lint, and 10 crates that disabled both lints.</p>
+<pre><code>## # A tibble: 4 × 7
+##   Category          `# Crates` `# Unique Errors` Total        Mean  St.Dev Max  
+##   &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;             &lt;chr&gt;        &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;
+## 1 Foreign Functions 150 / 96   548 / 446         16318 / 144… 108.… 464.2… 5375…
+## 2 Rust Functions    78 / 15    149 / 32          437 / 195    5.6 … 15.8 … 136 …
+## 3 Static Items      16 / 6     41 / 31           196 / 171    12.2… 24.6 … 99 /…
+## 4 All               236 / 110  738 / 509         16951 / 148… 71.8… 379.4… 5474…</code></pre>
+<pre><code>## [1] 14852</code></pre>
+<pre><code>## # A tibble: 16 × 7
+##    Type    Error  Unique `Foreign Funct…` `Foreign Items` `Rust Functions` Total
+##    &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;            &lt;dbl&gt;           &lt;dbl&gt;            &lt;dbl&gt; &lt;dbl&gt;
+##  1 Adt     EnumN…      2                4               0                0     4
+##  2 Adt     EnumN…     51               29               7               21    57
+##  3 Adt     Struc…    361             8329             161                7  8497
+##  4 Adt     Struc…      1                2               0                0     2
+##  5 Adt     Union…    105              912               2               10   924
+##  6 Adt     OnlyP…      1                1               0                0     1
+##  7 Array   --         54               21               0                0    21
+##  8 Char    --          7               19               0                0    19
+##  9 Dynamic --         32                3               0                4     7
+## 10 FnPtr   --         13              295               1                0   296
+## 11 Int     128Bit      2                1               0               66    67
+## 12 Slice   --         30                1               0                1     2
+## 13 Str     --          8                0               0                4     4
+## 14 Tuple   --         15                7               0               24    31
+## 15 Uint    128Bit     56             4862               0               58  4920
+## 16 All     --        738            14486             171              195 14852</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="improper-type-errors.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># large &lt;- function(x){</span></span>
+<span id="cb6-2"><a href="improper-type-errors.html#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   paste0(&#39;\textbf{&#39;, x, &#39;}&#39;)</span></span>
+<span id="cb6-3"><a href="improper-type-errors.html#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb6-4"><a href="improper-type-errors.html#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># addtorow &lt;- list()</span></span>
+<span id="cb6-5"><a href="improper-type-errors.html#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># addtorow$pos &lt;- list(0, 0)</span></span>
+<span id="cb6-6"><a href="improper-type-errors.html#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># addtorow$command &lt;- c(&quot;&amp; &amp; &amp; \\multicolumn{4}{c}{\\# Occurrences} \\\\\n&quot;,</span></span>
+<span id="cb6-7"><a href="improper-type-errors.html#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># &quot;Category &amp; \\# Crates &amp; \\# Unique &amp; Total &amp; Mean &amp; St.Dev. &amp; Max \\\\\n&quot;)</span></span>
+<span id="cb6-8"><a href="improper-type-errors.html#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># xt_counts = xtable(</span></span>
+<span id="cb6-9"><a href="improper-type-errors.html#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   count_summary, </span></span>
+<span id="cb6-10"><a href="improper-type-errors.html#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   type = &quot;latex&quot;, </span></span>
+<span id="cb6-11"><a href="improper-type-errors.html#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   digits=c(0,0,0,0,0,1,1,0),</span></span>
+<span id="cb6-12"><a href="improper-type-errors.html#cb6-12" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb6-13"><a href="improper-type-errors.html#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb6-14"><a href="improper-type-errors.html#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="improper-type-errors.html#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># align(xt_counts) &lt;- &quot;llcc|cccc&quot;</span></span>
+<span id="cb6-16"><a href="improper-type-errors.html#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># print(xt_counts, </span></span>
+<span id="cb6-17"><a href="improper-type-errors.html#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#       include.rownames = FALSE,</span></span>
+<span id="cb6-18"><a href="improper-type-errors.html#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#       add.to.row = addtorow, </span></span>
+<span id="cb6-19"><a href="improper-type-errors.html#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#       file = &quot;../latex/err_counts.tex&quot;,</span></span>
+<span id="cb6-20"><a href="improper-type-errors.html#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#       include.colnames = FALSE,</span></span>
+<span id="cb6-21"><a href="improper-type-errors.html#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#       sanitize.colnames.function = large,</span></span>
+<span id="cb6-22"><a href="improper-type-errors.html#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#       floating=FALSE,</span></span>
+<span id="cb6-23"><a href="improper-type-errors.html#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#       latex.environments=NULL</span></span>
+<span id="cb6-24"><a href="improper-type-errors.html#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb6-25"><a href="improper-type-errors.html#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="improper-type-errors.html#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co"># addtorow &lt;- list()</span></span>
+<span id="cb6-27"><a href="improper-type-errors.html#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co"># addtorow$pos &lt;- list(0, 0)</span></span>
+<span id="cb6-28"><a href="improper-type-errors.html#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co"># addtorow$command &lt;- c(&quot;&amp; &amp; &amp; \\multicolumn{4}{c}{\\# Hidden Occurrences} \\\\\n&quot;,</span></span>
+<span id="cb6-29"><a href="improper-type-errors.html#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co"># &quot;Error Category &amp; Error &amp; \\# Unique &amp; Foreign Functions &amp; Foreign Items &amp; Rust Functions &amp; Total \\\\\n&quot;)</span></span>
+<span id="cb6-30"><a href="improper-type-errors.html#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co"># xt_type_counts &lt;- xtable(</span></span>
+<span id="cb6-31"><a href="improper-type-errors.html#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   filtered, </span></span>
+<span id="cb6-32"><a href="improper-type-errors.html#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   type = &quot;latex&quot;, </span></span>
+<span id="cb6-33"><a href="improper-type-errors.html#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co">#   digits=c(0,0,0,0,0,0,0,0),</span></span>
+<span id="cb6-34"><a href="improper-type-errors.html#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co">#   floating=FALSE,</span></span>
+<span id="cb6-35"><a href="improper-type-errors.html#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="co">#   latex.environments=NULL</span></span>
+<span id="cb6-36"><a href="improper-type-errors.html#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb6-37"><a href="improper-type-errors.html#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co"># align(xt_type_counts) &lt;- &quot;lllc|cccc&quot;</span></span>
+<span id="cb6-38"><a href="improper-type-errors.html#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="co"># print(xt_type_counts, </span></span>
+<span id="cb6-39"><a href="improper-type-errors.html#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="co">#       include.rownames = FALSE,</span></span>
+<span id="cb6-40"><a href="improper-type-errors.html#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="co">#       add.to.row = addtorow, </span></span>
+<span id="cb6-41"><a href="improper-type-errors.html#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="co">#       file = &quot;../latex/err_type_counts.tex&quot;,</span></span>
+<span id="cb6-42"><a href="improper-type-errors.html#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="co">#       include.colnames = FALSE,</span></span>
+<span id="cb6-43"><a href="improper-type-errors.html#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="co">#       sanitize.colnames.function = large,</span></span>
+<span id="cb6-44"><a href="improper-type-errors.html#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="co">#       floating=FALSE,</span></span>
+<span id="cb6-45"><a href="improper-type-errors.html#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co">#       latex.environments=NULL</span></span>
+<span id="cb6-46"><a href="improper-type-errors.html#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co">#     )</span></span></code></pre></div>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="abi-distribution.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="sampling.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/03-improper.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
