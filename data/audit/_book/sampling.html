@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 4 Sampling | Audit</title>
+  <title>4 Sampling | Audit</title>
   <meta name="description" content="An audit trail for all data collection and analysis." />
   <meta name="generator" content="bookdown 0.31 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 4 Sampling | Audit" />
+  <meta property="og:title" content="4 Sampling | Audit" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="An audit trail for all data collection and analysis." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 4 Sampling | Audit" />
+  <meta name="twitter:title" content="4 Sampling | Audit" />
   
   <meta name="twitter:description" content="An audit trail for all data collection and analysis." />
   
@@ -23,7 +23,7 @@
 <meta name="author" content="Ian McCormack" />
 
 
-<meta name="date" content="2023-01-03" />
+<meta name="date" content="2023-01-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -162,8 +162,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
             <section class="normal" id="section-">
 <div id="sampling" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">Chapter 4</span> Sampling<a href="sampling.html#sampling" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>We began with a snapshot of the crates.io database taken on 12/20/2022, which contained 99,784 crates. From this population, 88,652 passed the early linting stage, while 11,132 failed. Of those that passed the early linting stage, 86,415 passed the late linting stage, while 2,237 failed. After the late linting stage, 16,372 failed to compile.</p>
+<h1><span class="header-section-number">4</span> Sampling<a href="sampling.html#sampling" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>We began with a snapshot of the crates.io database taken on 12/20/2022, which contained 99,784 crates. After filtering out crates without any valid published versions, 96,048 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 57 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 88,652 passed the early linting stage, while 7,396 failed it. Of those that passed the early linting stage, 86,415 passed the late linting stage, while 2,237 failed it. We use this subset of crates that passed all stages as the basis for our study, which comprises <strong>87% of all crates</strong>. Though 5,809 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
 
 </div>
             </section>

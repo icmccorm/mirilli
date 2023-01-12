@@ -28,6 +28,12 @@ all <- read_csv(
     show_col_types = FALSE
 )
 
+unfiltered_path <- file.path("../unfiltered.csv")
+unfiltered <- read_csv(
+  unfiltered_path,
+  show_col_types = FALSE
+)
+
 finished_early_path <- file.path("../compiled/finished_early.csv")
 finished_early <- read_csv(
     finished_early_path,
@@ -101,11 +107,9 @@ failed_compilation <- read_csv(
     show_col_types = FALSE
 )
 
-to_exclude_path <- file.path("../to_exclude.csv")
-to_exclude <- read_csv(
-    to_exclude_path,
+failed_download_path <- file.path("../results/failed_download.csv")
+failed_download <- read_csv(
+    failed_download_path,
     show_col_types = FALSE
 )
-
-
 ```

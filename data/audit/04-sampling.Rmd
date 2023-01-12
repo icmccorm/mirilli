@@ -1,17 +1,23 @@
-# Sampling
+# Quantitative Results
 ```{r echo=FALSE}
+unfiltered_total <- unfiltered %>% nrow
 total <- all %>% nrow
 passed_early <- finished_early %>% nrow
 failed_early <- total - passed_early
 passed_late <- finished_late %>% nrow
 failed_late <- passed_early - passed_late
+nfailed_download <- failed_download %>% nrow
 compiled <- total - (failed_compilation %>% nrow)
+failed_compilation <- passed_late - compiled
+had_valid <- finished_late 
 
-
+percent_sampled <- passed_late / unfiltered_total * 100
 
 fc <-function(n) {
   format(round(as.numeric(n), 0), nsmall=0, big.mark=",")
 } 
 ```
 
-We began with a snapshot of the crates.io database taken on 12/20/2022, which contained `r fc(total)` crates. From this population, `r fc(passed_early)` passed the early linting stage, while `r fc(failed_early)` failed. Of those that passed the early linting stage, `r fc(passed_late)` passed the late linting stage, while `r fc(failed_late)` failed. After removing crates without valid versions from the late linting stage, we are left with
+We began with a snapshot of the [crates.io](https://crates.io/data-access) database taken on 12/20/2022, which contained `r fc(unfiltered_total)` crates. After filtering out crates without any valid published versions, `r fc(total)` crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of `r fc(nfailed_download)` crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, `r fc(passed_early)` passed the early linting stage, while `r fc(failed_early)` failed it. Of those that passed the early linting stage, `r fc(passed_late)` passed the late linting stage, while `r fc(failed_late)` failed it. We use this subset of crates that passed both linting stages as the basis for our study, which comprises **`r fc(percent_sampled)`% of all crates** in the database. Though `r fc(failed_compilation)` crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.
+
+## ABI Distribution

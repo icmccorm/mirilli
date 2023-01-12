@@ -8,7 +8,7 @@ rm -rf ./data/results
 mkdir -p ./data/results
 mkdir -p ./data/results/early
 mkdir -p ./data/results/late
-TO_VISIT=$(cat ./data/all.csv)
+TO_VISIT=$(cat $1)
 while IFS=, read name version; 
 do
     if (cargo-download -x "$name==$version" --output ./test 1> /dev/null); then 
