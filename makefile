@@ -15,8 +15,10 @@ clean-cache:
 	@(./scripts/clean.sh)
 clean-compile:
 	@(rm -f ./data/compiled/* 1> /dev/null)
+	@(rm -f ./data/abi_subset.csv 1> /dev/null)
 compile: clean-compile
 	@(python3 ./scripts/compile.py ./data/results ./data/compiled)
+	@(Rscript ./scripts/extract_abi_subset.r 1> /dev/null)
 rates:
 	@(Rscript ./data/pass_rates.r)
 clean-sample:
