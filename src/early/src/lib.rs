@@ -20,12 +20,13 @@ extern crate rustc_trait_selection;
 use std::io::Write;
 use rustc_ast::ast;
 use rustc_ast::visit::FnKind;
+use rustc_target::spec::abi::lookup;
+use rustc_target::spec::abi::Abi as SpecAbi;
 use rustc_ast::Extern::Explicit;
 use rustc_span::Span;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
-
+use crate::rustc_lint::LintContext;
 dylint_linting::impl_early_lint! {
     pub FFICKLE_EARLY,
     Warn,
@@ -37,30 +38,35 @@ use rustc_lint::{EarlyContext, EarlyLintPass};
 #[derive(Default, Serialize, Deserialize)]
 
 struct FfickleEarly {
-    foreign_function_abis: HashMap<String, usize>,
-    static_item_abis: HashMap<String, usize>,
-    rust_function_abis: HashMap<String, usize>,
+    foreign_function_abis: HashMap<String, Vec<String>>,
+    static_item_abis: HashMap<String, Vec<String>>,
+    rust_function_abis: HashMap<String, Vec<String>>,
 }
 
 impl<'tcx> EarlyLintPass for FfickleEarly {
 
-    fn check_fn(&mut self, _: &EarlyContext<'_>, kind: FnKind<'_>, _: Span, _: ast::NodeId) {
+    fn check_fn(&mut self, cx: &EarlyContext<'_>, kind: FnKind< >, _: Span, _: ast::NodeId) {
         match kind {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
                 Explicit(sl, _) => {
+                    let session = &cx.sess();
+                    let parse_sess = &session.parse_sess;
+                    let source_map = &(*parse_sess).source_map();
                     let abi_string = sl.symbol_unescaped.as_str().to_string().replace("\"", "");
-                    self.rust_function_abis
-                        .entry(abi_string.to_string())
-                        .and_modify(|e| *e += 1)
-                        .or_insert(1);
+                    if !is_internal_abi(lookup(&abi_string).unwrap()) {
+                        self.rust_function_abis
+                            .entry(abi_string.to_string())
+                            .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(sig.span)]))
+                            .or_insert(vec![source_map.span_to_diagnostic_string(sig.span)]);
+                    }
                 }
                 _ => {}
             },
             _ => {}
-        };
+        };    
     }
 
-    fn check_item(&mut self, _cx: &EarlyContext<'_>, it: &ast::Item) {
+    fn check_item(&mut self, cx: &EarlyContext<'_>, it: &ast::Item) {
         match &it.kind {
             ast::ItemKind::ForeignMod(fm) => {
                 let fm: &ast::ForeignMod = fm;
@@ -68,22 +74,27 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                     Some(abi) => abi.symbol_unescaped.as_str().to_string().replace("\"", ""),
                     None => "C".to_string(),
                 };
-                let items: &Vec<rustc_ast::ptr::P<rustc_ast::ast::ForeignItem>> = &fm.items;
-                for item in items {
-                    match item.kind {
-                        rustc_ast::ast::ForeignItemKind::Fn(_) => {
-                            self.foreign_function_abis
-                                .entry(abi_string.to_string())
-                                .and_modify(|e| *e += 1)
-                                .or_insert(1);
+                if !is_internal_abi(lookup(&abi_string).unwrap()) {
+                    let items: &Vec<rustc_ast::ptr::P<rustc_ast::ast::ForeignItem>> = &fm.items;
+                    let session = &cx.sess();
+                    let parse_sess = &session.parse_sess;
+                    let source_map = &(*parse_sess).source_map();
+                    for item in items {
+                        match item.kind {
+                            rustc_ast::ast::ForeignItemKind::Fn(_) => {
+                                self.foreign_function_abis
+                                    .entry(abi_string.to_string())
+                                    .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(item.span)]))
+                                    .or_insert(vec![source_map.span_to_diagnostic_string(item.span)]);
+                            }
+                            rustc_ast::ast::ForeignItemKind::Static(_, _, _) => {
+                                self.static_item_abis
+                                    .entry(abi_string.to_string())
+                                    .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(item.span)]))
+                                    .or_insert(vec![source_map.span_to_diagnostic_string(item.span)]);
+                            }
+                            _ => {}
                         }
-                        rustc_ast::ast::ForeignItemKind::Static(_, _, _) => {
-                            self.static_item_abis
-                                .entry(abi_string.to_string())
-                                .and_modify(|e| *e += 1)
-                                .or_insert(1);
-                        }
-                        _ => {}
                     }
                 }
             }
@@ -113,7 +124,12 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         }
     }
 }
-
+fn is_internal_abi(abi: SpecAbi) -> bool {
+    matches!(
+        abi,
+        SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic | SpecAbi::PlatformIntrinsic
+    )
+}
 #[test]
 fn ui() {
     dylint_testing::ui_test(

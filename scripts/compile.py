@@ -2,7 +2,6 @@ import json
 import os
 import sys
 
-
 if (len(sys.argv) == 1):
     print(f"Usage: python3 compile.py [raw data] [destination dir]")
     exit(1)
@@ -13,8 +12,8 @@ if (len(sys.argv) < 3):
 else:
     out_dir = sys.argv[2]
 
-early_abis = "crate_name,abi,category,count\n"
-late_abis = "crate_name,abi,category,count\n"
+early_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
+late_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
 defn_types = ""
 decl_types = ""
 finished_early = "name\n"
@@ -28,7 +27,6 @@ CAT_FOREIGN_FN = "foreign_functions"
 CAT_STATIC_ITEM = "static_items"
 CAT_RUST_FN = "rust_functions"
 
-
 def read_json(path, name):
     fd = open(path, "r")
     json_obj = json.loads(fd.read())
@@ -36,19 +34,26 @@ def read_json(path, name):
     name = os.path.splitext(name)[0]
     return name, json_obj
 
-
 def dump(contents, path):
     fd = open(path, "w")
     fd.writelines(contents)
     fd.close()
 
+def location_to_csv(loc):
+    items = list(map(str.strip, loc.split(':')))
+    file = items[0]
+    start_line = items[1]
+    start_col = items[2]
+    end_line = items[3]
+    end_col = items[4]        
+    return f'"{file}",{start_line},{start_col},{end_line},{end_col}'
 
 def process_abis(name, category, json):
     entries = ""
     for key, value in json.items():
-        entries += f"{name},{category},{key},{value}\n"
+        for location in value.items():
+            entries += f"{name},{category},{key},{value},{location_to_csv(location)}\n"
     return entries
-
 
 def process_error_info(name, json):
     info_entries = ""
@@ -61,7 +66,6 @@ def process_error_info(name, json):
         e_reason = e_entry["reason"]
         info_entries += f'{name},{e_abi},{e_discr},{e_reason},{err_id},"{e_text}"\n'
     return info_entries
-
 
 def process_error_category(name, category, ignored, json):
     abi_counts = json[category]["abis"]
@@ -83,19 +87,12 @@ def process_error_category(name, category, ignored, json):
                 exit(1)
         for err_id in entry["locations"]:
             for loc in entry["locations"][err_id]:
-                items = list(map(str.strip, loc.split(':')))
-                file = items[0]
-                start_line = items[1]
-                start_col = items[2]
-                end_line = items[3]
-                end_col = items[4]
-                loc_entries += f'{name},{err_id},{category},{str(loc_ignored).lower()},"{file}",{start_line},{start_col},{end_line},{end_col}\n'
+                loc_entries += f'{name},{err_id},{category},{str(loc_ignored).lower()},{location_to_csv(loc)}\n'
     return {
         "category": category_entries,
         "locations": loc_entries,
         "abis": abi_entries,
     }
-
 
 if (os.path.isdir(walk_dir)):
     for dir in os.listdir(walk_dir):

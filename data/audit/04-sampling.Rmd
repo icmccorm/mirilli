@@ -18,6 +18,22 @@ fc <-function(n) {
 } 
 ```
 
-We began with a snapshot of the [crates.io](https://crates.io/data-access) database taken on 12/20/2022, which contained `r fc(unfiltered_total)` crates. After filtering out crates without any valid published versions, `r fc(total)` crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of `r fc(nfailed_download)` crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, `r fc(passed_early)` passed the early linting stage, while `r fc(failed_early)` failed it. Of those that passed the early linting stage, `r fc(passed_late)` passed the late linting stage, while `r fc(failed_late)` failed it. We use this subset of crates that passed both linting stages as the basis for our study, which comprises **`r fc(percent_sampled)`% of all crates** in the database. Though `r fc(failed_compilation)` crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.
+We began with a snapshot of the [crates.io](https://crates.io/data-access) database taken on 12/20/2022, which contained `r fc(unfiltered_total)` crates. After filtering out crates without any valid published versions, `r fc(total)` crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of `r fc(nfailed_download)` crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, `r fc(passed_early)` passed the early linting stage, while `r fc(failed_early)` failed it. Of those that passed the early linting stage, `r fc(passed_late)` passed the late linting stage, while `r fc(failed_late)` failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises **`r fc(percent_sampled)`% of all crates** in the database. Though `r fc(failed_compilation)` crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.
 
 ## ABI Distribution
+```{r echo=FALSE}
+late_abis%>% group_by(abi) %>% summarise(sum(count))
+lname <- late_abis %>% select(crate_name, abi, category) %>% unique
+ename <- early_abis %>% select(crate_name, abi, category) %>% unique
+ename$early_abi <- ename$abi
+lname$late_abi <- lname$abi
+not_captured_late <- lname %>% left_join(ename, by=c("crate_name")) %>% filter(is.na(late_abi)) %>% select(crate_name) %>% unique
+had_different_abi_early <- ename %>% left_join(lname, by=c("crate_name", "abi", "category")) %>% filter(is.na(late_abi))
+
+num_crates_with_unique_early_data <- had_different_abi_early %>% select(crate_name) %>% unique %>% nrow
+
+num_not_captured_late <- not_captured_late %>% nrow
+num_diff_abi_early <- had_different_abi_early %>% nrow
+```
+
+Both the early and late lints recorded the number of occurrences of each ABI for the rust functions, foreign functions, and static items declared in each crate. There were `r fc(num_diff_abi_early)` crates that only appeared in results from the early lint. However, there were `r fc(num_crates_with_unique_early_data)` crates that had one or more foreign ABIs that were *only* detected in the early lint. 

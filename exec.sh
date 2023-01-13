@@ -8,7 +8,6 @@ rm -rf ./data/results
 mkdir -p ./data/results
 mkdir -p ./data/results/early
 mkdir -p ./data/results/late
-TO_VISIT=$(cat $1)
 while IFS=, read name version; 
 do
     if (cargo-download -x "$name==$version" --output ./test 1> /dev/null); then 
@@ -18,14 +17,14 @@ do
         fi
         echo "Writing visit to data/results/visited.csv"
         echo "$name,$version" >> "data/results/visited.csv"
-        echo "Copying analysis output to data/results/early/$name-$version.json"
-        [ ! -f ./test/ffickle_early.json ] || mv ./test/ffickle_early.json "data/results/early/$name-$version.json"
-        echo "Copying analysis output to data/results/late/$name-$version.json"
-        [ ! -f ./test/ffickle_late.json ] || mv ./test/ffickle_late.json "data/results/late/$name-$version.json"
+        echo "Copying analysis output to data/results/early/$name.json"
+        [ ! -f ./test/ffickle_early.json ] || mv ./test/ffickle_early.json "data/results/early/$name.json"
+        echo "Copying analysis output to data/results/late/$name.json"
+        [ ! -f ./test/ffickle_late.json ] || mv ./test/ffickle_late.json "data/results/late/$name.json"
     else
         echo "${RED}DOWNLOAD FAILED${NC} $name $version\n"
         echo "$name,$version,$?" >> "data/results/failed_download.csv"
     fi
     rm -rf ./test
-done <<< "$TO_VISIT"
+done <<< "tail -n +2 $1"
 echo "${GREEN} FINISHED! ${NC} $name\n"

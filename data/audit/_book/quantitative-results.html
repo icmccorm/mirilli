@@ -23,7 +23,7 @@
 <meta name="author" content="Ian McCormack" />
 
 
-<meta name="date" content="2023-01-12" />
+<meta name="date" content="2023-01-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -166,9 +166,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="quantitative-results" class="section level1 hasAnchor" number="4">
 <h1><span class="header-section-number">4</span> Quantitative Results<a href="quantitative-results.html#quantitative-results" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>We began with a snapshot of the crates.io database taken on 12/20/2022, which contained 99,784 crates. After filtering out crates without any valid published versions, 96,048 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 57 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 88,652 passed the early linting stage, while 7,396 failed it. Of those that passed the early linting stage, 86,415 passed the late linting stage, while 2,237 failed it. We use this subset of crates that passed all stages as the basis for our study, which comprises <strong>87% of all crates</strong>. Though 5,809 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
+<p>We began with a snapshot of the <a href="https://crates.io/data-access">crates.io</a> database taken on 12/20/2022, which contained 99,785 crates. After filtering out crates without any valid published versions, 96,049 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 58 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 85,652 passed the early linting stage, while 10,397 failed it. Of those that passed the early linting stage, 83,491 passed the late linting stage, while 2,161 failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises <strong>84% of all crates</strong> in the database. Though 2,884 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
 <div id="abi-distribution-1" class="section level2 hasAnchor" number="4.1">
 <h2><span class="header-section-number">4.1</span> ABI Distribution<a href="quantitative-results.html#abi-distribution-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Both the early and late lints recorded the number of occurrences of each ABI for the rust functions, foreign functions, and static items declared in each crate. There were 4,151 crates that only appeared in results from the early lint. However, there were 3,434 crates that had one or more foreign ABIs that were <em>only</em> detected in the early lint.</p>
 
 </div>
 </div>

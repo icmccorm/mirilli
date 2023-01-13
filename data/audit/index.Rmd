@@ -21,6 +21,11 @@ late_abis <- read_csv(
     late_abis_path,
     show_col_types = FALSE
 )
+early_abis_path <- file.path("../compiled/early_abis.csv")
+early_abis <- read_csv(
+    early_abis_path,
+    show_col_types = FALSE
+)
 
 all_path <- file.path("../all.csv")
 all <- read_csv(

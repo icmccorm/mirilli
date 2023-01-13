@@ -20,9 +20,11 @@ extern crate rustc_target;
 extern crate rustc_trait_selection;
 extern crate rustc_type_ir;
 use crate::rustc_lint::LintContext;
+use rustc_session::Session;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
 use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
+use rustc_hir::intravisit::FnKind;
 use rustc_middle::ty::subst::SubstsRef;
 use rustc_middle::ty::TyKind;
 use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable};
@@ -96,7 +98,7 @@ struct ErrorLocation {
 struct ErrorCount {
     total_items: usize,
     item_error_counts: Vec<ItemErrorCounts>,
-    abis: HashMap<String, usize>,
+    abis: HashMap<String, Vec<String>>,
 }
 
 trait ErrorIDStore {
@@ -108,20 +110,22 @@ trait ErrorIDStore {
         were_ignored: bool,
     ) -> ();
 
-    fn record_abi(&mut self, abi_string: &str, item_type: ForeignItemType) -> ();
+    fn record_abi(&mut self, abi_string: &str, item_type: ForeignItemType, sp:Span, sess:&Session) -> ();
 }
 
 impl ErrorIDStore for FfickleLate {
-    fn record_abi<'tcx>(&mut self, abi_string: &str, item_type: ForeignItemType) -> () {
+    fn record_abi<'tcx>(&mut self, abi_string: &str, item_type: ForeignItemType, sp: Span, sess:&Session) -> () {
         let store = match item_type {
             ForeignItemType::RustFn => &mut self.rust_functions,
             ForeignItemType::ForeignFn => &mut self.foreign_functions,
             ForeignItemType::StaticItem => &mut self.static_items,
         };
+        let parse_sess = &sess.parse_sess;
+        let source_map = &(*parse_sess).source_map();
         (store.abis)
             .entry(abi_string.to_string())
-            .and_modify(|e| *e += 1)
-            .or_insert(1);
+            .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(sp)]))
+            .or_insert(vec![source_map.span_to_diagnostic_string(sp)]);
     }
     fn record_errors<'tcx>(
         &mut self,
@@ -604,7 +608,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             ty::Array(inner_ty, _) => self.check_type_for_ffi(cache, inner_ty),
 
             ty::FnPtr(sig) => {
-                if self.is_internal_abi(sig.abi()) {
+                if is_internal_abi(sig.abi()) {
                     return FfiUnsafe {
                         ty,
                         reason: Reason::FnPtr,
@@ -666,8 +670,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     fn emit_ffi_unsafe_type_lint(&mut self, ty: Ty<'tcx>, sp: Span, reason: Reason) {
         let kind: &'tcx TyKind<'tcx> = ty.kind();
         let discriminant = tykind_discriminant(kind);
-        let tyctx = self.cx.tcx;
-        let sess = tyctx.sess;
+        let sess = self.cx.sess();
         let parse_sess = &sess.parse_sess;
         let source_map = &(*parse_sess).source_map();
         let obj_rep = ObservedImproperType {
@@ -781,13 +784,13 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         let ty = self.cx.tcx.type_of(def_id);
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
+}
 
-    fn is_internal_abi(&self, abi: SpecAbi) -> bool {
-        matches!(
-            abi,
-            SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic | SpecAbi::PlatformIntrinsic
-        )
-    }
+fn is_internal_abi(abi: SpecAbi) -> bool {
+    matches!(
+        abi,
+        SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic | SpecAbi::PlatformIntrinsic
+    )
 }
 
 fn lint_disabled<'tcx>(cx: &LateContext<'tcx>, name: &str) -> bool {
@@ -811,22 +814,27 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         _: Span,
         hir_id: hir::HirId,
     ) {
-        use hir::intravisit::FnKind;
-
         let abi: rustc_target::spec::abi::Abi = match kind {
             FnKind::ItemFn(_, _, header, ..) => header.abi,
             FnKind::Method(_, sig, ..) => sig.header.abi,
             _ => return,
         };
-        let mut error_collection = vec![];
-        let mut vis = ImproperCTypesVisitor {
-            cx,
-            mode: CItemKind::Definition,
-            errors: &mut error_collection,
-        };
-        self.record_abi(abi.name(), ForeignItemType::RustFn);
+        if !is_internal_abi(abi) {
 
-        if !vis.is_internal_abi(abi) {
+            let mut error_collection = vec![];
+            let mut vis = ImproperCTypesVisitor {
+                cx,
+                mode: CItemKind::Definition,
+                errors: &mut error_collection,
+            };
+            let sp = match kind {
+                FnKind::ItemFn(_, sig, ..) => sig.span,
+                FnKind::Method(_, sig, ..) => sig.span,
+                _ => return,
+            };
+
+            self.record_abi(abi.name(), ForeignItemType::RustFn, sp, cx.sess());
+    
             vis.check_foreign_fn(hir_id, decl);
             if error_collection.len() > 0 {
                 let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS");
@@ -839,24 +847,27 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
             }
         }
     }
+
     fn check_foreign_item(&mut self, cx: &LateContext<'_>, it: &hir::ForeignItem<'_>) {
-        let mut error_collection = vec![];
-        let mut vis = ImproperCTypesVisitor {
-            cx,
-            mode: CItemKind::Declaration,
-            errors: &mut error_collection,
-        };
         let abi = cx.tcx.hir().get_foreign_abi(it.hir_id());
-        match it.kind {
-            hir::ForeignItemKind::Fn(_, _, _) => {
-                self.record_abi(abi.name(), ForeignItemType::ForeignFn);
+        if !is_internal_abi(abi) {
+            let mut error_collection = vec![];
+            let mut vis = ImproperCTypesVisitor {
+                cx,
+                mode: CItemKind::Declaration,
+                errors: &mut error_collection,
+            };
+            let abi = cx.tcx.hir().get_foreign_abi(it.hir_id());
+            match it.kind {
+                hir::ForeignItemKind::Fn(_, _, _) => {
+                    self.record_abi(abi.name(), ForeignItemType::ForeignFn, it.span, cx.sess());
+                }
+                hir::ForeignItemKind::Static(_, _) => {
+                    self.record_abi(abi.name(), ForeignItemType::StaticItem, it.span, cx.sess());
+                }
+                _ => {}
             }
-            hir::ForeignItemKind::Static(_, _) => {
-                self.record_abi(abi.name(), ForeignItemType::StaticItem);
-            }
-            _ => {}
-        }
-        if !vis.is_internal_abi(abi) {
+        
             let item_type = match it.kind {
                 hir::ForeignItemKind::Fn(ref decl, _, _) => {
                     vis.check_foreign_fn(it.hir_id(), decl);

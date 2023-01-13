@@ -23,7 +23,7 @@
 <meta name="author" content="Ian McCormack" />
 
 
-<meta name="date" content="2023-01-12" />
+<meta name="date" content="2023-01-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -166,27 +166,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="improper-type-errors" class="section level1 hasAnchor" number="3">
 <h1><span class="header-section-number">3</span> Improper Type Errors<a href="improper-type-errors.html#improper-type-errors" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>We observed 1.6951^{4} type errors in foreign bindings. There were 483 unique errors which occurred for 236 unique crates.</p>
-<p>There were 47 crates that disabled the <code>improper_ctypes</code> lint. There were 12 crates that disabled the <code>improper_types_definitions</code> lint. There were 10 crates that disabled both lints.</p>
-<p>When we include crates that have lints disabled per-item, we have 100 crates that disabled <code>improper_ctypes</code> lint, we have 21 crates that disabled the <code>improper_types_definitions</code> lint, and 10 crates that disabled both lints.</p>
+<p>We observed 1.6761^{4} type errors in foreign bindings. There were 478 unique errors which occurred for 227 unique crates.</p>
+<p>There were 44 crates that disabled the <code>improper_ctypes</code> lint. There were 12 crates that disabled the <code>improper_types_definitions</code> lint. There were 10 crates that disabled both lints.</p>
+<p>When we include crates that have lints disabled per-item, we have 95 crates that disabled <code>improper_ctypes</code> lint, we have 21 crates that disabled the <code>improper_types_definitions</code> lint, and 10 crates that disabled both lints.</p>
 <pre><code>## # A tibble: 4 × 7
 ##   Category          `# Crates` `# Unique Errors` Total        Mean  St.Dev Max  
 ##   &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;             &lt;chr&gt;        &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;
-## 1 Foreign Functions 150 / 96   548 / 446         16318 / 144… 108.… 464.2… 5375…
+## 1 Foreign Functions 142 / 91   525 / 435         16130 / 144… 113.… 476.7… 5375…
 ## 2 Rust Functions    78 / 15    149 / 32          437 / 195    5.6 … 15.8 … 136 …
-## 3 Static Items      16 / 6     41 / 31           196 / 171    12.2… 24.6 … 99 /…
-## 4 All               236 / 110  738 / 509         16951 / 148… 71.8… 379.4… 5474…</code></pre>
-<pre><code>## [1] 14852</code></pre>
+## 3 Static Items      15 / 6     40 / 31           194 / 171    12.9… 25.3 … 99 /…
+## 4 All               227 / 105  714 / 498         16761 / 147… 73.8… 386.8… 5474…</code></pre>
+<pre><code>## [1] 14793</code></pre>
 <pre><code>## # A tibble: 16 × 7
 ##    Type    Error  Unique `Foreign Funct…` `Foreign Items` `Rust Functions` Total
 ##    &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;            &lt;dbl&gt;           &lt;dbl&gt;            &lt;dbl&gt; &lt;dbl&gt;
 ##  1 Adt     EnumN…      2                4               0                0     4
 ##  2 Adt     EnumN…     51               29               7               21    57
-##  3 Adt     Struc…    361             8329             161                7  8497
+##  3 Adt     Struc…    354             8286             161                7  8454
 ##  4 Adt     Struc…      1                2               0                0     2
-##  5 Adt     Union…    105              912               2               10   924
+##  5 Adt     Union…    102              908               2               10   920
 ##  6 Adt     OnlyP…      1                1               0                0     1
-##  7 Array   --         54               21               0                0    21
+##  7 Array   --         42               21               0                0    21
 ##  8 Char    --          7               19               0                0    19
 ##  9 Dynamic --         32                3               0                4     7
 ## 10 FnPtr   --         13              295               1                0   296
@@ -194,8 +194,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 12 Slice   --         30                1               0                1     2
 ## 13 Str     --          8                0               0                4     4
 ## 14 Tuple   --         15                7               0               24    31
-## 15 Uint    128Bit     56             4862               0               58  4920
-## 16 All     --        738            14486             171              195 14852</code></pre>
+## 15 Uint    128Bit     54             4850               0               58  4908
+## 16 All     --        714            14427             171              195 14793</code></pre>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="improper-type-errors.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># large &lt;- function(x){</span></span>
 <span id="cb6-2"><a href="improper-type-errors.html#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   paste0(&#39;\textbf{&#39;, x, &#39;}&#39;)</span></span>
 <span id="cb6-3"><a href="improper-type-errors.html#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
