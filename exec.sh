@@ -10,8 +10,11 @@ mkdir -p ./data/results/early
 mkdir -p ./data/results/late
 while IFS=, read name version; 
 do
-    if (cargo-download -x "$name==$version" --output ./test 1> /dev/null); then 
-	if ! (cd test && (timeout 5m cargo dylint --all 1> /dev/null)); then
+    cargo-download -x "$name==$version" --output ./test
+    EXITCODE=$?
+    if [ "$EXITCODE" -eq "0" ]; then 
+        echo "SUCCESS"
+        if ! (cd test && (timeout 5m cargo dylint --all 1> /dev/null)); then
             echo "Writing failure to data/results/failed_compilation.csv"
             echo "$name,$version,$?" >> "data/results/failed_compilation.csv"
         fi
@@ -22,9 +25,10 @@ do
         echo "Copying analysis output to data/results/late/$name.json"
         [ ! -f ./test/ffickle_late.json ] || mv ./test/ffickle_late.json "data/results/late/$name.json"
     else
+        echo "FAILED (exit $EXITCODE)"
         echo "${RED}DOWNLOAD FAILED${NC} $name $version\n"
-        echo "$name,$version,$?" >> "data/results/failed_download.csv"
+        echo "$name,$version,$EXITCODE" >> "data/results/failed_download.csv"
     fi
     rm -rf ./test
-done <<< "tail -n +2 $1"
-echo "${GREEN} FINISHED! ${NC} $name\n"
+done <<< "$(tail -n +2 $1)"
+echo "FINISHED! $name\n"

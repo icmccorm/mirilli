@@ -99,10 +99,10 @@ if (os.path.isdir(walk_dir)):
         if dir == "early":
             early = os.path.join(walk_dir, dir)
             for early_result in os.listdir(early):
+                print(f"{early_result}-late")
                 path_to_early_result = os.path.join(early, early_result)
                 name, early_result_json = read_json(
                     path_to_early_result, early_result)
-                print(f"{name}-early")
                 finished_early += f"{name}\n"
                 early_abis += process_abis(name, CAT_FOREIGN_FN,
                                            early_result_json["foreign_function_abis"])
@@ -114,11 +114,11 @@ if (os.path.isdir(walk_dir)):
             late = os.path.join(walk_dir, dir)
             for late_result in os.listdir(late):
                 path_to_late_result = os.path.join(late, late_result)
+                print(f"{late_result}-late")
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
                 finished_late += f"{name}\n"
                 if late_result_json["error_id_count"] != 0:
-                    print(f"{name}-late")
                     defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
                     decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
                     lint_status_info += f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n'
