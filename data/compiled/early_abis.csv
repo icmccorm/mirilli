@@ -1001,6 +1001,7 @@ liblinear,static_items,C,1
 mouse-rs,foreign_functions,C,6
 crt0stack,static_items,C,1
 mimallocate-sys,foreign_functions,C,6
+crash-context,foreign_functions,C,1
 sqlite-vfs,foreign_functions,C,4
 sqlite-vfs,rust_functions,C,29
 fltk,foreign_functions,C,3
@@ -1457,6 +1458,8 @@ cult,foreign_functions,C,12
 example_dylib,rust_functions,C,3
 nstd_fs,rust_functions,C,20
 alien_ffi,foreign_functions,C,17
+crash-handler,foreign_functions,C,2
+crash-handler,rust_functions,C,4
 memflow-kvm-ioctl,foreign_functions,C,2
 tree-sitter-c-sharp,foreign_functions,C,1
 webgl_stdweb,foreign_functions,C,756
@@ -1829,6 +1832,7 @@ ntrumls,foreign_functions,C,3
 candy-wrapper,rust_functions,C,1
 fuzzyhash,rust_functions,C,2
 wasmboy,foreign_functions,C,2
+crankstart,rust_functions,C,16
 solana-budget-program,rust_functions,C,1
 mrml-wasm,rust_functions,C,10
 tree-sitter-cpp,foreign_functions,C,1
@@ -2178,6 +2182,8 @@ rvs-c-api,rust_functions,C,15
 unblock,foreign_functions,C,1
 unblock,rust_functions,C,2
 physx,rust_functions,C,17
+sdl2-sys,foreign_functions,C,1253
+sdl2-sys,static_items,C,1
 lxc-sys2,foreign_functions,C,11
 hotspot,foreign_functions,C,2
 tc-executor-wasmtime,rust_functions,C,1
@@ -4245,6 +4251,7 @@ gfx_glow,rust_functions,system,1
 rathe-storage-program,rust_functions,C,1
 tgrep,foreign_functions,C,1
 solana-exchange-program,rust_functions,C,1
+sleef-trig-sys,foreign_functions,C,5
 dvcompute_network,rust_functions,C,2
 wfst4str,rust_functions,C,58
 fastnoise_simd_bindings,foreign_functions,C,27

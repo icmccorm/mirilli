@@ -269,6 +269,9 @@ sapp-linux,foreign_functions,C,3019
 sapp-linux,rust_functions,Rust,96
 sapp-linux,rust_functions,C,63
 lapacke-sys,foreign_functions,C,2205
+sdl2-sys,foreign_functions,C,1253
+sdl2-sys,rust_functions,Rust,520
+sdl2-sys,static_items,C,1
 rsasl,rust_functions,Rust,425
 rsasl,static_items,C,2
 euphrates_x64,foreign_functions,win64,2
@@ -517,6 +520,7 @@ wasmtime-runtime,rust_functions,Rust,464
 wasmtime-runtime,rust_functions,C,31
 solana-exchange-program,rust_functions,Rust,186
 solana-exchange-program,rust_functions,C,1
+sleef-trig-sys,foreign_functions,C,5
 solana-failure-program,rust_functions,Rust,3
 solana-failure-program,rust_functions,C,1
 mech-math,rust_functions,C,4

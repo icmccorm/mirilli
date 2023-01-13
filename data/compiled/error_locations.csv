@@ -11839,6 +11839,12 @@ lapacke-sys,0,foreign_functions,false,"src/lib.rs",30514,16,30514,36
 lapacke-sys,1,foreign_functions,false,"src/lib.rs",30524,16,30524,37
 lapacke-sys,0,foreign_functions,false,"src/lib.rs",30718,16,30718,36
 lapacke-sys,1,foreign_functions,false,"src/lib.rs",30728,16,30728,37
+sdl2-sys,0,foreign_functions,true,"/usr/src/ffickle/test/target/dylint/target/nightly-2022-12-17-x86_64-unknown-linux-gnu/debug/build/sdl2-sys-aeebf4651ce73f6d/out/sdl_bindings.rs",3807,86,3807,90
+sdl2-sys,0,foreign_functions,true,"/usr/src/ffickle/test/target/dylint/target/nightly-2022-12-17-x86_64-unknown-linux-gnu/debug/build/sdl2-sys-aeebf4651ce73f6d/out/sdl_bindings.rs",5525,18,5525,22
+sdl2-sys,0,foreign_functions,true,"/usr/src/ffickle/test/target/dylint/target/nightly-2022-12-17-x86_64-unknown-linux-gnu/debug/build/sdl2-sys-aeebf4651ce73f6d/out/sdl_bindings.rs",5533,18,5533,22
+sdl2-sys,0,foreign_functions,true,"/usr/src/ffickle/test/target/dylint/target/nightly-2022-12-17-x86_64-unknown-linux-gnu/debug/build/sdl2-sys-aeebf4651ce73f6d/out/sdl_bindings.rs",5541,18,5541,22
+sdl2-sys,0,foreign_functions,true,"/usr/src/ffickle/test/target/dylint/target/nightly-2022-12-17-x86_64-unknown-linux-gnu/debug/build/sdl2-sys-aeebf4651ce73f6d/out/sdl_bindings.rs",5568,18,5568,22
+sdl2-sys,0,foreign_functions,true,"/usr/src/ffickle/test/target/dylint/target/nightly-2022-12-17-x86_64-unknown-linux-gnu/debug/build/sdl2-sys-aeebf4651ce73f6d/out/sdl_bindings.rs",5578,18,5578,22
 rsasl,0,static_items,false,"src/registry.rs",268,5,268,25
 rsasl,0,static_items,false,"src/registry.rs",268,5,268,25
 euphrates_x64,1,foreign_functions,false,"src/lib.rs",7,70,7,77
@@ -16564,6 +16570,10 @@ wasmtime-runtime,0,foreign_functions,true,"src/libcalls.rs",95,32,95,46
 solana-exchange-program,0,rust_functions,false,"/root/.cargo/registry/src/github.com-1ecc6299db9ec823/solana-sdk-1.8.16/src/entrypoint_native.rs",157,31,157,36
 solana-exchange-program,1,rust_functions,false,"/root/.cargo/registry/src/github.com-1ecc6299db9ec823/solana-sdk-1.8.16/src/entrypoint_native.rs",158,29,158,80
 solana-exchange-program,2,rust_functions,false,"/root/.cargo/registry/src/github.com-1ecc6299db9ec823/solana-sdk-1.8.16/src/entrypoint_native.rs",159,14,159,63
+sleef-trig-sys,0,foreign_functions,true,"src/lib.rs",15,35,15,42
+sleef-trig-sys,0,foreign_functions,true,"src/lib.rs",15,47,15,54
+sleef-trig-sys,1,foreign_functions,true,"src/lib.rs",16,34,16,41
+sleef-trig-sys,1,foreign_functions,true,"src/lib.rs",16,46,16,53
 solana-failure-program,2,rust_functions,false,"/root/.cargo/registry/src/github.com-1ecc6299db9ec823/solana-sdk-1.7.15/src/entrypoint_native.rs",159,14,159,63
 solana-failure-program,0,rust_functions,false,"/root/.cargo/registry/src/github.com-1ecc6299db9ec823/solana-sdk-1.7.15/src/entrypoint_native.rs",157,31,157,36
 solana-failure-program,1,rust_functions,false,"/root/.cargo/registry/src/github.com-1ecc6299db9ec823/solana-sdk-1.7.15/src/entrypoint_native.rs",158,29,158,80

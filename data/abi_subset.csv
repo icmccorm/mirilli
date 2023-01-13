@@ -113,6 +113,7 @@ solana-accountsdb-plugin-postgres,1.9.7
 gaborator-sys,0.1.1
 sapp-linux,0.1.15
 lapacke-sys,0.1.4
+sdl2-sys,0.35.2
 rsasl,2.0.0-rc.4
 euphrates_x64,0.1.0
 ladspa_noisecoring,1.0.0
@@ -213,6 +214,7 @@ spooles_ffi,0.1.1
 nature_integrate_test_converter,0.0.2
 wasmtime-runtime,3.0.1
 solana-exchange-program,1.8.16
+sleef-trig-sys,0.1.0
 solana-failure-program,1.7.15
 mech-math,0.0.5
 redis-cell,0.2.2
@@ -999,6 +1001,7 @@ liblinear,1.0.0
 mouse-rs,0.4.2
 crt0stack,0.1.0
 mimallocate-sys,0.1.1
+crash-context,0.5.1
 sqlite-vfs,0.2.0
 fltk,1.3.24
 tree-sitter-yabo,0.0.1
@@ -1333,6 +1336,7 @@ embedded-freetype-sys,0.2.0
 example_dylib,0.1.0
 nstd_fs,0.5.0
 alien_ffi,0.1.0
+crash-handler,0.5.1
 memflow-kvm-ioctl,0.1.0
 tree-sitter-c-sharp,0.20.0
 webgl_stdweb,0.3.0
@@ -1625,6 +1629,7 @@ ntrumls,0.9.6
 candy-wrapper,0.1.1
 fuzzyhash,0.2.1
 wasmboy,0.0.2
+crankstart,0.1.1
 mrml-wasm,1.2.3
 tree-sitter-cpp,0.20.0
 libXNVCtrl-sys,1.29.2

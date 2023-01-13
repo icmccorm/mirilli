@@ -8204,6 +8204,12 @@ lapacke-sys,foreign_functions,2184,0,1,false
 lapacke-sys,foreign_functions,2185,1,1,false
 lapacke-sys,foreign_functions,2202,0,1,false
 lapacke-sys,foreign_functions,2203,1,1,false
+sdl2-sys,foreign_functions,236,0,1,true
+sdl2-sys,foreign_functions,314,0,1,true
+sdl2-sys,foreign_functions,315,0,1,true
+sdl2-sys,foreign_functions,316,0,1,true
+sdl2-sys,foreign_functions,319,0,1,true
+sdl2-sys,foreign_functions,320,0,1,true
 rsasl,static_items,0,0,1,false
 rsasl,static_items,1,0,1,false
 euphrates_x64,foreign_functions,1,1,1,false
@@ -11477,6 +11483,8 @@ wasmtime-runtime,foreign_functions,26,0,1,true
 solana-exchange-program,rust_functions,0,2,1,false
 solana-exchange-program,rust_functions,0,0,1,false
 solana-exchange-program,rust_functions,0,1,1,false
+sleef-trig-sys,foreign_functions,3,0,2,true
+sleef-trig-sys,foreign_functions,4,1,2,true
 solana-failure-program,rust_functions,0,2,1,false
 solana-failure-program,rust_functions,0,1,1,false
 solana-failure-program,rust_functions,0,0,1,false

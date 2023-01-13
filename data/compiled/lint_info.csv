@@ -113,6 +113,7 @@ solana-accountsdb-plugin-postgres,false,false
 gaborator-sys,false,false
 sapp-linux,true,true
 lapacke-sys,false,false
+sdl2-sys,false,true
 rsasl,false,false
 euphrates_x64,false,false
 ladspa_noisecoring,false,false
@@ -213,6 +214,7 @@ spooles_ffi,false,false
 nature_integrate_test_converter,false,false
 wasmtime-runtime,false,false
 solana-exchange-program,false,false
+sleef-trig-sys,false,true
 solana-failure-program,false,false
 mech-math,false,false
 redis-cell,false,false
