@@ -32,7 +32,7 @@ do
                 echo "$name,$version,$EXITCODE" >> "data/results/failed_download.csv"
             else
                 echo "PAUSE..."
-                sleep 10s
+                sleep 10
                 echo "RETRY..."
             fi
         fi
