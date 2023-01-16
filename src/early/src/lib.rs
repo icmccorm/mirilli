@@ -21,12 +21,13 @@ use std::io::Write;
 use rustc_ast::ast;
 use rustc_ast::visit::FnKind;
 use rustc_target::spec::abi::lookup;
-use rustc_target::spec::abi::Abi as SpecAbi;
 use rustc_ast::Extern::Explicit;
 use rustc_span::Span;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use crate::rustc_lint::LintContext;
+use shared::*;
+
 dylint_linting::impl_early_lint! {
     pub FFICKLE_EARLY,
     Warn,
@@ -50,14 +51,12 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
             FnKind::Fn(_, _, sig, ..) => match sig.header.ext {
                 Explicit(sl, _) => {
                     let session = &cx.sess();
-                    let parse_sess = &session.parse_sess;
-                    let source_map = &(*parse_sess).source_map();
                     let abi_string = sl.symbol_unescaped.as_str().to_string().replace("\"", "");
                     if !is_internal_abi(lookup(&abi_string).unwrap()) {
                         self.rust_function_abis
                             .entry(abi_string.to_string())
-                            .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(sig.span)]))
-                            .or_insert(vec![source_map.span_to_diagnostic_string(sig.span)]);
+                            .and_modify(|e| e.extend(vec![span_to_string(sig.span, session)]))
+                            .or_insert(vec![span_to_string(sig.span, session)]);
                     }
                 }
                 _ => {}
@@ -124,12 +123,7 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
         }
     }
 }
-fn is_internal_abi(abi: SpecAbi) -> bool {
-    matches!(
-        abi,
-        SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic | SpecAbi::PlatformIntrinsic
-    )
-}
+
 #[test]
 fn ui() {
     dylint_testing::ui_test(

@@ -20,6 +20,7 @@ extern crate rustc_target;
 extern crate rustc_trait_selection;
 extern crate rustc_type_ir;
 use crate::rustc_lint::LintContext;
+use shared::*;
 use rustc_session::Session;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
@@ -31,7 +32,6 @@ use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisita
 use rustc_span::symbol::sym;
 use rustc_span::Span;
 use rustc_target::abi::{Abi, WrappingRange};
-use rustc_target::spec::abi::Abi as SpecAbi;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::Write;
@@ -120,12 +120,10 @@ impl ErrorIDStore for FfickleLate {
             ForeignItemType::ForeignFn => &mut self.foreign_functions,
             ForeignItemType::StaticItem => &mut self.static_items,
         };
-        let parse_sess = &sess.parse_sess;
-        let source_map = &(*parse_sess).source_map();
         (store.abis)
             .entry(abi_string.to_string())
-            .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(sp)]))
-            .or_insert(vec![source_map.span_to_diagnostic_string(sp)]);
+            .and_modify(|e| e.extend(vec![span_to_string(sp, sess)]))
+            .or_insert(vec![span_to_string(sp, sess)]);
     }
     fn record_errors<'tcx>(
         &mut self,
@@ -784,13 +782,6 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         let ty = self.cx.tcx.type_of(def_id);
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
-}
-
-fn is_internal_abi(abi: SpecAbi) -> bool {
-    matches!(
-        abi,
-        SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic | SpecAbi::PlatformIntrinsic
-    )
 }
 
 fn lint_disabled<'tcx>(cx: &LateContext<'tcx>, name: &str) -> bool {
