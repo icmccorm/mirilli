@@ -1,5 +1,8 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
+rustup --version
+rustc --version
+cargo --version
 make clean && make all
 rm -rf ./data/results
 mkdir -p ./data/results
