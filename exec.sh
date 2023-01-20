@@ -1,5 +1,5 @@
 #!/bin/bash
-source "$HOME/.cargo/env"
+export PATH="$HOME/.cargo/bin:$PATH"
 make clean && make all
 rm -rf ./data/results
 mkdir -p ./data/results
