@@ -198,7 +198,6 @@ enum FfiResult<'tcx> {
         reason: Reason,
     },
 }
-
 pub(crate) fn nonnull_optimization_guaranteed<'tcx>(
     tcx: TyCtxt<'tcx>,
     def: ty::AdtDef<'tcx>,
@@ -215,9 +214,7 @@ pub fn transparent_newtype_field<'a, 'tcx>(
     let param_env = tcx.param_env(variant.def_id);
     variant.fields.iter().find(|field| {
         let field_ty = tcx.type_of(field.did);
-        let is_zst = tcx
-            .layout_of(param_env.and(field_ty))
-            .map_or(false, |layout| layout.is_zst());
+        let is_zst = tcx.layout_of(param_env.and(field_ty)).map_or(false, |layout| layout.is_zst());
         !is_zst
     })
 }
@@ -288,7 +285,6 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
         // We should only ever reach this case if ty_is_known_nonnull is extended
         // to other types.
         ref _unhandled => {
-
             return None;
         }
     })
@@ -353,7 +349,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             self.emit_ffi_unsafe_type_lint(
                 ty,
                 sp,
-                Reason::Array,
+                Reason::Array
             );
             true
         } else {
@@ -372,10 +368,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         if field_ty.has_opaque_types() {
             self.check_type_for_ffi(cache, field_ty)
         } else {
-            let field_ty = self
-                .cx
-                .tcx
-                .normalize_erasing_regions(self.cx.param_env, field_ty);
+            let field_ty = self.cx.tcx.normalize_erasing_regions(self.cx.param_env, field_ty);
             self.check_type_for_ffi(cache, field_ty)
         }
     }
@@ -399,10 +392,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             } else {
                 // All fields are ZSTs; this means that the type should behave
                 // like (), which is FFI-unsafe
-                FfiUnsafe {
-                    ty,
-                    reason: Reason::StructZeroSized,
-                }
+                FfiUnsafe { ty, reason: Reason::StructZeroSized }
             }
         } else {
             // We can't completely trust repr(C) markings; make sure the fields are
@@ -424,11 +414,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 }
             }
 
-            if all_phantom {
-                FfiPhantom(ty)
-            } else {
-                FfiSafe
-            }
+            if all_phantom { FfiPhantom(ty) } else { FfiSafe }
         }
     }
 
@@ -455,7 +441,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                     } else {
                         return FfiUnsafe {
                             ty,
-                            reason: Reason::Box,
+                            reason: Reason::Box
                         };
                     }
                 }
@@ -495,7 +481,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                                     Reason::StructFieldless
                                 } else {
                                     Reason::UnionFieldless
-                                },
+                                }
                             };
                         }
 
@@ -515,7 +501,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             if repr_nullable_ptr(self.cx, ty, self.mode).is_none() {
                                 return FfiUnsafe {
                                     ty,
-                                    reason: Reason::EnumNoRepresentation,
+                                    reason: Reason::EnumNoRepresentation
                                 };
                             }
                         }
@@ -550,13 +536,12 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             ty::Char => FfiUnsafe {
                 ty,
-                reason: Reason::Char,
+                reason: Reason::Char
             },
 
-            ty::Int(ty::IntTy::I128) | ty::Uint(ty::UintTy::U128) => FfiUnsafe {
-                ty,
-                reason: Reason::Bit128,
-            },
+            ty::Int(ty::IntTy::I128) | ty::Uint(ty::UintTy::U128) => {
+                FfiUnsafe { ty, reason: Reason::Num128Bit }
+            }
 
             // Primitive types with a stable representation.
             ty::Bool | ty::Int(..) | ty::Uint(..) | ty::Float(..) | ty::Never => FfiSafe,
@@ -566,19 +551,18 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 reason: Reason::Slice
             },
 
-            ty::Dynamic(..) => FfiUnsafe {
-                ty,
-                reason: Reason::Dyn
-            },
+            ty::Dynamic(..) => {
+                FfiUnsafe { ty, reason: Reason::Dyn }
+            }
 
             ty::Str => FfiUnsafe {
                 ty,
-                reason: Reason::Str,
+                reason: Reason::Str
             },
 
             ty::Tuple(..) => FfiUnsafe {
                 ty,
-                reason: Reason::Tuple,
+                reason: Reason::Tuple
             },
 
             ty::RawPtr(ty::TypeAndMut { ty, .. }) | ty::Ref(_, ty, _)
@@ -609,7 +593,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 if is_internal_abi(sig.abi()) {
                     return FfiUnsafe {
                         ty,
-                        reason: Reason::FnPtr,
+                        reason: Reason::FnPtr
                     };
                 }
 
@@ -639,10 +623,9 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             // While opaque types are checked for earlier, if a projection in a struct field
             // normalizes to an opaque type, then it will reach this branch.
-            ty::Alias(ty::Opaque, ..) => FfiUnsafe {
-                ty,
-                reason: Reason::Opaque,
-            },
+            ty::Alias(ty::Opaque, ..) => {
+                FfiUnsafe { ty, reason: Reason::Opaque }
+            }
 
             // `extern "C" fn` functions can have type parameters, which may or may not be FFI-safe,
             //  so they are currently ignored for the purposes of this lint.
@@ -782,7 +765,9 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         let ty = self.cx.tcx.type_of(def_id);
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
+
 }
+
 
 fn lint_disabled<'tcx>(cx: &LateContext<'tcx>, name: &str) -> bool {
     let lint_store = cx.lint_store;
@@ -927,7 +912,7 @@ enum Reason {
     Str,
     Dyn,
     Slice,
-    Bit128,
+    Num128Bit,
     Char,
     EnumNonExhaustive,
     EnumNonExhaustiveVariant,
