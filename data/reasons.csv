@@ -3,9 +3,9 @@ Opaque,0
 FnPtr,1
 Tuple,2
 Str,3
-Dynamic,4
+Dyn,4
 Slice,5
-128Bit,6
+Num128Bit,6
 Char,7
 EnumNonExhaustive,8
 EnumNonExhaustiveVariant,9
@@ -14,8 +14,8 @@ StructFieldless,11
 UnionFieldless,12
 StructNonExhaustive,13
 UnionNonExhaustive,14
-StructNoRepresentation,15
-UnionNoRepresentation,16
+StructLayout,15
+UnionLayout,16
 Box,17
 EnumPhantomData,18
 StructZeroSized,19
