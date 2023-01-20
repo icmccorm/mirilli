@@ -42,6 +42,7 @@ struct FfickleEarly {
     foreign_function_abis: HashMap<String, Vec<String>>,
     static_item_abis: HashMap<String, Vec<String>>,
     rust_function_abis: HashMap<String, Vec<String>>,
+    unknown_abis: Vec<String>
 }
 
 impl<'tcx> EarlyLintPass for FfickleEarly {
@@ -52,11 +53,18 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                 Explicit(sl, _) => {
                     let session = &cx.sess();
                     let abi_string = sl.symbol_unescaped.as_str().to_string().replace("\"", "");
-                    if !is_internal_abi(lookup(&abi_string).unwrap()) {
-                        self.rust_function_abis
-                            .entry(abi_string.to_string())
-                            .and_modify(|e| e.extend(vec![span_to_string(sig.span, session)]))
-                            .or_insert(vec![span_to_string(sig.span, session)]);
+                    match lookup(&abi_string) {
+                        Some(abi) => {
+                            if !is_internal_abi(abi) {
+                                    self.rust_function_abis
+                                    .entry(abi_string.to_string())
+                                    .and_modify(|e| e.extend(vec![span_to_string(sig.span, session)]))
+                                    .or_insert(vec![span_to_string(sig.span, session)]);
+                            }
+                        }
+                        None => {
+                            self.unknown_abis.extend(vec![abi_string])
+                        }
                     }
                 }
                 _ => {}
@@ -76,21 +84,19 @@ impl<'tcx> EarlyLintPass for FfickleEarly {
                 if !is_internal_abi(lookup(&abi_string).unwrap()) {
                     let items: &Vec<rustc_ast::ptr::P<rustc_ast::ast::ForeignItem>> = &fm.items;
                     let session = &cx.sess();
-                    let parse_sess = &session.parse_sess;
-                    let source_map = &(*parse_sess).source_map();
                     for item in items {
                         match item.kind {
                             rustc_ast::ast::ForeignItemKind::Fn(_) => {
                                 self.foreign_function_abis
                                     .entry(abi_string.to_string())
-                                    .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(item.span)]))
-                                    .or_insert(vec![source_map.span_to_diagnostic_string(item.span)]);
+                                    .and_modify(|e| e.extend(vec![span_to_string(item.span, session)]))
+                                    .or_insert(vec![span_to_string(item.span, session)]);
                             }
                             rustc_ast::ast::ForeignItemKind::Static(_, _, _) => {
                                 self.static_item_abis
                                     .entry(abi_string.to_string())
-                                    .and_modify(|e| e.extend(vec![source_map.span_to_diagnostic_string(item.span)]))
-                                    .or_insert(vec![source_map.span_to_diagnostic_string(item.span)]);
+                                    .and_modify(|e| e.extend(vec![span_to_string(item.span, session)]))
+                                    .or_insert(vec![span_to_string(item.span, session)]);
                             }
                             _ => {}
                         }
