@@ -1,14 +1,15 @@
 .PHONY: default
 default: all
 .DEFAULT_GOAL := all
-all:
+all: clean
 	@(cd src/early && cargo build)
 	@(cd src/late && cargo build)
 	@(cargo dylint list)
 clean:
 	@(rm -rf ./test > /dev/null)
-	@(rm -f all_sorted.csv)
-	@(rm -f visited_sorted.csv)
+	@(rm -rf ./src/early/target)
+	@(rm -rf ./src/late/target)
+	@(rm -rf ./src/shared/target)
 clean-cache:
 	@(cargo install cargo-cache 1> /dev/null)
 	@(cargo cache -a 1> /dev/null)
