@@ -34,3 +34,4 @@ CREATE VIEW depends_on AS (
         INNER JOIN population parent_v on dependencies.version_id = parent_v.version_id
         INNER JOIN crates parent on parent_v.crate_id = parent.id
 );
+

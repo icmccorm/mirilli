@@ -12,8 +12,8 @@ if (len(sys.argv) < 3):
 else:
     out_dir = sys.argv[2]
 
-early_abis = "crate_name,category,abi,count\n"
-late_abis = "crate_name,category,abi,count\n"
+early_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
+late_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
 defn_types = ""
 decl_types = ""
 finished_early = "name\n"
@@ -50,9 +50,9 @@ def location_to_csv(loc):
 
 def process_abis(name, category, json):
     entries = ""
-    for key, value in json.items():
-        entries += f"{name},{category},{key},{value}\n"
-        #for location in value.items():    
+    for key, loc_list in json.items():
+        for loc in loc_list:
+            entries += f"{name},{category},{key},{location_to_csv(loc)}\n"
     return entries
 
 def process_error_info(name, json):

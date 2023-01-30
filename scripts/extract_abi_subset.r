@@ -26,3 +26,4 @@ bind_rows(late_names, early_names) %>%
     unique %>%
     inner_join(all, by = ("crate_name")) %>%
     write_csv(file.path("./data/abi_subset.csv"))
+problems()
