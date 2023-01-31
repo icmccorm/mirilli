@@ -1,5 +1,6 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
+export DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
 rustup --version
 rustc --version
 cargo --version
@@ -18,6 +19,7 @@ do
         if [ "$EXITCODE" -eq "0" ]; then 
             echo "SUCCESS"
             TRIES_REMAINING=0
+            export DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
             if ! (cd test && (timeout 5m cargo dylint --all 1> /dev/null)); then
                 COMP_EXIT_CODE=$?
                 echo "Writing failure to data/results/failed_compilation.csv"
