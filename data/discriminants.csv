@@ -25,3 +25,4 @@ discriminant,type_name
 23,Placeholder
 24,Infer
 25,Error
+26,GeneratorWitnessMIR
