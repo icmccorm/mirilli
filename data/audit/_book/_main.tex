@@ -117,7 +117,7 @@
 
 \title{Audit}
 \author{Ian McCormack}
-\date{2023-01-03}
+\date{2023-01-24}
 
 \begin{document}
 \maketitle
@@ -126,9 +126,6 @@
 \setcounter{tocdepth}{1}
 \tableofcontents
 }
-\hypertarget{about}{%
-\chapter{About}\label{about}}
-
 \hypertarget{introduction}{%
 \chapter{Introduction}\label{introduction}}
 
@@ -139,7 +136,7 @@ The maximum number of ABIs defined in a single file.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{by\_count }\OtherTok{\textless{}{-}}\NormalTok{ foreign\_abis }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(crate\_name) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{summarize}\NormalTok{(}\AttributeTok{n=}\FunctionTok{n}\NormalTok{())}
+\NormalTok{by\_count }\OtherTok{\textless{}{-}}\NormalTok{ late\_abis }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(crate\_name) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{summarize}\NormalTok{(}\AttributeTok{n=}\FunctionTok{n}\NormalTok{())}
 \FunctionTok{print}\NormalTok{(}\FunctionTok{max}\NormalTok{(by\_count}\SpecialCharTok{$}\NormalTok{n))}
 \end{Highlighting}
 \end{Shaded}
@@ -149,6 +146,128 @@ The maximum number of ABIs defined in a single file.
 \end{verbatim}
 
 The number of ABI occurrences in files.
+
+\hypertarget{improper-type-errors}{%
+\chapter{Improper Type Errors}\label{improper-type-errors}}
+
+We observed 16,771 type errors in foreign bindings. There were 480 unique errors which occurred for 229 unique crates. Of these crates,
+
+There were 46 crates that globally disabled the \texttt{improper\_ctypes} lint, there were 12 crates that globally disabled the \texttt{improper\_types\_definitions} lint, and there were 10 crates that globally disabled both lints.
+
+There were 51 crates that selectively disabled the \texttt{improper\_ctypes} lint, there were 9 crates that selectively disabled the \texttt{improper\_types\_definitions} lint, and there were 0 crates that selectively disabled both lints.
+
+When combined, there were 97 crates that disabled the \texttt{improper\_ctypes} in some fashion, there were 21 crates that selectively disabled the \texttt{improper\_types\_definitions} lint in some fashion, and there were 10 crates that disabled both lints in some fashion.
+
+This provides us with a sample of 107 crates that hid improper type errors.
+
+\begin{verbatim}
+## # A tibble: 4 x 7
+##   Category          `# Crates` `# Unique Errors` Total        Mean  St.Dev Max  
+##   <chr>             <chr>      <chr>             <chr>        <chr> <chr>  <chr>
+## 1 Foreign Functions 144 / 93   14 / 14           16140 / 144~ 112.~ 473.6~ 5375~
+## 2 Rust Functions    78 / 15    13 / 9            437 / 195    5.6 ~ 15.8 ~ 136 ~
+## 3 Static Items      15 / 6     8 / 4             194 / 171    12.9~ 25.3 ~ 99 /~
+## 4 All               229 / 107  35 / 27           16771 / 148~ 73.2~ 385.1~ 5474~
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 16 x 7
+##    Type    Error  Unique `Foreign Funct~` `Foreign Items` `Rust Functions` Total
+##    <chr>   <chr>   <int>            <dbl>           <dbl>            <dbl> <dbl>
+##  1 Adt     EnumN~      2                4               0                0     4
+##  2 Adt     EnumN~      3               29               7               21    57
+##  3 Adt     Struc~      3             8286             161                7  8454
+##  4 Adt     Struc~      1                2               0                0     2
+##  5 Adt     Union~      3              912               2               10   924
+##  6 Adt     OnlyP~      1                1               0                0     1
+##  7 Array   --          2               21               0                0    21
+##  8 Char    --          2               19               0                0    19
+##  9 Dynamic Dyn         3                3               0                4     7
+## 10 FnPtr   --          3              295               1                0   296
+## 11 Int     Num12~      2                1               0               66    67
+## 12 Slice   --          2                1               0                1     2
+## 13 Str     --          2                0               0                4     4
+## 14 Tuple   --          3                7               0               24    31
+## 15 Uint    Num12~      3             4856               0               58  4914
+## 16 All     --         35            14437             171              195 14803
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# large \textless{}{-} function(x)\{}
+\CommentTok{\#   paste0(\textquotesingle{}\textbackslash{}textbf\{\textquotesingle{}, x, \textquotesingle{}\}\textquotesingle{})}
+\CommentTok{\# \}}
+\CommentTok{\# addtorow \textless{}{-} list()}
+\CommentTok{\# addtorow$pos \textless{}{-} list(0, 0)}
+\CommentTok{\# addtorow$command \textless{}{-} c("\& \& \& \textbackslash{}\textbackslash{}multicolumn\{4\}\{c\}\{\textbackslash{}\textbackslash{}\# Occurrences\} \textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n",}
+\CommentTok{\# "Category \& \textbackslash{}\textbackslash{}\# Crates \& \textbackslash{}\textbackslash{}\# Unique \& Total \& Mean \& St.Dev. \& Max \textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n")}
+\CommentTok{\# xt\_counts = xtable(}
+\CommentTok{\#   count\_summary, }
+\CommentTok{\#   type = "latex", }
+\CommentTok{\#   digits=c(0,0,0,0,0,1,1,0),}
+ 
+\CommentTok{\# )}
+
+\CommentTok{\# align(xt\_counts) \textless{}{-} "llcc|cccc"}
+\CommentTok{\# print(xt\_counts, }
+\CommentTok{\#       include.rownames = FALSE,}
+\CommentTok{\#       add.to.row = addtorow, }
+\CommentTok{\#       file = "../latex/err\_counts.tex",}
+\CommentTok{\#       include.colnames = FALSE,}
+\CommentTok{\#       sanitize.colnames.function = large,}
+\CommentTok{\#       floating=FALSE,}
+\CommentTok{\#       latex.environments=NULL}
+\CommentTok{\# )}
+
+\CommentTok{\# addtorow \textless{}{-} list()}
+\CommentTok{\# addtorow$pos \textless{}{-} list(0, 0)}
+\CommentTok{\# addtorow$command \textless{}{-} c("\& \& \& \textbackslash{}\textbackslash{}multicolumn\{4\}\{c\}\{\textbackslash{}\textbackslash{}\# Hidden Occurrences\} \textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n",}
+\CommentTok{\# "Error Category \& Error \& \textbackslash{}\textbackslash{}\# Unique \& Foreign Functions \& Foreign Items \& Rust Functions \& Total \textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n")}
+\CommentTok{\# xt\_type\_counts \textless{}{-} xtable(}
+\CommentTok{\#   filtered, }
+\CommentTok{\#   type = "latex", }
+\CommentTok{\#   digits=c(0,0,0,0,0,0,0,0),}
+\CommentTok{\#   floating=FALSE,}
+\CommentTok{\#   latex.environments=NULL}
+\CommentTok{\# )}
+\CommentTok{\# align(xt\_type\_counts) \textless{}{-} "lllc|cccc"}
+\CommentTok{\# print(xt\_type\_counts, }
+\CommentTok{\#       include.rownames = FALSE,}
+\CommentTok{\#       add.to.row = addtorow, }
+\CommentTok{\#       file = "../latex/err\_type\_counts.tex",}
+\CommentTok{\#       include.colnames = FALSE,}
+\CommentTok{\#       sanitize.colnames.function = large,}
+\CommentTok{\#       floating=FALSE,}
+\CommentTok{\#       latex.environments=NULL}
+\CommentTok{\#     )}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{quantitative-results}{%
+\chapter{Quantitative Results}\label{quantitative-results}}
+
+We began with a snapshot of the \href{https://crates.io/data-access}{crates.io} database taken on 12/20/2022, which contained 102,359 crates. After filtering out crates without any valid published versions, 98,501 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 57 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 85,694 passed the early linting stage, while 12,807 failed it. Of those that passed the early linting stage, 83,533 passed the late linting stage, while 2,161 failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises \textbf{82\% of all crates} in the database. Though 474 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.
+
+\hypertarget{abi-distribution-1}{%
+\section{ABI Distribution}\label{abi-distribution-1}}
+
+\begin{verbatim}
+## # A tibble: 7 x 2
+##   abi                `sum(count)`
+##   <chr>                     <dbl>
+## 1 C                         84310
+## 2 C-unwind                      1
+## 3 platform-intrinsic           46
+## 4 Rust                      95021
+## 5 stdcall                     128
+## 6 system                      415
+## 7 win64                         2
+\end{verbatim}
+
+Both the early and late lints recorded the number of occurrences of each ABI for the rust functions, foreign functions, and static items declared in each crate. There were 4,155 crates that only appeared in results from the early lint. However, there were 3,437 crates that had one or more foreign ABIs that were \emph{only} detected in the early lint.
+
+For qualitative analysis, we focus on the subset of improper type errors that
+were explicitly hidden by developers that disabling the corresponding lint.
 
   \bibliography{book.bib,packages.bib}
 

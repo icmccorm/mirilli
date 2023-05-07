@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>3 Improper Type Errors | Audit</title>
+  <title>4 Improper Type Errors | Audit</title>
   <meta name="description" content="An audit trail for all data collection and analysis." />
   <meta name="generator" content="bookdown 0.31 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="3 Improper Type Errors | Audit" />
+  <meta property="og:title" content="4 Improper Type Errors | Audit" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="An audit trail for all data collection and analysis." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="3 Improper Type Errors | Audit" />
+  <meta name="twitter:title" content="4 Improper Type Errors | Audit" />
   
   <meta name="twitter:description" content="An audit trail for all data collection and analysis." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="abi-distribution.html"/>
-<link rel="next" href="quantitative-results.html"/>
+<link rel="prev" href="quantitative-results.html"/>
+<link rel="next" href="references.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -138,12 +138,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
 <li class="chapter" data-level="2" data-path="abi-distribution.html"><a href="abi-distribution.html"><i class="fa fa-check"></i><b>2</b> ABI Distribution</a></li>
-<li class="chapter" data-level="3" data-path="improper-type-errors.html"><a href="improper-type-errors.html"><i class="fa fa-check"></i><b>3</b> Improper Type Errors</a></li>
-<li class="chapter" data-level="4" data-path="quantitative-results.html"><a href="quantitative-results.html"><i class="fa fa-check"></i><b>4</b> Quantitative Results</a>
+<li class="chapter" data-level="3" data-path="quantitative-results.html"><a href="quantitative-results.html"><i class="fa fa-check"></i><b>3</b> Quantitative Results</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="quantitative-results.html"><a href="quantitative-results.html#abi-distribution-1"><i class="fa fa-check"></i><b>4.1</b> ABI Distribution</a></li>
-<li class="chapter" data-level="4.2" data-path="quantitative-results.html"><a href="quantitative-results.html#improper-type-errors-1"><i class="fa fa-check"></i><b>4.2</b> Improper Type Errors</a></li>
+<li class="chapter" data-level="3.1" data-path="quantitative-results.html"><a href="quantitative-results.html#abi-distribution-1"><i class="fa fa-check"></i><b>3.1</b> ABI Distribution</a></li>
+<li class="chapter" data-level="3.2" data-path="quantitative-results.html"><a href="quantitative-results.html#improper-type-errors"><i class="fa fa-check"></i><b>3.2</b> Improper Type Errors</a></li>
 </ul></li>
+<li class="chapter" data-level="4" data-path="improper-type-errors-1.html"><a href="improper-type-errors-1.html"><i class="fa fa-check"></i><b>4</b> Improper Type Errors</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -165,8 +165,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="improper-type-errors" class="section level1 hasAnchor" number="3">
-<h1><span class="header-section-number">3</span> Improper Type Errors<a href="improper-type-errors.html#improper-type-errors" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="improper-type-errors-1" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">4</span> Improper Type Errors<a href="improper-type-errors-1.html#improper-type-errors-1" class="anchor-section" aria-label="Anchor link to header"></a></h1>
 <p>We observed 16,771 type errors in foreign bindings. There were 480 unique errors which occurred for 229 unique crates. Of these crates,</p>
 <p>There were 46 crates that globally disabled the <code>improper_ctypes</code> lint, there were 12 crates that globally disabled the <code>improper_types_definitions</code> lint, and there were 10 crates that globally disabled both lints.</p>
 <p>There were 51 crates that selectively disabled the <code>improper_ctypes</code> lint, there were 9 crates that selectively disabled the <code>improper_types_definitions</code> lint, and there were 0 crates that selectively disabled both lints.</p>
@@ -199,14 +199,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 15 Uint    Num128Bit                 4856               0               58  4914
 ## 16 All     --                       14437             171              195 14803</code></pre>
 
+<p>For qualitative analysis, we focus on the subset of improper type errors that
+were explicitly hidden by developers that disabling the corresponding lint.</p>
+
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="abi-distribution.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="quantitative-results.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="quantitative-results.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

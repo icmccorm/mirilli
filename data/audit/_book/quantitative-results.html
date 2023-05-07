@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>4 Quantitative Results | Audit</title>
+  <title>2 Quantitative Results | Audit</title>
   <meta name="description" content="An audit trail for all data collection and analysis." />
   <meta name="generator" content="bookdown 0.31 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="4 Quantitative Results | Audit" />
+  <meta property="og:title" content="2 Quantitative Results | Audit" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="An audit trail for all data collection and analysis." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="4 Quantitative Results | Audit" />
+  <meta name="twitter:title" content="2 Quantitative Results | Audit" />
   
   <meta name="twitter:description" content="An audit trail for all data collection and analysis." />
   
@@ -23,15 +23,15 @@
 <meta name="author" content="Ian McCormack" />
 
 
-<meta name="date" content="2023-01-13" />
+<meta name="date" content="2023-01-30" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="improper-type-errors.html"/>
-<link rel="next" href="references.html"/>
+<link rel="prev" href="introduction.html"/>
+<link rel="next" href="sampling-for-qualitative-analysis.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -54,70 +54,6 @@
 <script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
 
 
-<style type="text/css">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-</style>
 
 
 <link rel="stylesheet" href="style.css" type="text/css" />
@@ -137,12 +73,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <li class="divider"></li>
 <li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
-<li class="chapter" data-level="2" data-path="abi-distribution.html"><a href="abi-distribution.html"><i class="fa fa-check"></i><b>2</b> ABI Distribution</a></li>
-<li class="chapter" data-level="3" data-path="improper-type-errors.html"><a href="improper-type-errors.html"><i class="fa fa-check"></i><b>3</b> Improper Type Errors</a></li>
-<li class="chapter" data-level="4" data-path="quantitative-results.html"><a href="quantitative-results.html"><i class="fa fa-check"></i><b>4</b> Quantitative Results</a>
+<li class="chapter" data-level="2" data-path="quantitative-results.html"><a href="quantitative-results.html"><i class="fa fa-check"></i><b>2</b> Quantitative Results</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="quantitative-results.html"><a href="quantitative-results.html#abi-distribution-1"><i class="fa fa-check"></i><b>4.1</b> ABI Distribution</a></li>
+<li class="chapter" data-level="2.1" data-path="quantitative-results.html"><a href="quantitative-results.html#abi-distribution"><i class="fa fa-check"></i><b>2.1</b> ABI Distribution</a></li>
+<li class="chapter" data-level="2.2" data-path="quantitative-results.html"><a href="quantitative-results.html#improper-type-errors"><i class="fa fa-check"></i><b>2.2</b> Improper Type Errors</a></li>
 </ul></li>
+<li class="chapter" data-level="3" data-path="sampling-for-qualitative-analysis.html"><a href="sampling-for-qualitative-analysis.html"><i class="fa fa-check"></i><b>3</b> Sampling for Qualitative Analysis</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -164,13 +100,58 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="quantitative-results" class="section level1 hasAnchor" number="4">
-<h1><span class="header-section-number">4</span> Quantitative Results<a href="quantitative-results.html#quantitative-results" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>We began with a snapshot of the <a href="https://crates.io/data-access">crates.io</a> database taken on 12/20/2022, which contained 99,785 crates. After filtering out crates without any valid published versions, 96,049 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 58 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 85,652 passed the early linting stage, while 10,397 failed it. Of those that passed the early linting stage, 83,491 passed the late linting stage, while 2,161 failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises <strong>84% of all crates</strong> in the database. Though 2,884 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
-<div id="abi-distribution-1" class="section level2 hasAnchor" number="4.1">
-<h2><span class="header-section-number">4.1</span> ABI Distribution<a href="quantitative-results.html#abi-distribution-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Both the early and late lints recorded the number of occurrences of each ABI for the rust functions, foreign functions, and static items declared in each crate. There were 4,151 crates that only appeared in results from the early lint. However, there were 3,434 crates that had one or more foreign ABIs that were <em>only</em> detected in the early lint.</p>
-
+<div id="quantitative-results" class="section level1 hasAnchor" number="2">
+<h1><span class="header-section-number">2</span> Quantitative Results<a href="quantitative-results.html#quantitative-results" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>We began with a snapshot of the <a href="https://crates.io/data-access">crates.io</a> database taken on 12/20/2022, which contained 102,359 crates. After filtering out crates without any valid published versions, 98,501 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 36 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 34,909 passed the early linting stage, while 63,592 failed it. Of those that passed the early linting stage, 34,098 passed the late linting stage, while 811 failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises <strong>33% of all crates</strong> in the database. Though 1,002 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
+<div id="abi-distribution" class="section level2 hasAnchor" number="2.1">
+<h2><span class="header-section-number">2.1</span> ABI Distribution<a href="quantitative-results.html#abi-distribution" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Both the early and late lints recorded the number of occurrences of each ABI for the rust functions, foreign functions, and static items declared in each crate. We merged results from the early and late lints by recording the location in source code where each foreign item occurre and eliminating duplicate results. This ensures a more accurate count of foreign ABI use than using only the late lint, as has been common in prior work, given that some crates may pass the early lint but then fail the late lint due to missing dependencies that cargo cannot provide.</p>
+<pre><code>## # A tibble: 13 × 3
+## # Groups:   abi [8]
+##    abi        category          `n()`
+##    &lt;chr&gt;      &lt;chr&gt;             &lt;int&gt;
+##  1 C          foreign_functions 97300
+##  2 C          rust_functions    12315
+##  3 C          static_items       3137
+##  4 C-unwind   rust_functions        2
+##  5 efiapi     rust_functions        1
+##  6 system     foreign_functions   570
+##  7 system     rust_functions      749
+##  8 sysv64     foreign_functions     2
+##  9 sysv64     rust_functions       13
+## 10 thiscall   foreign_functions  2814
+## 11 unadjusted foreign_functions    12
+## 12 win64      foreign_functions     2
+## 13 win64      rust_functions        3</code></pre>
+</div>
+<div id="improper-type-errors" class="section level2 hasAnchor" number="2.2">
+<h2><span class="header-section-number">2.2</span> Improper Type Errors<a href="quantitative-results.html#improper-type-errors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>We observed 10,176 type errors in foreign bindings, which occurred for 70 unique crates. Of these crates, there were 16 that globally disabled the <code>improper_ctypes</code> lint, 6 that globally disabled the <code>improper_types_definitions</code> lint, and 6 that globally disabled both lints. Alternatively, there were 11 crates that selectively disabled the <code>improper_ctypes</code> lint, 3 that selectively disabled the <code>improper_types_definitions</code> lint, and 0 crates that selectively disabled both lints. Combined, this results in 27 crates that disabled <code>improper_ctypes</code>, 9 that disabled <code>improper_types_definitions</code>, and 6 that disabled both lints in some fashion.</p>
+<p>We classify errors as unique based on three factors. The first is the error type, of which there are 22 that the <code>improper_ctypes</code> lints will produce. The same error type can occur for multiple data types, of which there are 26. However, not every error type can occur for every data type; some, such as the “Str” error type, will only occur for the “Str” data type. We also classify two otherwise identical errors as being unique if they are associated with different categories of foreign items. There are three foreign item categories: rust functions, foreign functions, and foreign static items.</p>
+<p>The table below summarizes the quantity and types of errors observed. Error counts to the right of a ‘/’ were hidden from the user.</p>
+<pre><code>## # A tibble: 4 × 4
+##   Category          `# Crates` `# Unique Errors` Total       
+##   &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;             &lt;chr&gt;       
+## 1 Foreign Functions 49 / 23    11 / 9            9839 / 9055 
+## 2 Rust Functions    18 / 7     11 / 8            232 / 170   
+## 3 Static Items      4 / 1      3 / 1             105 / 99    
+## 4 All               70 / 30    25 / 18           10176 / 9324</code></pre>
+<p>The following table displays hidden error counts by error type and data type.</p>
+<pre><code>## # A tibble: 12 × 6
+##    Type    Error         `Foreign Funct…` `Foreign Items` `Rust Functions` Total
+##    &lt;chr&gt;   &lt;chr&gt;                    &lt;dbl&gt;           &lt;dbl&gt;            &lt;dbl&gt; &lt;dbl&gt;
+##  1 Adt     EnumNoRepres…               20               0                3    23
+##  2 Adt     StructFieldl…             5809              99                7  5915
+##  3 Adt     UnionLayout                404               0                9   413
+##  4 Array   --                           1               0                0     1
+##  5 Char    --                           1               0                0     1
+##  6 Dynamic Dyn                          2               0                0     2
+##  7 Int     Num128Bit                    1               0               66    67
+##  8 Slice   --                           0               0                1     1
+##  9 Str     --                           0               0                2     2
+## 10 Tuple   --                           7               0               24    31
+## 11 Uint    Num128Bit                 2810               0               58  2868
+## 12 All     All                       9055              99              170  9324</code></pre>
 </div>
 </div>
             </section>
@@ -178,8 +159,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-<a href="improper-type-errors.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="sampling-for-qualitative-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -210,7 +191,7 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/USERNAME/REPO/edit/BRANCH/04-sampling.Rmd",
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/02-quantitative.Rmd",
 "text": "Edit"
 },
 "history": {

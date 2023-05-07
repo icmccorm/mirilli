@@ -1,4 +1,4 @@
-name
+crate_name
 elfo-macros
 clap_complete
 fn-cache
