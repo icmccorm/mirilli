@@ -20,19 +20,21 @@ extern crate rustc_target;
 extern crate rustc_trait_selection;
 extern crate rustc_type_ir;
 use crate::rustc_lint::LintContext;
-use shared::*;
-use rustc_session::Session;
+use crate::rustc_middle::ty::TypeVisitableExt;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
-use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
+use rustc_hir::def_id::LocalDefId;
 use rustc_hir::intravisit::FnKind;
+use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
 use rustc_middle::ty::subst::SubstsRef;
 use rustc_middle::ty::TyKind;
 use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable};
+use rustc_session::Session;
 use rustc_span::symbol::sym;
 use rustc_span::Span;
 use rustc_target::abi::{Abi, WrappingRange};
 use serde::{Deserialize, Serialize};
+use shared::*;
 use std::collections::HashMap;
 use std::io::Write;
 use std::iter;
@@ -110,11 +112,23 @@ trait ErrorIDStore {
         were_ignored: bool,
     ) -> ();
 
-    fn record_abi(&mut self, abi_string: &str, item_type: ForeignItemType, sp:Span, sess:&Session) -> ();
+    fn record_abi(
+        &mut self,
+        abi_string: &str,
+        item_type: ForeignItemType,
+        sp: Span,
+        sess: &Session,
+    ) -> ();
 }
 
 impl ErrorIDStore for FfickleLate {
-    fn record_abi<'tcx>(&mut self, abi_string: &str, item_type: ForeignItemType, sp: Span, sess:&Session) -> () {
+    fn record_abi<'tcx>(
+        &mut self,
+        abi_string: &str,
+        item_type: ForeignItemType,
+        sp: Span,
+        sess: &Session,
+    ) -> () {
         let store = match item_type {
             ForeignItemType::RustFn => &mut self.rust_functions,
             ForeignItemType::ForeignFn => &mut self.foreign_functions,
@@ -146,7 +160,7 @@ impl ErrorIDStore for FfickleLate {
             let foreign_err = ForeignTypeError {
                 discriminant: err.discriminant,
                 str_rep: err.str_rep,
-                abi: abi_string.to_string().replace("\"", ""),
+                abi: abi_string.to_string().replace('\"', ""),
                 reason: err.reason,
             };
             let id_opt = self.error_id_map.iter().find_map(|(key, val)| {
@@ -193,10 +207,7 @@ struct ImproperCTypesVisitor<'a, 'tcx> {
 enum FfiResult<'tcx> {
     FfiSafe,
     FfiPhantom(Ty<'tcx>),
-    FfiUnsafe {
-        ty: Ty<'tcx>,
-        reason: Reason,
-    },
+    FfiUnsafe { ty: Ty<'tcx>, reason: Reason },
 }
 pub(crate) fn nonnull_optimization_guaranteed<'tcx>(
     tcx: TyCtxt<'tcx>,
@@ -213,12 +224,13 @@ pub fn transparent_newtype_field<'a, 'tcx>(
 ) -> Option<&'a ty::FieldDef> {
     let param_env = tcx.param_env(variant.def_id);
     variant.fields.iter().find(|field| {
-        let field_ty = tcx.type_of(field.did);
-        let is_zst = tcx.layout_of(param_env.and(field_ty)).map_or(false, |layout| layout.is_zst());
+        let field_ty = tcx.type_of(field.did).subst_identity();
+        let is_zst = tcx
+            .layout_of(param_env.and(field_ty))
+            .map_or(false, |layout| layout.is_zst());
         !is_zst
     })
 }
-
 /// Is type known to be non-null?
 fn ty_is_known_nonnull<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>, mode: CItemKind) -> bool {
     let tcx = cx.tcx;
@@ -302,7 +314,7 @@ pub(crate) fn repr_nullable_ptr<'tcx>(
 ) -> Option<Ty<'tcx>> {
     if let ty::Adt(ty_def, substs) = ty.kind() {
         let field_ty = match &ty_def.variants().raw[..] {
-            [var_one, var_two] => match (&var_one.fields[..], &var_two.fields[..]) {
+            [var_one, var_two] => match (&var_one.fields.raw[..], &var_two.fields.raw[..]) {
                 ([], [field]) | ([field], []) => field.ty(cx.tcx, substs),
                 _ => return None,
             },
@@ -346,11 +358,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     /// Check if the type is array and emit an unsafe type lint.
     fn check_for_array_ty(&mut self, sp: Span, ty: Ty<'tcx>) -> bool {
         if let ty::Array(..) = ty.kind() {
-            self.emit_ffi_unsafe_type_lint(
-                ty,
-                sp,
-                Reason::Array
-            );
+            self.emit_ffi_unsafe_type_lint(ty, sp, Reason::Array);
             true
         } else {
             false
@@ -368,7 +376,10 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         if field_ty.has_opaque_types() {
             self.check_type_for_ffi(cache, field_ty)
         } else {
-            let field_ty = self.cx.tcx.normalize_erasing_regions(self.cx.param_env, field_ty);
+            let field_ty = self
+                .cx
+                .tcx
+                .normalize_erasing_regions(self.cx.param_env, field_ty);
             self.check_type_for_ffi(cache, field_ty)
         }
     }
@@ -384,40 +395,46 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     ) -> FfiResult<'tcx> {
         use FfiResult::*;
 
-        if def.repr().transparent() {
+        let transparent_safety = def.repr().transparent().then(|| {
             // Can assume that at most one field is not a ZST, so only check
             // that field's type for FFI-safety.
             if let Some(field) = transparent_newtype_field(self.cx.tcx, variant) {
-                self.check_field_type_for_ffi(cache, field, substs)
+                return self.check_field_type_for_ffi(cache, field, substs);
             } else {
                 // All fields are ZSTs; this means that the type should behave
-                // like (), which is FFI-unsafe
-                FfiUnsafe { ty, reason: Reason::StructZeroSized }
-            }
-        } else {
-            // We can't completely trust repr(C) markings; make sure the fields are
-            // actually safe.
-            let mut all_phantom = !variant.fields.is_empty();
-            for field in &variant.fields {
-                match self.check_field_type_for_ffi(cache, &field, substs) {
-                    FfiSafe => {
-                        all_phantom = false;
-                    }
-                    FfiPhantom(..) if def.is_enum() => {
-                        return FfiUnsafe {
-                            ty,
-                            reason: Reason::EnumPhantomData
-                        };
-                    }
-                    FfiPhantom(..) => {}
-                    r => return r,
+                // like (), which is FFI-unsafe... except if all fields are PhantomData,
+                // which is tested for below
+                FfiUnsafe {
+                    ty,
+                    reason: Reason::StructZeroSized,
                 }
             }
+        });
+        // We can't completely trust repr(C) markings; make sure the fields are
+        // actually safe.
+        let mut all_phantom = !variant.fields.is_empty();
+        for field in &variant.fields {
+            match self.check_field_type_for_ffi(cache, &field, substs) {
+                FfiSafe => {
+                    all_phantom = false;
+                }
+                FfiPhantom(..) if !def.repr().transparent() && def.is_enum() => {
+                    return FfiUnsafe {
+                        ty,
+                        reason: Reason::EnumPhantomData,
+                    };
+                }
+                FfiPhantom(..) => {}
+                r => return transparent_safety.unwrap_or(r),
+            }
+        }
 
-            if all_phantom { FfiPhantom(ty) } else { FfiSafe }
+        if all_phantom {
+            FfiPhantom(ty)
+        } else {
+            transparent_safety.unwrap_or(FfiSafe)
         }
     }
-
     /// Checks if the given type is "ffi-safe" (has a stable, well-defined
     /// representation which can be exported to C code).
     fn check_type_for_ffi(&self, cache: &mut FxHashSet<Ty<'tcx>>, ty: Ty<'tcx>) -> FfiResult<'tcx> {
@@ -441,7 +458,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                     } else {
                         return FfiUnsafe {
                             ty,
-                            reason: Reason::Box
+                            reason: Reason::Box,
                         };
                     }
                 }
@@ -457,7 +474,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                                     Reason::StructLayout
                                 } else {
                                     Reason::UnionLayout
-                                }
+                                },
                             };
                         }
 
@@ -470,7 +487,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                                     Reason::StructNonExhaustive
                                 } else {
                                     Reason::UnionNonExhaustive
-                                }
+                                },
                             };
                         }
 
@@ -481,7 +498,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                                     Reason::StructFieldless
                                 } else {
                                     Reason::UnionFieldless
-                                }
+                                },
                             };
                         }
 
@@ -501,7 +518,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             if repr_nullable_ptr(self.cx, ty, self.mode).is_none() {
                                 return FfiUnsafe {
                                     ty,
-                                    reason: Reason::EnumNoRepresentation
+                                    reason: Reason::EnumNoRepresentation,
                                 };
                             }
                         }
@@ -509,7 +526,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                         if def.is_variant_list_non_exhaustive() && !def.did().is_local() {
                             return FfiUnsafe {
                                 ty,
-                                reason: Reason::EnumNonExhaustive
+                                reason: Reason::EnumNonExhaustive,
                             };
                         }
 
@@ -519,7 +536,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             if is_non_exhaustive && !variant.def_id.is_local() {
                                 return FfiUnsafe {
                                     ty,
-                                    reason: Reason::EnumNonExhaustiveVariant
+                                    reason: Reason::EnumNonExhaustiveVariant,
                                 };
                             }
 
@@ -536,33 +553,35 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             ty::Char => FfiUnsafe {
                 ty,
-                reason: Reason::Char
+                reason: Reason::Char,
             },
 
-            ty::Int(ty::IntTy::I128) | ty::Uint(ty::UintTy::U128) => {
-                FfiUnsafe { ty, reason: Reason::Num128Bit }
-            }
+            ty::Int(ty::IntTy::I128) | ty::Uint(ty::UintTy::U128) => FfiUnsafe {
+                ty,
+                reason: Reason::Num128Bit,
+            },
 
             // Primitive types with a stable representation.
             ty::Bool | ty::Int(..) | ty::Uint(..) | ty::Float(..) | ty::Never => FfiSafe,
 
             ty::Slice(_) => FfiUnsafe {
                 ty,
-                reason: Reason::Slice
+                reason: Reason::Slice,
             },
 
-            ty::Dynamic(..) => {
-                FfiUnsafe { ty, reason: Reason::Dyn }
-            }
+            ty::Dynamic(..) => FfiUnsafe {
+                ty,
+                reason: Reason::Dyn,
+            },
 
             ty::Str => FfiUnsafe {
                 ty,
-                reason: Reason::Str
+                reason: Reason::Str,
             },
 
             ty::Tuple(..) => FfiUnsafe {
                 ty,
-                reason: Reason::Tuple
+                reason: Reason::Tuple,
             },
 
             ty::RawPtr(ty::TypeAndMut { ty, .. }) | ty::Ref(_, ty, _)
@@ -593,7 +612,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 if is_internal_abi(sig.abi()) {
                     return FfiUnsafe {
                         ty,
-                        reason: Reason::FnPtr
+                        reason: Reason::FnPtr,
                     };
                 }
 
@@ -623,9 +642,10 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             // While opaque types are checked for earlier, if a projection in a struct field
             // normalizes to an opaque type, then it will reach this branch.
-            ty::Alias(ty::Opaque, ..) => {
-                FfiUnsafe { ty, reason: Reason::Opaque }
-            }
+            ty::Alias(ty::Opaque, ..) => FfiUnsafe {
+                ty,
+                reason: Reason::Opaque,
+            },
 
             // `extern "C" fn` functions can have type parameters, which may or may not be FFI-safe,
             //  so they are currently ignored for the purposes of this lint.
@@ -643,6 +663,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             | ty::Closure(..)
             | ty::Generator(..)
             | ty::GeneratorWitness(..)
+            | ty::GeneratorWitnessMIR(..)
             | ty::Placeholder(..)
             | ty::FnDef(..) => panic!("unexpected type in foreign function: {:?}", ty),
         }
@@ -665,12 +686,12 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
     fn check_for_opaque_ty(&mut self, sp: Span, ty: Ty<'tcx>) -> bool {
         struct ProhibitOpaqueTypes;
-        impl<'tcx> ty::visit::TypeVisitor<'tcx> for ProhibitOpaqueTypes {
+        impl<'tcx> ty::visit::TypeVisitor<TyCtxt<'tcx>> for ProhibitOpaqueTypes {
             type BreakTy = Ty<'tcx>;
 
             fn visit_ty(&mut self, ty: Ty<'tcx>) -> ControlFlow<Self::BreakTy> {
                 if !ty.has_opaque_types() {
-                    return ControlFlow::CONTINUE;
+                    return ControlFlow::Continue(());
                 }
 
                 if let ty::Alias(ty::Opaque, ..) = ty.kind() {
@@ -730,11 +751,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         match self.check_type_for_ffi(&mut FxHashSet::default(), ty) {
             FfiResult::FfiSafe => {}
             FfiResult::FfiPhantom(ty) => {
-                self.emit_ffi_unsafe_type_lint(
-                    ty,
-                    sp,
-                    Reason::OnlyPhantomData
-                );
+                self.emit_ffi_unsafe_type_lint(ty, sp, Reason::OnlyPhantomData);
             }
             // If `ty` is a `repr(transparent)` newtype, and the non-zero-sized type is a generic
             // argument, which after substitution, is `()`, then this branch can be hit.
@@ -745,9 +762,8 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
     }
 
-    fn check_foreign_fn(&mut self, id: hir::HirId, decl: &hir::FnDecl<'_>) {
-        let def_id = self.cx.tcx.hir().local_def_id(id);
-        let sig = self.cx.tcx.fn_sig(def_id);
+    fn check_foreign_fn(&mut self, def_id: LocalDefId, decl: &hir::FnDecl<'_>) {
+        let sig = self.cx.tcx.fn_sig(def_id).subst_identity();
         let sig = self.cx.tcx.erase_late_bound_regions(sig);
 
         for (input_ty, input_hir) in iter::zip(sig.inputs(), decl.inputs) {
@@ -760,14 +776,11 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
     }
 
-    fn check_foreign_static(&mut self, id: hir::HirId, span: Span) {
-        let def_id = self.cx.tcx.hir().local_def_id(id);
-        let ty = self.cx.tcx.type_of(def_id);
+    fn check_foreign_static(&mut self, id: hir::OwnerId, span: Span) {
+        let ty = self.cx.tcx.type_of(id).subst_identity();
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
-
 }
-
 
 fn lint_disabled<'tcx>(cx: &LateContext<'tcx>, name: &str) -> bool {
     let lint_store = cx.lint_store;
@@ -781,6 +794,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         self.decl_lint_disabled_for_crate = lint_disabled(cx, "IMPROPER_CTYPES");
         self.defn_lint_disabled_for_crate = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS")
     }
+
     fn check_fn(
         &mut self,
         cx: &LateContext<'tcx>,
@@ -788,15 +802,15 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         decl: &'tcx hir::FnDecl<'_>,
         _: &'tcx hir::Body<'_>,
         _: Span,
-        hir_id: hir::HirId,
+        id: LocalDefId,
     ) {
         let abi: rustc_target::spec::abi::Abi = match kind {
             FnKind::ItemFn(_, _, header, ..) => header.abi,
             FnKind::Method(_, sig, ..) => sig.header.abi,
             _ => return,
         };
-        if !is_internal_abi(abi) {
 
+        if !is_internal_abi(abi) {
             let mut error_collection = vec![];
             let mut vis = ImproperCTypesVisitor {
                 cx,
@@ -810,8 +824,8 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
             };
 
             self.record_abi(abi.name(), ForeignItemType::RustFn, sp, cx.sess());
-    
-            vis.check_foreign_fn(hir_id, decl);
+
+            vis.check_foreign_fn(id, decl);
             if error_collection.len() > 0 {
                 let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS");
                 self.record_errors(
@@ -843,14 +857,14 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 }
                 _ => {}
             }
-        
+
             let item_type = match it.kind {
                 hir::ForeignItemKind::Fn(ref decl, _, _) => {
-                    vis.check_foreign_fn(it.hir_id(), decl);
+                    vis.check_foreign_fn(it.owner_id.def_id, decl);
                     Some(ForeignItemType::ForeignFn)
                 }
                 hir::ForeignItemKind::Static(ref ty, _) => {
-                    vis.check_foreign_static(it.hir_id(), ty.span);
+                    vis.check_foreign_static(it.owner_id, ty.span);
                     Some(ForeignItemType::StaticItem)
                 }
                 hir::ForeignItemKind::Type => None,
@@ -930,9 +944,7 @@ enum Reason {
     OnlyPhantomData,
 }
 
-const fn tykind_discriminant(
-    value: &rustc_middle::ty::TyKind,
-) -> usize {
+const fn tykind_discriminant(value: &rustc_middle::ty::TyKind) -> usize {
     match value {
         rustc_middle::ty::TyKind::Bool => 0,
         rustc_middle::ty::TyKind::Char => 1,
@@ -960,5 +972,6 @@ const fn tykind_discriminant(
         rustc_middle::ty::TyKind::Placeholder(_) => 23,
         rustc_middle::ty::TyKind::Infer(_) => 24,
         rustc_middle::ty::TyKind::Error(_) => 25,
+        rustc_type_ir::TyKind::GeneratorWitnessMIR(_, _) => 26,
     }
 }
