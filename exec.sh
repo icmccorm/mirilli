@@ -20,16 +20,15 @@ do
         if [ "$EXITCODE" -eq "0" ]; then 
             echo "SUCCESS"
             TRIES_REMAINING=0
-            NUM_TESTS_SRC=$(grep -r "#\[test\]" ./extracted/src | wc -l | xargs)
-            NUM_TESTS_TESTS=$(grep -r "#\[test\]" ./extracted/tests | wc -l | xargs)
-            NUM_TESTS_BENCHES=$(grep -r "#\[test\]" ./extracted/benches | wc -l | xargs)
-            NUM_TESTS=$(($NUM_TESTS_SRC + $NUM_TESTS_TESTS + $NUM_TESTS_BENCHES))
-            NUM_BENCHES_SRC=$(grep -r "#\[bench\]" ./extracted/src | wc -l | xargs)
-            NUM_BENCHES_TESTS=$(grep -r "#\[bench\]" ./extracted/tests | wc -l | xargs)
-            NUM_BENCHES_BENCHES=$(grep -r "#\[bench\]" ./extracted/benches | wc -l | xargs)
-            NUM_BENCHES=$(($NUM_BENCHES_SRC + $NUM_BENCHES_TESTS + $NUM_BENCHES_BENCHES))
-            grep -r 'extern\s*\(\"\(C\)\(-unwind\)\?\"\)\?\s*\(fn\|{\)' --include '*.rs'
             cd extracted
+            NUM_TESTS_SRC=$(grep -r "#\[test\]" ./src | wc -l | xargs)
+            NUM_TESTS_TESTS=$(grep -r "#\[test\]" ./tests | wc -l | xargs)
+            NUM_TESTS_BENCHES=$(grep -r "#\[test\]" ./benches | wc -l | xargs)
+            NUM_TESTS=$(($NUM_TESTS_SRC + $NUM_TESTS_TESTS + $NUM_TESTS_BENCHES))
+            NUM_BENCHES_SRC=$(grep -r "#\[bench\]" ./src | wc -l | xargs)
+            NUM_BENCHES_TESTS=$(grep -r "#\[bench\]" ./tests | wc -l | xargs)
+            NUM_BENCHES_BENCHES=$(grep -r "#\[bench\]" ./benches | wc -l | xargs)
+            NUM_BENCHES=$(($NUM_BENCHES_SRC + $NUM_BENCHES_TESTS + $NUM_BENCHES_BENCHES))
             NUM_FFI_C=$(grep -r 'extern\s*\(\"\(C\)\(-unwind\)\?\"\)\?\s*\(fn\|{\)' --include '*.rs' | wc -l | xargs)
             NUM_FFI=$(grep -r 'extern\s*\(\"\(C\|cdecl\|stdcall\|fastcall\|vectorcall\|thiscall\|aapcs\|win64\|sysv64\|ptx-kernel\|msp430-interrupt\|x86-interrupt\|amdgpu-kernel\|efiapi\|avr-interrupt\|avr-non-blocking-interrupt\|C-cmse-nonsecure-call\|wasm\|system\|platform-intrinsic\|unadjusted\)\(-unwind\)\?\"\)\?\s*\(fn\|{\)' --include '*.rs' | wc -l | xargs)
             cd ..
