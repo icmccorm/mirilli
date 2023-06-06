@@ -40,23 +40,32 @@ counts %>%
     filter((test_count + bench_count) > 0) %>%
     write_csv(file.path("./data/compiled/grep_ffi_tests.csv"))
 
-late_names <- late_abis %>% select(crate_name)
-early_names <- early_abis %>% select(crate_name)
+late_names <- late_abis %>%
+    select(crate_name) %>%
+    unique()
+early_names <- early_abis %>%
+    select(crate_name) %>%
+    unique()
+# select names in early_names that don't appear in late_names
+early_names_failed_late <- early_names %>%
+    anti_join(late_names, by = ("crate_name"))
+# write out
+early_names_failed_late %>%
+    inner_join(all, by = ("crate_name")) %>%
+    write_csv(file.path("./data/compiled/early_names_failed_late.csv"))
+
+
 captured_abi_subset <- bind_rows(late_names, early_names) %>%
-    unique() %>%
     inner_join(all, by = ("crate_name")) %>%
     write_csv(file.path("./data/compiled/abi_subset.csv"))
-
-# merge all rows from captured abi subset with external ffi bindings and keep unique ones
-
-unmerged_output_path <- file.path("./data/compiled/captured_abi_subset.csv")
-
+unmerged_output_path <- file.path("./data/compiled/abi_subset.csv")
 captured_abi_subset %>% write_csv(unmerged_output_path)
 
-output_path <- file.path("./data/compiled/abi_subset.csv")
 
-combined <- bind_rows(captured_abi_subset, external_ffi_bindings) %>%
+early_abis %>%
+    select(crate_name) %>%
     unique() %>%
-    write_csv(output_path)
+    inner_join(all, by = ("crate_name")) %>%
+    write_csv(file.path("./data/compiled/abi_subset_early.csv"))
 
 problems()
