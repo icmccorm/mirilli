@@ -7,8 +7,8 @@ cargo --version
 make clean && make all
 rm -rf ./data/results
 mkdir -p ./data/results
-#mkdir -p ./data/results/early
-#mkdir -p ./data/results/late
+mkdir -p ./data/results/early
+mkdir -p ./data/results/late
 echo crate_name,version,ffi_c_count,ffi_count,test_count,bench_count >> ./data/results/count.csv
 TRIES_REMAINING=3
 while IFS=, read -r name version; 
@@ -34,18 +34,18 @@ do
             cd ..
             echo "$name,$version,$NUM_FFI_C,$NUM_FFI,$NUM_TESTS,$NUM_BENCHES" >> ./data/results/count.csv
 
-            #export DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
-            #if ! (cd extracted && (timeout 5m cargo dylint --all 1> /dev/null)); then
-            #    COMP_EXIT_CODE=$?
-            #    echo "Writing failure to data/results/failed_compilation.csv"
-            #    echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
-            #fi
+            export DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
+            if ! (cd extracted && (timeout 5m cargo dylint --all 1> /dev/null)); then
+                COMP_EXIT_CODE=$?
+                echo "Writing failure to data/results/failed_compilation.csv"
+                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
+            fi
             echo "Writing visit to data/results/visited.csv"
             echo "$name,$version" >> "data/results/visited.csv"
-            #echo "Copying analysis output to data/results/early/$name.json"
-            #[ ! -f ./extracted/ffickle_early.json ] || mv ./extracted/ffickle_early.json "data/results/early/$name.json"
-            #echo "Copying analysis output to data/results/late/$name.json"
-            #[ ! -f ./extracted/ffickle_late.json ] || mv ./extracted/ffickle_late.json "data/results/late/$name.json"
+            echo "Copying analysis output to data/results/early/$name.json"
+            [ ! -f ./extracted/ffickle_early.json ] || mv ./extracted/ffickle_early.json "data/results/early/$name.json"
+            echo "Copying analysis output to data/results/late/$name.json"
+            [ ! -f ./extracted/ffickle_late.json ] || mv ./extracted/ffickle_late.json "data/results/late/$name.json"
         else
             echo "FAILED (exit $EXITCODE)"
             if [ "$TRIES_REMAINING" -eq "0" ]; then
