@@ -118,18 +118,17 @@ if (os.path.isdir(walk_dir)):
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
                 finished_late += f"{name}\n"
-                if late_result_json["error_id_count"] != 0:
-                    defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
-                    decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
-                    lint_status_info += f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n'
-                    err_info += process_error_info(name, late_result_json)
-                    for category in [CAT_FOREIGN_FN, CAT_RUST_FN, CAT_STATIC_ITEM]:
-                        data = process_error_category(
-                            name, category, decl_lint_disabled, late_result_json
-                        )
-                        error_category_counts += data["category"]
-                        err_locations += data["locations"]
-                        late_abis += data["abis"]
+                defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
+                decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
+                lint_status_info += f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n'
+                err_info += process_error_info(name, late_result_json)
+                for category in [CAT_FOREIGN_FN, CAT_RUST_FN, CAT_STATIC_ITEM]:
+                    data = process_error_category(
+                        name, category, decl_lint_disabled, late_result_json
+                    )
+                    error_category_counts += data["category"]
+                    err_locations += data["locations"]
+                    late_abis += data["abis"]
 
     dump(finished_early, os.path.join(out_dir, "finished_early.csv"))
     dump(finished_late, os.path.join(out_dir, "finished_late.csv"))
