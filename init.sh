@@ -8,7 +8,10 @@ if [ $SUDO_USER ]; then
 else
     REAL_USER=$(whoami)
 fi
-apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev grep openssl gcc curl clang llvm make -y
+apt-get update -y
+apt-get upgrade -y 
+apt-get install pkg-config libssl-dev grep openssl gcc curl clang llvm make -y
+
 sudo -u $REAL_USER echo 'export PATH="$PATH:~/.cargo/bin"' >> ~/.bashrc
 sudo -u $REAL_USER echo 'export DEFAULT_TOOLCHAIN="nightly-2023-04-06"' >> ~/.bashrc
 sudo -u $REAL_USER echo 'export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"' >> ~/.bashrc
