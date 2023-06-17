@@ -1,6 +1,6 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
-export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/ffickle/src/late/target/debug/"
+export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
 rustup --version
 rustc --version
 cargo --version
@@ -35,26 +35,24 @@ do
             cd ..
             echo "$name,$version,$NUM_FFI_C,$NUM_FFI,$NUM_TESTS,$NUM_BENCHES" >> ./data/results/count.csv
 
-            export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/ffickle/src/late/target/debug/"
+            export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
             if ! (cd extracted && (timeout 5m cargo dylint --all 1> /dev/null)); then
                 COMP_EXIT_CODE=$?
                 echo "Writing failure to data/results/failed_compilation.csv"
                 echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
             fi
-            if ! (cd extracted && (timeout 5m cargo test -- --list --format=terse > "tests.txt")); then
-                COMP_EXIT_CODE=$?
-                echo "Writing failure to data/results/failed_tests.csv"
-                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_tests.csv"
-            fi
+            #if ! (cd extracted && (timeout 5m cargo test -- --list --format=terse > "tests.txt")); then
+            #    COMP_EXIT_CODE=$?
+            #   echo "Writing failure to data/results/failed_tests.csv"
+            #  echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_tests.csv"
+            #fi
             echo "Writing visit to data/results/visited.csv"
             echo "$name,$version" >> "data/results/visited.csv"
             echo "Copying analysis output to data/results/early/$name.json"
             [ ! -f ./extracted/ffickle_early.json ] || mv ./extracted/ffickle_early.json "data/results/early/$name.json"
             echo "Copying analysis output to data/results/late/$name.json"
             [ ! -f ./extracted/ffickle_late.json ] || mv ./extracted/ffickle_late.json "data/results/late/$name.json"
-
-            [ ! -f ./extracted/tests.txt ] || mv ./extracted/tests.txt "data/results/tests/$name.txt"
-
+            #[ ! -f ./extracted/tests.txt ] || mv ./extracted/tests.txt "data/results/tests/$name.txt"
         else
             echo "FAILED (exit $EXITCODE)"
             if [ "$TRIES_REMAINING" -eq "0" ]; then

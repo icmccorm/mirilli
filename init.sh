@@ -10,7 +10,7 @@ else
 fi
 apt-get update -y
 apt-get upgrade -y 
-apt-get install pkg-config libssl-dev grep openssl gcc curl clang llvm make -y
+apt-get install pkg-config libssl-dev grep openssl gcc curl clang llvm make cmake -y
 
 sudo -u $REAL_USER echo 'export PATH="$PATH:~/.cargo/bin"' >> ~/.bashrc
 sudo -u $REAL_USER echo 'export DEFAULT_TOOLCHAIN="nightly-2023-04-06"' >> ~/.bashrc
