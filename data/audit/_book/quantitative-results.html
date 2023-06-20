@@ -23,7 +23,7 @@
 <meta name="author" content="Ian McCormack" />
 
 
-<meta name="date" content="2023-05-26" />
+<meta name="date" content="2023-06-20" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -106,58 +106,60 @@
             <section class="normal" id="section-">
 <div id="quantitative-results" class="section level1 hasAnchor" number="2">
 <h1><span class="header-section-number">2</span> Quantitative Results<a href="quantitative-results.html#quantitative-results" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>We began with a snapshot of the <a href="https://crates.io/data-access">crates.io</a> database taken on 12/20/2022, which contained 113,632 crates. After filtering out crates without any valid published versions, 109,348 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 13 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 38,707 passed the early linting stage, while 70,641 failed it. Of those that passed the early linting stage, 37,804 passed the late linting stage, while 903 failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises <strong>33% of all crates</strong> in the database. Though 1,156 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
+<p>We began with a snapshot of the <a href="https://crates.io/data-access">crates.io</a> database taken on 12/20/2022, which contained 113,632 crates. After filtering out crates without any valid published versions, 109,348 crates remained. We ran our linting tool on this population. Prior to linting, we found that the latest version of 0 crates contained an empty archive when downloaded from crates.io. For crates with non-empty archives, 87,725 passed the early linting stage, while 21,623 failed it. Of those that passed the early linting stage, 85,452 passed the late linting stage, while 2,273 failed it. We use the subset of crates that passed both linting stages as the basis for our study, which comprises <strong>75% of all crates</strong> in the database. Though -6,471 crates that passed the late linting stage failed to compile, we still include these in our sample to avoid excluding crates that have valid Rust code but are missing dependencies that cargo cannot provide.</p>
 <div id="abi-distribution" class="section level2 hasAnchor" number="2.1">
 <h2><span class="header-section-number">2.1</span> ABI Distribution<a href="quantitative-results.html#abi-distribution" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Both the early and late lints recorded the number of occurrences of each ABI for the rust functions, foreign functions, and static items declared in each crate. We merged results from the early and late lints by recording the location in source code where each foreign item occurre and eliminating duplicate results. This ensures a more accurate count of foreign ABI use than using only the late lint, as has been common in prior work, given that some crates may pass the early lint but then fail the late lint due to missing dependencies that cargo cannot provide.</p>
 <pre><code>## Warning in full_join(., early_abis, by = c(&quot;crate_name&quot;, &quot;category&quot;, &quot;abi&quot;, : Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 1 of `x` matches multiple rows in `y`.
-## ℹ Row 1073 of `y` matches multiple rows in `x`.
+## ℹ Row 1522 of `x` matches multiple rows in `y`.
+## ℹ Row 1904 of `y` matches multiple rows in `x`.
 ## ℹ If a many-to-many relationship is expected, set `relationship = &quot;many-to-many&quot;` to silence this warning.</code></pre>
-<pre><code>## # A tibble: 13 × 3
-## # Groups:   abi [8]
-##    abi        category            `n()`
-##    &lt;chr&gt;      &lt;chr&gt;               &lt;int&gt;
-##  1 C          foreign_functions 1642548
-##  2 C          rust_functions      14708
-##  3 C          static_items         3171
-##  4 C-unwind   rust_functions          3
-##  5 efiapi     rust_functions          1
-##  6 system     foreign_functions     532
-##  7 system     rust_functions        756
-##  8 sysv64     foreign_functions       2
-##  9 sysv64     rust_functions         16
-## 10 thiscall   foreign_functions    2814
-## 11 unadjusted foreign_functions      12
-## 12 win64      foreign_functions       2
-## 13 win64      rust_functions          3</code></pre>
+<pre><code>## # A tibble: 21 × 3
+## # Groups:   abi [12]
+##    abi              category            `n()`
+##    &lt;chr&gt;            &lt;chr&gt;               &lt;int&gt;
+##  1 C                foreign_functions 8246366
+##  2 C                rust_functions     108809
+##  3 C                static_items        11917
+##  4 C-unwind         foreign_functions       1
+##  5 C-unwind         rust_functions         18
+##  6 cdecl            foreign_functions       2
+##  7 efiapi           rust_functions          5
+##  8 msp430-interrupt foreign_functions       2
+##  9 msp430-interrupt rust_functions          1
+## 10 stdcall          foreign_functions     154
+## # ℹ 11 more rows</code></pre>
 </div>
 <div id="improper-type-errors" class="section level2 hasAnchor" number="2.2">
 <h2><span class="header-section-number">2.2</span> Improper Type Errors<a href="quantitative-results.html#improper-type-errors" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>We observed 9,983 type errors in foreign bindings, which occurred for 79 unique crates. Of these crates, there were 16 that globally disabled the <code>improper_ctypes</code> lint, 6 that globally disabled the <code>improper_types_definitions</code> lint, and 6 that globally disabled both lints. Alternatively, there were 10 crates that selectively disabled the <code>improper_ctypes</code> lint, 2 that selectively disabled the <code>improper_types_definitions</code> lint, and 1 crates that selectively disabled both lints. Combined, this results in 26 crates that disabled <code>improper_ctypes</code>, 8 that disabled <code>improper_types_definitions</code>, and 7 that disabled both lints in some fashion.</p>
+<p>We observed 16,407 type errors in foreign bindings, which occurred for 227 unique crates. Of these crates, there were 166 that globally disabled the <code>improper_ctypes</code> lint, 90 that globally disabled the <code>improper_types_definitions</code> lint, and 86 that globally disabled both lints. Alternatively, there were 41 crates that selectively disabled the <code>improper_ctypes</code> lint, 11 that selectively disabled the <code>improper_types_definitions</code> lint, and 1 crates that selectively disabled both lints. Combined, this results in 207 crates that disabled <code>improper_ctypes</code>, 101 that disabled <code>improper_types_definitions</code>, and 87 that disabled both lints in some fashion.</p>
 <p>We classify errors as unique based on three factors. The first is the error type, of which there are 22 that the <code>improper_ctypes</code> lints will produce. The same error type can occur for multiple data types, of which there are 27. However, not every error type can occur for every data type; some, such as the “Str” error type, will only occur for the “Str” data type. We also classify two otherwise identical errors as being unique if they are associated with different categories of foreign items. There are three foreign item categories: rust functions, foreign functions, and foreign static items.</p>
 <p>The table below summarizes the quantity and types of errors observed. Error counts to the right of a ‘/’ were hidden from the user.</p>
 <pre><code>## # A tibble: 4 × 4
-##   Category          `# Crates` `# Unique Errors` Total      
-##   &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;             &lt;chr&gt;      
-## 1 Foreign Functions 52 / 22    12 / 9            9594 / 8741
-## 2 Rust Functions    26 / 6     11 / 6            286 / 172  
-## 3 Static Items      3 / 1      3 / 1             103 / 99   
-## 4 All               79 / 27    26 / 16           9983 / 9012</code></pre>
+##   Category          `# Crates` `# Unique Errors` Total        
+##   &lt;chr&gt;             &lt;chr&gt;      &lt;chr&gt;             &lt;chr&gt;        
+## 1 Foreign Functions 145 / 92   14 / 13           15756 / 14106
+## 2 Rust Functions    79 / 19    12 / 7            467 / 242    
+## 3 Static Items      11 / 5     7 / 3             184 / 169    
+## 4 All               227 / 109  33 / 23           16407 / 14517</code></pre>
 <p>The following table displays hidden error counts by error type and data type.</p>
-<pre><code>## # A tibble: 10 × 6
+<pre><code>## # A tibble: 14 × 6
 ##    Type    Error      `Foreign Functions` `Foreign Items` `Rust Functions` Total
 ##    &lt;chr&gt;   &lt;chr&gt;                    &lt;dbl&gt;           &lt;dbl&gt;            &lt;dbl&gt; &lt;dbl&gt;
-##  1 Adt     EnumNoRep…                  21               0                1    22
-##  2 Adt     StructFie…                5809              99                7  5915
-##  3 Adt     UnionLayo…                 404               0               17   421
-##  4 Array   --                           1               0                0     1
-##  5 Char    --                           1               0                0     1
-##  6 Dynamic Dyn                          2               0                0     2
-##  7 Int     Num128Bit                    1               0               66    67
-##  8 Tuple   --                           7               0               23    30
-##  9 Uint    Num128Bit                 2495               0               58  2553
-## 10 All     All                       8741              99              172  9012</code></pre>
+##  1 Adt     EnumNoRep…                  27               7               23    57
+##  2 Adt     StructFie…                8001             161                7  8169
+##  3 Adt     StructNon…                   2               0                0     2
+##  4 Adt     UnionLayo…                1196               0               55  1251
+##  5 Adt     OnlyPhant…                   1               0                0     1
+##  6 Array   --                           5               0                0     5
+##  7 Char    --                           2               0                0     2
+##  8 Dynamic Dyn                          3               0               10    13
+##  9 FnPtr   --                         286               1                0   287
+## 10 Int     Num128Bit                    1               0               66    67
+## 11 Slice   --                           1               0                0     1
+## 12 Tuple   --                           7               0               23    30
+## 13 Uint    Num128Bit                 4574               0               58  4632
+## 14 All     All                      14106             169              242 14517</code></pre>
 </div>
 </div>
             </section>

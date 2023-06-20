@@ -57,6 +57,7 @@ early_names_failed_late %>%
 
 captured_abi_subset <- bind_rows(late_names, early_names) %>%
     inner_join(all, by = ("crate_name")) %>%
+    unique() %>%
     write_csv(file.path("./data/compiled/abi_subset.csv"))
 unmerged_output_path <- file.path("./data/compiled/abi_subset.csv")
 captured_abi_subset %>% write_csv(unmerged_output_path)
