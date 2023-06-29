@@ -67,7 +67,6 @@ do
             fi
         fi
     done
-    chown -R $USER ./extracted
     rm -rf ./extracted
     TRIES_REMAINING=3
 done <<< "$(tail -n +2 "$1")"
