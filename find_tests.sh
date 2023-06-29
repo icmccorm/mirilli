@@ -1,12 +1,13 @@
+#!/bin/bash
 rm -rf ./data/results/tests
 rm -rf ./extracted
 mkdir -p ./data/results/tests
-mkdir -p ./data/results/tests/lists
-mkdir -p ./data/results/tests/status
+mkdir -p ./data/results/tests/info
 touch ./data/results/tests/failed_download.csv
 touch ./data/results/tests/failed_rustc_compilation.csv
+echo "crate_name,version,exit_code" >> ./data/results/tests/failed_rustc_compilation.csv
 touch ./data/results/tests/failed_miri_compilation.csv
-touch ./data/results/tests/miri_timeout.csv
+echo "crate_name,version,exit_code" >> ./data/results/tests/failed_miri_compilation.csv
 while IFS=, read -r name version; 
 do
     TRIES_REMAINING=3
@@ -20,57 +21,53 @@ do
             MIRI_FAILED=0
             RUSTC_FAILED=0
             cd extracted
-            if ! (timeout 5m cargo test -q -- --list > rustc_list.txt); then
-                RUSTC_FAILED=1
-                COMP_EXIT_CODE=$?
-                echo "Writing failure to data/results/failed_rustc_compilation.csv"
-                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_rustc_compilation.csv"
+            timeout 5m cargo test -q -- --list | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > rustc_list.txt
+            RUSTC_FAILED=$PIPESTATUS
+            if [ $RUSTC_FAILED -ne 0 ]; then
+                echo "$name,$version,$RUSTC_FAILED" >> "../data/results/tests/failed_rustc_compilation.csv"
             fi
-            if ! (timeout 5m cargo miri test -q -- --list > miri_list.txt); then
-                MIRI_FAILED=1
-                COMP_EXIT_CODE=$?
-                echo "Writing failure to data/results/failed_rustc_compilation.csv"
-                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_miri_compilation.csv"
+            if [ $RUSTC_FAILED -eq 0 ]; then
+                timeout 5m cargo miri test -q -- --list | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > miri_list.txt
+                MIRI_FAILED=$PIPESTATUS
+                if [ $MIRI_FAILED -ne 0 ]; then
+                    echo "$name,$version,$MIRI_FAILED" >> "../data/results/tests/failed_miri_compilation.csv"
+                fi            
             fi
             # if miri and rustc succeeded
-            if [ "$MIRI_FAILED" -eq "0" ] && [ "$RUSTC_FAILED" -eq "0" ]; then
-                cat -n ./miri_list.txt ./rustc_list.txt | sort -uk2 | sort -nk1 | cut -f2- | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > miri_list_final.txt
-                touch ./failed_ffi.txt
+            if [ "$MIRI_FAILED" -eq "0" ] && [ "$RUSTC_FAILED" -eq "0" ] && [ $(cat ./rustc_list.txt | wc -l) -ne 0 ]; then
+                OUTPUT_FILE="../data/results/tests/info/$name-$version.csv"
+                echo "exit_code,failed_from_ffi,test_name" > $OUTPUT_FILE
+                comm -13 ./miri_list.txt ./rustc_list.txt | sed 's/^/-1,-1,/' >> $OUTPUT_FILE
                 while IFS=" " read -r name line; 
                 do
                     touch err
                     if [ -z "$line" ]; then  
                         echo "Running $name..."
-                        timeout 1m cargo miri test -q "$name" -- --exact 2> err
+                        MIRIFLAGS=-Zmiri-disable-isolation timeout 1m cargo miri test -q "$name" -- --exact 2> err
                     else 
                         echo "Running $name $line..."
-                        timeout 1m cargo miri test -q -- --doc "$name $line" 2> err
+                        MIRIFLAGS=-Zmiri-disable-isolation timeout 1m cargo miri test -q -- --doc "$name $line" 2> err
                     fi
-                    FAILED_FROM_FFI=$(grep -q "error: unsupported operation: can't call foreign function" ./err)
-                    # check if FAILED_FROM_FFI had a match
-                    if [[ "$FAILED_FROM_FFI" -eq "0" ]]; then
-                        echo "$name $line" >> ./failed_ffi.txt
-                    fi
+                    EXITCODE=$?
+                    grep -q "error: unsupported operation: can't call foreign function" ./err
+                    echo "$EXITCODE,$?,$name $line" >> $OUTPUT_FILE
                     rm -f err
-                done < ./miri_list_final.txt
-                cp ./miri_list_final.txt "../data/results/tests/lists/$name_$version.txt"
-                cp ./failed_ffi.txt "../data/results/tests/status/$name_$version.txt"
-                rm ./failed_ffi.txt
-                rm ./miri_list_final.txt
+                done < ./miri_list.txt
             fi
             cd ..
         else
             echo "FAILED (exit $EXITCODE)"
             if [ "$TRIES_REMAINING" -eq "0" ]; then
-                echo "$name,$version,$EXITCODE" >> "data/results/tests/failed_download.csv"
+                echo "$name,$version,$EXITCODE" >> "./data/results/tests/failed_download.csv"
             else
                 echo "PAUSE..."
                 sleep 10
                 echo "RETRY..."
             fi
         fi
-        rm -rf ./extracted
     done
+    chown -R $USER ./extracted
+    rm -rf ./extracted
     TRIES_REMAINING=3
 done <<< "$(tail -n +2 "$1")"
 printf 'FINISHED! %s\n' "$name"
