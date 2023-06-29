@@ -14,6 +14,7 @@ RUN ~/.cargo/bin/cargo search
 RUN ~/.cargo/bin/cargo install cargo-download cargo-dylint dylint-link
 RUN ~/.cargo/bin/rustup install $DEFAULT_TOOLCHAIN
 RUN ~/.cargo/bin/rustup default $DEFAULT_TOOLCHAIN
+RUN ~/.cargo/bin/rustup +$DEFAULT_TOOLCHAIN component add miri 
 RUN (cd src/early && ~/.cargo/bin/cargo build)
 RUN (cd src/late && ~/.cargo/bin/cargo build)
 ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
