@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="$HOME/.cargo/bin:$PATH"
 rm -rf ./data/results/tests
 rm -rf ./extracted
 mkdir -p ./data/results/tests
@@ -66,7 +67,6 @@ do
             fi
         fi
     done
-    chown -R $USER ./extracted
     rm -rf ./extracted
     TRIES_REMAINING=3
 done <<< "$(tail -n +2 "$1")"
