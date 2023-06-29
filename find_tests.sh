@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="$HOME/.cargo/bin:$PATH"
 rm -rf ./data/results/tests
 rm -rf ./extracted
 mkdir -p ./data/results/tests
