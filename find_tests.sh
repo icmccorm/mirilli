@@ -44,10 +44,10 @@ do
                     touch err
                     if [ -z "$line" ]; then  
                         echo "Running $test_name..."
-                        MIRIFLAGS=-Zmiri-disable-isolation timeout 1m cargo miri test -q "$test_name" -- --exact 2> err
+                        MIRIFLAGS=-Zmiri-disable-isolation timeout 30s cargo miri test -q "$test_name" -- --exact 2> err
                     else 
                         echo "Running $test_name $line..."
-                        MIRIFLAGS=-Zmiri-disable-isolation timeout 1m cargo miri test -q -- --doc "$test_name $line" 2> err
+                        MIRIFLAGS=-Zmiri-disable-isolation timeout 30s cargo miri test -q -- --doc "$test_name $line" 2> err
                     fi
                     EXITCODE=$?
                     grep -q "error: unsupported operation: can't call foreign function" ./err
