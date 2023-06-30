@@ -11,6 +11,7 @@ touch ./data/results/tests/failed_miri_compilation.csv
 echo "crate_name,version,exit_code" >> ./data/results/tests/failed_miri_compilation.csv
 while IFS=, read -r crate_name version; 
 do
+    unset -v IFS
     TRIES_REMAINING=3
     while [ "$TRIES_REMAINING" -gt "0" ]; do
         echo "Downloading $crate_name@$version..."
@@ -46,7 +47,7 @@ do
                 echo "Logging tests to $OUTPUT_FILE"
                 echo "exit_code,failed_from_ffi,test_name" > "$OUTPUT_FILE"
                 comm -13 ./miri_list.txt ./rustc_list.txt | sed 's/^/-1,-1,/' >> "$OUTPUT_FILE"
-                while IFS=$'\n' read -r test_name; 
+                while read -r test_name; 
                 do
                     touch err
                     # if $test_name is of the form "filename line_number"
@@ -77,5 +78,6 @@ do
     done
     rm -rf ./extracted
     TRIES_REMAINING=3
+    IFS=,
 done <<< "$(tail -n +2 "$1")"
 printf 'FINISHED! %s\n' "$crate_name"
