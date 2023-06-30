@@ -8,6 +8,7 @@ touch ./data/results/tests/failed_download.csv
 touch ./data/results/tests/failed_rustc_compilation.csv
 echo "crate_name,version,exit_code" >> ./data/results/tests/failed_rustc_compilation.csv
 touch ./data/results/tests/failed_miri_compilation.csv
+touch ./data/results/tests/visited.csv
 echo "crate_name,version,exit_code" >> ./data/results/tests/failed_miri_compilation.csv
 while IFS=, read -r crate_name version; 
 do
@@ -83,5 +84,6 @@ do
     rm -rf ./extracted
     TRIES_REMAINING=3
     IFS=,
+    echo "$crate_name,$version" >> ./data/results/tests/visited.csv
 done < $1
 printf 'FINISHED! %s\n' "$crate_name"
