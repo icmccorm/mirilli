@@ -79,5 +79,5 @@ do
     rm -rf ./extracted
     TRIES_REMAINING=3
     IFS=,
-done <<< "$(tail -n +2 "$1")"
+done < $1
 printf 'FINISHED! %s\n' "$crate_name"
