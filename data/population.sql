@@ -1,7 +1,7 @@
 DROP VIEW IF EXISTS downloads_percentile_all_time;
 DROP VIEW IF EXISTS ffi_and_dependents;
-DROP VIEW IF EXISTS crates_with_ffi;
-DROP VIEW IF EXISTS first_order;
+DROP VIEW IF EXISTS crates_with_ffi cascade;
+DROP VIEW IF EXISTS first_order cascade ;
 DROP VIEW IF EXISTS zeroth_order;
 DROP VIEW IF EXISTS depends_on_ffi;
 DROP VIEW IF EXISTS children_to_select;
@@ -13,11 +13,10 @@ DROP VIEW IF EXISTS grep_subsample_min_config;
 DROP VIEW IF EXISTS grep_subsample;
 DROP VIEW IF EXISTS crates_with_tests;
 DROP VIEW IF EXISTS crates_with_tests_and_ffi;
-DROP TABLE IF EXISTS grep_sample;
+DROP TABLE IF EXISTS grep_sample cascade;
 DROP TABLE IF EXISTS passed_cargo_early;
 DROP TABLE IF EXISTS passed_cargo_late;
 DROP TABLE IF EXISTS lint_found_abi;
-select crate_name, version from population order by crate_name asc;
 CREATE TABLE grep_sample
 (
     crate_name  VARCHAR,
@@ -128,19 +127,6 @@ copy passed_cargo_late (crate_name)
     DELIMITER ','
     CSV HEADER;
 
-
-
-select count(*) from passed_cargo_early;
-select crate_name, version from population where population.crate_name not in (select crate_name from passed_cargo_early) order by random() limit 20;
-
-select population.crate_name, population.version from population inner join downloads_percentile_last_month on population.crate_id = downloads_percentile_last_month.crate_id
-where percentile > 90;
-
-select count(*)
-from downloads_percentile_last_month
-         inner join passed_cargo_early on passed_cargo_early.crate_name = downloads_percentile_last_month.crate_name
-where percentile > 90;
-
 CREATE VIEW crates_with_ffi_lint AS
 (
 select p.*
@@ -196,12 +182,15 @@ from lint_found_abi
          inner join crates on crates.name = lint_found_abi.crate_name
 
     );
-select count(*)
-from first_order
-         inner join crates on crates.name = first_order.crate_name
-         inner join downloads_percentile_last_month dplm on crates.id = dplm.crate_id
-where percentile >= 80
+create view crates_to_test as
+    (
+    select distinct t.*, dplm.percentile from (select crate_name, version from zeroth_order
+    union all
+    select crate_name, version from first_order) as t inner join
+        downloads_percentile_last_month dplm on dplm.crate_name = t.crate_name
+    );
 
 
-/*select crate_name, version, crates.repository from crates_with_ffi_lint inner join crates on crates_with_ffi_lint.crate_id = crates.id;
-*/
+
+select crates_to_test.crate_name, crates_to_test.version from crates_to_test inner join grep_sample gs on crates_to_test.crate_name = gs.crate_name
+    where gs.test_count > 0

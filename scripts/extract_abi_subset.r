@@ -19,12 +19,6 @@ all <- read_csv(
     show_col_types = FALSE
 )
 
-external_ffi_bindings_path <- file.path("./data/external_ffi_bindings.csv")
-external_ffi_bindings <- read_csv(
-    external_ffi_bindings_path,
-    show_col_types = FALSE
-)
-
 counts_path <- file.path("./data/results/count.csv")
 counts <- read_csv(
     counts_path,
@@ -43,22 +37,15 @@ counts %>%
 late_names <- late_abis %>%
     select(crate_name) %>%
     unique()
+
 early_names <- early_abis %>%
     select(crate_name) %>%
     unique()
-# select names in early_names that don't appear in late_names
-early_names_failed_late <- early_names %>%
-    anti_join(late_names, by = ("crate_name"))
-# write out
-early_names_failed_late %>%
-    inner_join(all, by = ("crate_name")) %>%
 
 captured_abi_subset <- bind_rows(late_names, early_names) %>%
     inner_join(all, by = ("crate_name")) %>%
     unique() %>%
     write_csv(file.path("./data/compiled/abi_subset.csv"))
-unmerged_output_path <- file.path("./data/compiled/abi_subset.csv")
-captured_abi_subset %>% write_csv(unmerged_output_path)
 
 early_abis %>%
     select(crate_name) %>%

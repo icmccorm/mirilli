@@ -873,8 +873,8 @@ node_api_system,foreign_functions,136,0,1,true
 node_api_system,foreign_functions,137,0,1,true
 node_api_system,foreign_functions,138,0,1,true
 bing-rs,rust_functions,0,0,1,false
-thorin,foreign_functions,0,0,2,true
 thorin,foreign_functions,0,1,1,true
+thorin,foreign_functions,0,0,2,true
 starlane-core,rust_functions,0,0,1,false
 t_bang,rust_functions,0,0,1,false
 emacs_module_bindings,rust_functions,0,0,1,false
