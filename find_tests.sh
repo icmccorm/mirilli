@@ -6,10 +6,8 @@ mkdir -p ./data/results/tests
 mkdir -p ./data/results/tests/info
 touch ./data/results/tests/failed_download.csv
 touch ./data/results/tests/failed_rustc_compilation.csv
-echo "crate_name,version,exit_code" >> ./data/results/tests/failed_rustc_compilation.csv
 touch ./data/results/tests/failed_miri_compilation.csv
 touch ./data/results/tests/visited.csv
-echo "crate_name,version,exit_code" >> ./data/results/tests/failed_miri_compilation.csv
 while IFS=, read -r crate_name version; 
 do
     unset -v IFS
@@ -35,10 +33,12 @@ do
             if [ "$RUSTC_FAILED" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
                 OUTPUT_FILE="../data/results/tests/info/$crate_name-$version.csv"
                 echo "Logging tests to $OUTPUT_FILE"
-                echo "exit_code,had_ffi,test_name" > "$OUTPUT_FILE"
                 while read -r test_name; 
                 do
                     touch err
+                    if [[ $test_name =~ ^[0-9]*\ test[s]*,\ [0-9]*\ benchmark[s]*$ ]]; then
+                        continue
+                    fi
                     # if $test_name is of the form "filename line_number"
                     if [[ $test_name =~ ^.*\ [0-9]*$ ]]; then
                         echo "Running DOC test, $test_name..."

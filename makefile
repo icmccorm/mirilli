@@ -22,7 +22,5 @@ compile: clean-compile
 	@(Rscript ./scripts/extract_abi_subset.r 1> /dev/null)
 rates:
 	@(Rscript ./data/pass_rates.r)
-clean-sample:
-	@(rm -f ./data/coding/samples/* 1> /dev/null)
-sample: clean-sample
-	@(Rscript ./data/sample.r)
+extract: clean-compile
+	./scripts/extract.sh

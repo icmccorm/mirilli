@@ -10,7 +10,12 @@ mkdir -p ./data/results
 mkdir -p ./data/results/early
 mkdir -p ./data/results/late
 mkdir -p ./data/results/tests
+
+touch ./data/results/failed_compilation.csv
+touch ./data/results/failed_download.csv
+
 echo crate_name,version,ffi_c_count,ffi_count,test_count,bench_count >> ./data/results/count.csv
+
 TRIES_REMAINING=3
 while IFS=, read -r name version; 
 do
