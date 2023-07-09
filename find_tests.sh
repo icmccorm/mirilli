@@ -65,7 +65,7 @@ do
                             EXITCODE="-1"
                         fi
                     fi
-                    echo "$EXITCODE,$HAD_FFI,$test_name" >> "$OUTPUT_FILE"
+                    echo "$EXITCODE,$HAD_FFI,\"$test_name\"" >> "$OUTPUT_FILE"
                     rm -f err 
                 done < ./rustc_list.txt
             fi

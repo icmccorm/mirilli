@@ -50,9 +50,9 @@ for file in ./data/archives/partitions/ffi/*.zip; do
             echo "INVALID CRATE VERSION: $filename"
             exit 1
         fi
-        while  read -r line; do
+        while read -r line; do
             echo "$line,$crate_name,$version" >> $RESULT_DIR/tests.csv
-        done <<< $csv_file
+        done < $csv_file
     done
     cat $ROOT/visited.csv >> $RESULT_DIR/visited.csv
     cat $ROOT/failed_download.csv >> $RESULT_DIR/failed_download.csv

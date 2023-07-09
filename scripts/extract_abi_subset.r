@@ -24,6 +24,15 @@ counts <- read_csv(
     counts_path,
     show_col_types = FALSE
 )
+colnames(counts) <- c(
+    "crate_name",
+    "version",
+    "ffi_c_count",
+    "ffi_count",
+    "test_count",
+    "bench_count"
+)
+
 counts %>%
     filter(ffi_c_count > 0) %>%
     filter((test_count + bench_count) > 0) %>%
@@ -52,4 +61,3 @@ early_abis %>%
     unique() %>%
     inner_join(all, by = ("crate_name")) %>%
     write_csv(file.path("./data/compiled/abi_subset_early.csv"))
-

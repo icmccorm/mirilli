@@ -20,6 +20,7 @@ clean-compile:
 compile: clean-compile
 	@(python3 ./scripts/compile.py ./data/results ./data/compiled)
 	@(Rscript ./scripts/extract_abi_subset.r 1> /dev/null)
+	@(Rscript ./scripts/extract_miri_tests.r 1> /dev/null)
 rates:
 	@(Rscript ./data/pass_rates.r)
 extract: clean-compile
