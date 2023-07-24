@@ -71,5 +71,5 @@ do
         rm -rf ./extracted
     done
     TRIES_REMAINING=3
-done <<< "$(tail -n +2 "$1")"
+done <<< "$(tail -n +0 "$1")"
 printf 'FINISHED! %s\n' "$name"

@@ -25,3 +25,9 @@ rates:
 	@(Rscript ./data/pass_rates.r)
 extract: clean-compile
 	./scripts/extract.sh
+push:
+	@./list_instances.sh instances.csv
+	@./push.sh ./instances.csv
+pull:
+	@./list_instances.sh ./instances.csv
+	@./pull.sh ./instances.csv
