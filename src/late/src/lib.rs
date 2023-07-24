@@ -111,7 +111,7 @@ struct ErrorCount {
 trait ErrorIDStore {
     fn record_errors(
         &mut self,
-        errors: Vec<ObservedImproperType>,
+        errors: &Vec<ObservedImproperType>,
         abi_string: &str,
         item_type: ForeignItemType,
         were_ignored: bool,
@@ -148,7 +148,7 @@ impl ErrorIDStore for FfickleLate {
     }
     fn record_errors<'tcx>(
         &mut self,
-        errors: Vec<ObservedImproperType>,
+        errors: &Vec<ObservedImproperType>,
         abi_string: &str,
         item_type: ForeignItemType,
         were_ignored: bool,
@@ -168,7 +168,7 @@ impl ErrorIDStore for FfickleLate {
         for err in errors {
             let foreign_err = ForeignTypeError {
                 discriminant: err.discriminant,
-                str_rep: err.str_rep,
+                str_rep: err.str_rep.clone(),
                 abi: abi_string.to_string().replace('\"', ""),
                 reason: err.reason,
             };
@@ -191,7 +191,7 @@ impl ErrorIDStore for FfickleLate {
                 .locations
                 .entry(id)
                 .or_default()
-                .extend(vec![err.location]);
+                .extend(vec![err.location.clone()]);
             let count = (err_counts).counts.entry(id).or_insert(0);
             *count += 1;
         }
@@ -881,7 +881,6 @@ impl FfickleLate {
         ty: Ty<'tcx>,
         item_type: ForeignItemType,
     ) {
-        let abi = cx.tcx.hir().get_foreign_abi(hir_ty.hir_id);
         let mut error_collection = vec![];
         let mut vis = ImproperCTypesVisitor {
             cx,
@@ -889,15 +888,22 @@ impl FfickleLate {
             errors: &mut error_collection,
         };
         for (fn_ptr_ty, span) in vis.find_fn_ptr_ty_with_external_abi(hir_ty, ty) {
+            let abi = fn_ptr_ty.fn_sig(cx.tcx).abi();
+            if !is_internal_abi(abi) {
+                self.record_abi(abi.name(), item_type, span, cx.sess());
+            }
             vis.check_type_for_ffi_and_report_errors(span, fn_ptr_ty, true, false);
+            let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES");
+            if vis.errors.len() > 0 {
+                self.record_errors(
+                    &*vis.errors,
+                    format!("{}", abi).as_str(),
+                    item_type,
+                    were_ignored,
+                );
+            }
+            vis.errors.clear();
         }
-        let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES");
-        self.record_errors(
-            error_collection,
-            format!("{}", abi).as_str(),
-            item_type,
-            were_ignored,
-        );
     }
 }
 
@@ -941,7 +947,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         if error_collection.len() > 0 {
             let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS");
             self.record_errors(
-                error_collection,
+                &error_collection,
                 format!("{}", abi).as_str(),
                 abi_type,
                 were_ignored,
@@ -1019,7 +1025,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 }
                 let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES");
                 self.record_errors(
-                    error_collection,
+                    &error_collection,
                     format!("{}", abi).as_str(),
                     tp,
                     were_ignored,
