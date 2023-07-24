@@ -54,6 +54,7 @@ struct ObservedImproperType {
     str_rep: String,
     location: String,
     reason: i32,
+    desc: String,
 }
 
 #[derive(PartialEq, Eq, Default, Serialize, Deserialize, Hash)]
@@ -310,7 +311,6 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
         }
     })
 }
-
 /// Check if this enum can be safely exported based on the "nullable pointer optimization". If it
 /// can, return the type that `ty` can be safely converted to, otherwise return `None`.
 /// Currently restricted to function pointers, boxes, references, `core::num::NonZero*`,
@@ -373,7 +373,6 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             false
         }
     }
-
     /// Checks if the given field's type is "ffi-safe".
     fn check_field_type_for_ffi(
         &self,
@@ -392,6 +391,8 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             self.check_type_for_ffi(cache, field_ty)
         }
     }
+
+    /// Checks if the given `VariantDef`'s field types are "ffi-safe".
     fn check_variant_for_ffi(
         &self,
         cache: &mut FxHashSet<Ty<'tcx>>,
@@ -678,6 +679,10 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     }
 
     fn emit_ffi_unsafe_type_lint(&mut self, ty: Ty<'tcx>, sp: Span, reason: Reason) {
+        let desc = match self.mode {
+            CItemKind::Declaration => "block",
+            CItemKind::Definition => "fn",
+        };
         let kind: &'tcx TyKind<'tcx> = ty.kind();
         let discriminant = tykind_discriminant(kind);
         let sess = self.cx.sess();
@@ -688,6 +693,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             str_rep: format!("{}", ty).to_string(),
             location: source_map.span_to_diagnostic_string(sp),
             reason: reason as i32,
+            desc: desc.to_string(),
         };
         self.errors.append(&mut vec![obj_rep]);
     }
@@ -769,12 +775,11 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             }
         }
     }
-
     /// Check if a function's argument types and result type are "ffi-safe".
     ///
     /// For a external ABI function, argument types and the result type are walked to find fn-ptr
     /// types that have external ABIs, as these still need checked.
-    fn check_fn_inner(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
+    fn check_fn_helper(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
         let sig = self.cx.tcx.fn_sig(def_id).subst_identity();
         let sig = self.cx.tcx.erase_late_bound_regions(sig);
 
@@ -792,7 +797,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     }
 
     /// Check if a function's argument types and result type are "ffi-safe".
-    fn check_foreign_fn(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
+    fn check_foreign_fn_helper(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
         let sig = self.cx.tcx.fn_sig(def_id).subst_identity();
         let sig = self.cx.tcx.erase_late_bound_regions(sig);
 
@@ -805,7 +810,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
     }
 
-    fn check_foreign_static(&mut self, id: hir::OwnerId, span: Span) {
+    fn check_foreign_static_helper(&mut self, id: hir::OwnerId, span: Span) {
         let ty = self.cx.tcx.type_of(id).subst_identity();
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
@@ -831,6 +836,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                         self.spans.push(ty.span);
                     }
                 }
+
                 hir::intravisit::walk_ty(self, ty)
             }
         }
@@ -907,7 +913,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         kind: hir::intravisit::FnKind<'tcx>,
         decl: &'tcx hir::FnDecl<'_>,
         _: &'tcx hir::Body<'_>,
-        _: Span,
+        sp: Span,
         id: LocalDefId,
     ) {
         let abi: rustc_target::spec::abi::Abi = match kind {
@@ -923,13 +929,15 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         };
 
         let abi_type = if is_internal_abi(abi) {
-            vis.check_fn_inner(id, decl);
+            vis.check_fn_helper(id, decl);
             ForeignItemType::RustABIFn
         } else {
-            vis.check_foreign_fn(id, decl);
+            vis.check_foreign_fn_helper(id, decl);
             ForeignItemType::ForeignABIFn
         };
-
+        if !is_internal_abi(abi) {
+            self.record_abi(abi.name(), abi_type, sp, cx.sess());
+        }
         if error_collection.len() > 0 {
             let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS");
             self.record_errors(
@@ -991,22 +999,24 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
 
         let item_type = match it.kind {
             hir::ForeignItemKind::Fn(ref decl, _, _) if !is_internal_abi(abi) => {
-                vis.check_foreign_fn(it.owner_id.def_id, decl);
+                vis.check_foreign_fn_helper(it.owner_id.def_id, decl);
                 Some(ForeignItemType::ForeignABIFn)
             }
             hir::ForeignItemKind::Static(ref ty, _) if !is_internal_abi(abi) => {
-                vis.check_foreign_static(it.owner_id, ty.span);
+                vis.check_foreign_static_helper(it.owner_id, ty.span);
                 Some(ForeignItemType::StaticItem)
             }
             hir::ForeignItemKind::Fn(ref decl, _, _) => {
-                vis.check_fn_inner(it.owner_id.def_id, decl);
+                vis.check_fn_helper(it.owner_id.def_id, decl);
                 Some(ForeignItemType::RustABIFn)
             }
             hir::ForeignItemKind::Static(..) | hir::ForeignItemKind::Type => None,
         };
         match item_type {
             Some(tp) => {
-                self.record_abi(abi.name(), tp, it.span, cx.sess());
+                if !is_internal_abi(abi) {
+                    self.record_abi(abi.name(), tp, it.span, cx.sess());
+                }
                 let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES");
                 self.record_errors(
                     error_collection,
