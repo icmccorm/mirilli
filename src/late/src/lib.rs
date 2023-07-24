@@ -134,7 +134,6 @@ impl ErrorIDStore for FfickleLate {
         sp: Span,
         sess: &Session,
     ) -> () {
-        println!("{:?}", abi_string)
         let store = match item_type {
             ForeignItemType::RustABIFn => &mut self.rust_functions,
             ForeignItemType::ForeignABIFn => &mut self.foreign_functions,
@@ -942,9 +941,9 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
             vis.check_foreign_fn_helper(id, decl);
             ForeignItemType::ForeignABIFn
         };
-
-        self.record_abi(abi.name(), abi_type, sp, cx.sess());
-
+        if !is_internal_abi(abi) {
+            self.record_abi(abi.name(), abi_type, sp, cx.sess());
+        }
         if error_collection.len() > 0 {
             let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES_DEFINITIONS");
             self.record_errors(
@@ -1021,7 +1020,9 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         };
         match item_type {
             Some(tp) => {
-                self.record_abi(abi.name(), tp, it.span, cx.sess());
+                if !is_internal_abi(abi) {
+                    self.record_abi(abi.name(), tp, it.span, cx.sess());
+                }
                 let were_ignored = lint_disabled(cx, "IMPROPER_CTYPES");
                 self.record_errors(
                     &error_collection,

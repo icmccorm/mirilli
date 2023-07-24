@@ -13,6 +13,7 @@ mkdir -p ./data/results/tests
 
 touch ./data/results/failed_compilation.csv
 touch ./data/results/failed_download.csv
+touch ./data/results/has_bytecode.csv
 
 echo crate_name,version,ffi_c_count,ffi_count,test_count,bench_count >> ./data/results/count.csv
 
@@ -46,11 +47,10 @@ do
                 echo "Writing failure to data/results/failed_compilation.csv"
                 echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
             fi
-            #if ! (cd extracted && (timeout 5m cargo test -- --list --format=terse > "tests.txt")); then
-            #    COMP_EXIT_CODE=$?
-            #   echo "Writing failure to data/results/failed_tests.csv"
-            #  echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_tests.csv"
-            #fi
+            if [ -n "$(find . -type f -name '*.bc' -print -quit)" ]; then
+                echo "Writing visit to data/results/has_bytecode.csv"
+                echo "$name,$version" >> "data/results/has_bytecode.csv"
+            fi
             echo "Writing visit to data/results/visited.csv"
             echo "$name,$version" >> "data/results/visited.csv"
             echo "Copying analysis output to data/results/early/$name.json"
