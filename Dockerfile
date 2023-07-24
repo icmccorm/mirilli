@@ -12,6 +12,7 @@ RUN (cd rust && ./x.py install)
 RUN (cd rust && ./x.py build miri)
 RUN (cd rust && /x.py install miri)
 RUN rustup toolchain link miri-custom /usr/src/ffickle/rust/build
+ENV DEFAULT_TOOLCHAIN "nightly-2023-07-14"
 RUN ~/.cargo/bin/rustup install $DEFAULT_TOOLCHAIN
 RUN ~/.cargo/bin/rustup default $DEFAULT_TOOLCHAIN
 RUN ~/.cargo/bin/cargo search
