@@ -1,6 +1,7 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
+export CC="clang --save-temps=obj"
 rustup --version
 rustc --version
 cargo --version
@@ -40,14 +41,14 @@ do
             NUM_FFI=$(grep -r 'extern\s*\(\"\(C\|cdecl\|stdcall\|fastcall\|vectorcall\|thiscall\|aapcs\|win64\|sysv64\|ptx-kernel\|msp430-interrupt\|x86-interrupt\|amdgpu-kernel\|efiapi\|avr-interrupt\|avr-non-blocking-interrupt\|C-cmse-nonsecure-call\|wasm\|system\|platform-intrinsic\|unadjusted\)\(-unwind\)\?\"\)\?\s*\(fn\|{\)' --include '*.rs' | wc -l | xargs)
             cd ..
             echo "$name,$version,$NUM_FFI_C,$NUM_FFI,$NUM_TESTS,$NUM_BENCHES" >> ./data/results/count.csv
-
+            export CC="clang --save-temps=obj"
             export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
             if ! (cd extracted && (timeout 5m cargo dylint --all 1> /dev/null)); then
                 COMP_EXIT_CODE=$?
                 echo "Writing failure to data/results/failed_compilation.csv"
                 echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
             fi
-            if [ -n "$(find . -type f -name '*.bc' -print -quit)" ]; then
+            if [ -n "$(find ./extracted -type f -name '*.bc' -print -quit)" ]; then
                 echo "Writing visit to data/results/has_bytecode.csv"
                 echo "$name,$version" >> "data/results/has_bytecode.csv"
             fi
