@@ -15,3 +15,7 @@ data/archives
 data/results.zip
 *.sh
 results-old-full
+instances.csv
+results
+pulled
+pulled-old
