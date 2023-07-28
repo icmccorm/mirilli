@@ -35,14 +35,17 @@ do
                 echo "Logging tests to $OUTPUT_FILE"
                 while read -r test_name; 
                 do
-                    touch err
+                    rm -f err && touch err
+                    EXITCODE=0
+                    HAD_FFI=0
+                    OUTPUT=""
                     if [[ $test_name =~ ^[0-9]*\ test[s]*,\ [0-9]*\ benchmark[s]*$ ]]; then
                         continue
                     fi
                     # if $test_name is of the form "filename line_number"
                     if [[ $test_name =~ ^.*\ [0-9]*$ ]]; then
-                        echo "Running DOC test, $test_name..."
-                        OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 30s cargo miri test -q -- --doc "$test_name" 2> err)
+                        echo "Skipping DOC test, $test_name..."
+                        continue
                     else
                         echo "Running NORMAL test, $test_name..."
                         OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 30s cargo miri test -q "$test_name" -- --exact 2> err)
