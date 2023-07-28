@@ -29,8 +29,16 @@ do
                 echo "Failed to get test list from rustc"
                 echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/tests/failed_rustc_compilation.csv"
             fi
+            echo "Precompiling miri"
+            timeout 5m cargo miri test -q -- --list > /dev/null
+            MIRI_FAILED=$?
+            if [ "$MIRI_FAILED" -ne 0 ]; then
+                echo "Failed to precompile tests for miri"
+                echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/tests/failed_miri_compilation.csv"
+            fi
             # if miri and rustc succeeded
-            if [ "$RUSTC_FAILED" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
+            if [ "$RUSTC_FAILED" -eq "0" ] && [ "$MIRI_FAILED" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
+
                 OUTPUT_FILE="../data/results/tests/info/$crate_name.csv"
                 echo "Logging tests to $OUTPUT_FILE"
                 while read -r test_name; 
@@ -48,10 +56,12 @@ do
                         continue
                     else
                         echo "Running NORMAL test, $test_name..."
-                        OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 30s cargo miri test -q "$test_name" -- --exact 2> err)
+                        OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 60s cargo miri test -q "$test_name" -- --exact 2> err)
                     fi
                     EXITCODE=$?
                     if [ "$EXITCODE" -ne 0 ]; then
+                        echo "Exit code is $EXITCODE"
+                        echo "Output was: $OUTPUT"
                         grep -q "error: unsupported operation: can't call foreign function" ./err
                         HAD_FFI=$?
                         if [ "$HAD_FFI" -eq "0" ]; then
@@ -60,7 +70,7 @@ do
                             echo "Miri failed for $test_name."
                         fi
                     else
-                        HAD_FFI=0
+                        HAD_FFI="-1"
                         if echo $OUTPUT | grep -q "1 passed"; then
                             echo "Miri passed for $test_name"
                         else
