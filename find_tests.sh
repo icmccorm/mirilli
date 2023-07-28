@@ -31,7 +31,7 @@ do
             fi
             # if miri and rustc succeeded
             if [ "$RUSTC_FAILED" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
-                OUTPUT_FILE="../data/results/tests/info/$crate_name-$version.csv"
+                OUTPUT_FILE="../data/results/tests/info/$crate_name.csv"
                 echo "Logging tests to $OUTPUT_FILE"
                 while read -r test_name; 
                 do
