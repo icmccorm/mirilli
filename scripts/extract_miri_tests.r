@@ -1,7 +1,28 @@
 library(dplyr)
 library(readr)
+if (file.exists("./data/results/tests/visited.csv")) {
+    visited <- read_csv(
+        file.path("./data/results/tests/visited.csv"),
+        show_col_types = FALSE,
+        header = FALSE
+    )
+    has_bytecode <- read_csv(
+        file.path("./data/results/has_bytecode.csv"),
+        show_col_types = FALSE,
+        header = FALSE
+    )
+    # ensure that the two are equal
+    stopifnot(
+        nrow(visited) == nrow(has_bytecode),
+        all(visited$crate_name == has_bytecode$crate_name)
+    )
+}
+
+
 # if ./data/results/tests is not empty, then we can use this to filter
 if (file.exists("./data/results/tests/tests.csv")) {
+
+
     tests <- read_csv(
         file.path("./data/results/tests/tests.csv"),
         show_col_types = FALSE
