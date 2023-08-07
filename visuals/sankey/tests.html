@@ -11,30 +11,23 @@
         data.addColumn('string', 'To');
         data.addColumn('number', 'Weight');
         data.addRows([
-          [ 'All 📦: 120,629', '📦 Valid', 116007],
-          [ 'All 📦: 120,629', '📦 Yanked: 4,622', 4622],
-          [ '📦 Valid', '✅ Early', 89940],
-          [ '📦 Valid', '❌ Early: 26,067', 26067],
-          [ '✅ Early', '✅ Late', 87612],
-          [ '✅ Early', '❌ Late: 2,328', 2328],
-          [ '✅ Late', '✅ Compilation: 84,490', 84490],
-          [ '✅ Late', '❌ Compilation: 3,122', 3122],
+          [ 'Depends on FFI', 'Has LLVM Bytecode', 116007],
+          [ 'All 📦: 84,490', 'No FFI Dependency', 116007],
         ]);
 
         // Sets chart options.
         var options = {
-          width: 1400,
-          height: 650,
+          width: 1000,
           sankey: {
             node: {
               label: {
-                fontSize: 24,
+                fontSize: 18,
                 color: '#000',
                 italic: false,
               },
               interactivity: false, // Allows you to select nodes.
               labelPadding: 20,     // Horizontal distance between the label and the node.
-              nodePadding: 80,     // Vertical distance between nodes.
+              nodePadding: 30,     // Vertical distance between nodes.
               width: 20,            // Thickness of the node.
             },
             link: { color: { fill: '#CCCCCC', fillOpacity: 0.5 } },

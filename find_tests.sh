@@ -23,7 +23,7 @@ do
             RUSTC_FAILED=0
             cd extracted || return
             echo "Getting test list from rustc"
-            timeout 5m cargo test -- --list | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > rustc_list.txt
+            timeout 10m cargo test -- --list | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > rustc_list.txt
             RUSTC_FAILED=${PIPESTATUS[0]}
             if [ "$RUSTC_FAILED" -ne 0 ]; then
                 echo "Failed to get test list from rustc"
@@ -33,7 +33,7 @@ do
             # if miri and rustc succeeded
             if [ "$RUSTC_FAILED" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
                 echo "Precompiling miri"
-                timeout 5m cargo miri test -q -- --list > /dev/null
+                timeout 10m cargo miri test -q -- --list > /dev/null
                 MIRI_FAILED=$?
                 if [ "$MIRI_FAILED" -ne 0 ]; then
                     echo "Failed to precompile tests for miri"
