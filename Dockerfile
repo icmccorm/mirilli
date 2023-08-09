@@ -10,16 +10,18 @@ ENV PATH="$PATH:~/.cargo/bin"
 RUN ~/.cargo/bin/rustup install nightly
 RUN ~/.cargo/bin/rustup uninstall stable
 RUN git submodule update --init ./rust
-RUN (cd rust && git submodule update --init ./src/llvm-project)
-RUN (cd rust && git submodule update --init ./src/inkwell)
-RUN (cd rust && git submodule update --init ./src/llvm-sys)
+WORKDIR /usr/src/ffickle/rust
+RUN git submodule update --init ./src/llvm-project
+RUN git submodule update --init ./src/inkwell
+RUN git submodule update --init ./src/llvm-sys
 ENV LLVM_SYS_160_PREFIX=/usr/src/rust/build/host/llvm/
-RUN (cd rust && ./x.py build)
-RUN (cd rust && ./x.py install)
+RUN ./x.py build
+RUN ./x.py install
 RUN ~/.cargo/bin/rustup toolchain link miri-custom /usr/src/ffickle/rust/build/host/stage2/
 RUN ~/.cargo/bin/rustup default miri-custom
-RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} (cd rust && ./x.py build miri)
-RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} (cd rust && ./x.py install miri)
+RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py build miri
+RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py install miri
+WORKDIR /usr/src/ffickle/
 RUN ~/.cargo/bin/cargo search
 RUN ~/.cargo/bin/cargo install cargo-download cargo-dylint dylint-link
 RUN (cd src/early && ~/.cargo/bin/cargo build)
