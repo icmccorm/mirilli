@@ -12,10 +12,8 @@ touch ./data/results/execution/status.csv
 CURRENT_CRATE=""
 while IFS=, read -r test_name crate_name version <&3; 
 do
-    # if the current crate is not an empty string,
-    # and crate_name is not the same as the current crate
     SUCCEEDED_DOWNLOADING=0
-    if [ "$CURRENT_CRATE" != "" ] && [ "$crate_name" != "$CURRENT_CRATE" ]; then
+    if [ "$CURRENT_CRATE" == "" ] || [ "$crate_name" != "$CURRENT_CRATE" ]; then
         rm -rf ./extracted
         TRIES_REMAINING=3
         while [ "$TRIES_REMAINING" -gt "0" ]; do
@@ -26,14 +24,17 @@ do
             if [ "$EXITCODE" -eq "0" ]; then
                 echo "$crate_name,$version" >> ./data/results/tests/visited.csv
                 echo "Precompiling miri"
+                cd extracted
                 timeout 10m cargo miri test -q -- --list > /dev/null
                 MIRI_FAILED=$?
                 if [ "$MIRI_FAILED" -ne 0 ]; then
                     echo "Failed to precompile tests for miri"
                     echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/tests/failed_miri_compilation.csv"
                 else
+                    TRIES_REMAINING=0
                     SUCCEEDED_DOWNLOADING=1
                 fi
+                cd ..
             else
                 echo "FAILED (exit $EXITCODE)"
                 if [ "$TRIES_REMAINING" -eq "0" ]; then
@@ -52,16 +53,17 @@ do
     CURRENT_CRATE="$crate_name"
     if [ "$SUCCEEDED_DOWNLOADING" -eq "1" ]; then
         echo "Running NORMAL test, $test_name..."
+        cd extracted
         EXITCODE=0
         OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 60s cargo miri test -q "$test_name" -- --exact 2> err)
         EXITCODE=$?
-        echo "$EXITCODE,$crate_name,\"$test_name\"" >> ./data/results/execution/status.csv
+        echo "$EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/status.csv
         if [ "$EXITCODE" -ne 0 ]; then
             if [ "$EXITCODE" -ne 124 ]; then
-                mkdir -p "./data/results/execution/crates/$crate_name"
-                cp err "./data/results/execution/crates/$crate_name/$test_name.log"
+                mkdir -p "../data/results/execution/crates/$crate_name"
+                cp err "../data/results/execution/crates/$crate_name/$test_name.log"
             fi
         fi
+        cd ..
     fi
-done 3< "$1"
-printf 'FINISHED!\n'
+done 3< $1
