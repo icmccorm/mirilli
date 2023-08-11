@@ -55,7 +55,7 @@ do
         echo "Running NORMAL test, $test_name..."
         cd extracted
         EXITCODE=0
-        OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 60s cargo miri test -q "$test_name" -- --exact 2> err)
+        OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout 5m cargo miri test -q "$test_name" -- --exact 2> err)
         EXITCODE=$?
         echo "$EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/status.csv
         if [ "$EXITCODE" -ne 0 ]; then

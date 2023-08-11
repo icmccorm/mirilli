@@ -1,0 +1,17 @@
+crate,test,error_type,error_text,error_subtext
+croaring,smoke2,LLI Internal Error,LLI does not support inline assembly.,NA
+dmntk-feel-number,test_abs_002,Unsupported Operation,Mismatched number of fields; LLVM Actual (2) vs Rust(1),NA
+llama,tests::for_loop,Unsupported Operation,Unsupported function call,LLVMInitializeAArch64TargetInfo
+libtz,timezone::tests::basics,Unsupported Operation,Unsupported function call,strchr
+rlua-async,tests::async_chunk,Unsupported Operation,Unsupported function call,time
+grin_keychain,extkey_bip32::tests::test_vector_2,Undefined Behavior,`copy_nonoverlapping` called on overlapping ranges,NA
+ggetrs,archs4::functions::correlation::testing::test_correlation_nonsense_query,Unsupported Operation,can't call foreign function `TLS_method` on OS `linux`,NA
+genetic-algorithm-tsp,routes::tests::add_n_random_nodes,Unsupported Operation,can't call foreign function `XXH64_createState` on OS `linux`,NA
+ggetrs,ensembl::functions::database::testing::test_ensembl_database_full,Unsupported Operation,can't call foreign function `getaddrinfo` on OS `linux`,NA
+elfx86exts,run_on_self,Unsupported Operation,can't call foreign function `pipe2` on OS `linux`,NA
+rocksdb_sq,tests::test_stack_db,Unsupported Operation,can't call foreign function `rocksdb_options_create` on OS `linux`,NA
+sqlx-model,curd::insert::curd_insert,Unsupported Operation,can't call foreign function `socket` on OS `linux`,NA
+libusb1-sys,test_init_and_exit,Undefined Behavior,scalar size mismatch,expected 4 bytes but got 16 bytes instead
+libabieos-sys,test::test_from_example_2j,Custom Build Failed,NA,NA
+tetsy-secp256k1,ecdh::tests::ecdh_raw,Miri Internal Error,NA,NA
+croaring,smoke2,Test Failed,NA,NA

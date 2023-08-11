@@ -1,0 +1,7 @@
+error_type,count
+Unsupported Operation,149
+Miri Internal Error,32
+Undefined Behavior,9
+Custom Build Failed,6
+LLI Internal Error,5
+Test Failed,5
