@@ -2,12 +2,11 @@ error_type,count
 Unsupported Operation,9457
 Miri Internal Error,1583
 Undefined Behavior,1162
-Test Failed,472
 Custom Build Failed,402
-LLI Internal Error,379
-concrete type differs from previous defining opaque type use,185
-internal compiler error,65
-aborting due to 10 previous errors,34
-memory leaked,15
-aborting due to previous error,6
-deadlock,1
+Lli Internal Error,379
+Compilation Failed,185
+Test Failed,93
+Internal Compiler Error,65
+Unknown Abort,40
+Memory Leaked,15
+Deadlock,1
