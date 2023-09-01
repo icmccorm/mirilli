@@ -1,0 +1,12 @@
+error_type,count
+Unsupported Operation,9457
+Miri Internal Error,1583
+Undefined Behavior,1162
+Custom Build Failed,402
+Lli Internal Error,379
+Compilation Failed,185
+Test Failed,93
+Internal Compiler Error,65
+Unknown Abort,40
+Memory Leaked,15
+Deadlock,1

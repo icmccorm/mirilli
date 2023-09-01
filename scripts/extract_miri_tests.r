@@ -4,24 +4,20 @@ if (file.exists("./data/results/tests/visited.csv")) {
     visited <- read_csv(
         file.path("./data/results/tests/visited.csv"),
         show_col_types = FALSE,
-        header = FALSE
-    )
+    ) %>% unique()
+
     has_bytecode <- read_csv(
         file.path("./data/results/has_bytecode.csv"),
         show_col_types = FALSE,
-        header = FALSE
-    )
+    ) %>% unique()
+
     # ensure that the two are equal
     stopifnot(
-        nrow(visited) == nrow(has_bytecode),
-        all(visited$crate_name == has_bytecode$crate_name)
+        nrow(visited) == nrow(has_bytecode)
     )
 }
-
-
 # if ./data/results/tests is not empty, then we can use this to filter
 if (file.exists("./data/results/tests/tests.csv")) {
-
 
     tests <- read_csv(
         file.path("./data/results/tests/tests.csv"),

@@ -1,0 +1,8 @@
+ub_type,count,error_type
+Internal Error,658,Internal Error
+Uninitialized Memory,187,Uninitialized Memory
+Use-After-Free,111,Use-After-Free
+Stacked Borrows - Failed Write,73,Stacked Borrows - Failed Write
+Stacked Borrows - Failed Read,64,Stacked Borrows - Failed Read
+Constructing Invalid Value,45,Constructing Invalid Value
+Stacked Borrows - Failed Retag,24,Stacked Borrows - Failed Retag

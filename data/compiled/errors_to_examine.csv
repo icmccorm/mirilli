@@ -1,0 +1,125 @@
+crate,test,error_type,error_text,error_subtext
+llama,tests::for_loop,Unsupported Operation,Unsupported function call,LLVMInitializeAArch64TargetInfo
+llama-wasm,tests::test_for_loop,Unsupported Operation,Unsupported function call,LLVMInitializeX86TargetInfo
+authenticode-parser,conformance::pe_file,Unsupported Operation,Unsupported function call,OBJ_create
+adbutils,client::test::test_path,Unsupported Operation,Unsupported function call,OPENSSL_init_ssl
+dilithium-raw,dilithium2::tests::test_invalid_modified_signature,Unsupported Operation,Unsupported function call,PQCLEAN_DILITHIUM2_CLEAN_polyvec_matrix_expand
+pqcrypto-hqc,ffi::test_hqcrmrs192_clean::test_ffi,Unsupported Operation,Unsupported function call,PQCLEAN_HQCRMRS192_CLEAN_hqc_pke_keygen
+pqcrypto-newhope,ffi::test_newhope512cca_clean::test_ffi,Unsupported Operation,Unsupported function call,PQCLEAN_NEWHOPE512CCA_CLEAN_cpapke_keypair
+ate,dio::test::test_dio,Unsupported Operation,Unsupported function call,PQCRYPTO_RUST_randombytes
+depdive,cratesio::tests::test_cratesio_stats_for_libc,Unsupported Operation,Unsupported function call,TLS_method
+libmdbx,test_begin_txn,Unsupported Operation,Unsupported function call,__assert_fail
+mseed,record::tests::test_detect,Unsupported Operation,Unsupported function call,__ctype_b_loc
+dec,test_ordered_decimal128,Unsupported Operation,Unsupported function call,abs
+eureka,program_access::tests::test_program_access__get_if_available__success,Unsupported Operation,Unsupported function call,access
+bellperson-sha512,uint64::test::test_uint64_addmany_constants,Unsupported Operation,Unsupported function call,add_mod_256
+atms,multi_sig::tests::serde_pk,Unsupported Operation,Unsupported function call,add_mod_384
+qurs,state_calc,Unsupported Operation,Unsupported function call,cabs
+x42ltc,tests::encoder_reinitialization_fails_if_internal_buffer_is_too_small,Unsupported Operation,Unsupported function call,ceil
+bls_bulletproofs,inner_product_proof::tests::test_inner_product,Unsupported Operation,Unsupported function call,check_mod_256
+git2,cred::test::credential_helper4,Unsupported Operation,Unsupported function call,chmod
+bellperson-sha512,sha512::test::test_full_block,Unsupported Operation,Unsupported function call,cneg_mod_256
+fft4r,real::tests::basic_test,Unsupported Operation,Unsupported function call,cos
+knetrs,knet::tests::test_accept_failed,Unsupported Operation,Unsupported function call,epoll_create
+argon2-kdf,hasher::tests::test_hash_auth_string_argon2d,Unsupported Operation,Unsupported function call,explicit_bzero
+rsofa,tests::test_a2tf,Unsupported Operation,Unsupported function call,floor
+rsofa,tests::test_anp,Unsupported Operation,Unsupported function call,fmod
+rpi_ws281x-sys,should_detect_rpi_version,Unsupported Operation,Unsupported function call,fopen
+bls_bulletproofs,range_proof::tests::create_and_verify_n_32_m_1,Unsupported Operation,Unsupported function call,fromx_mont_384
+adbutils,client::test::test_devices,Unsupported Operation,Unsupported function call,getaddrinfo
+reef,usage,Unsupported Operation,Unsupported function call,geteuid
+cargo-cache,date::libtests::parse_dates_panic1,Unsupported Operation,Unsupported function call,localtime_r
+cat_solver,tests::solver,Unsupported Operation,Unsupported function call,log10
+brotli2,raw::tests::compress_smoke,Unsupported Operation,Unsupported function call,log2
+quick-js,tests::context_reset,Unsupported Operation,Unsupported function call,malloc_usable_size
+blsful,aggegratesigs_work::case_1_g1,Unsupported Operation,Unsupported function call,mulx_mont_sparse_256
+rebound-sys,tests::test_integrate_particle,Unsupported Operation,Unsupported function call,nan
+rust-locale,ctype::tests::is_space_i18n,Unsupported Operation,Unsupported function call,newlocale
+speex-safe,mode::encoder::test::encodes_frame_without_segfault,Unsupported Operation,Unsupported function call,pow
+aubio,filterbank::test::test_filterbank_do,Unsupported Operation,Unsupported function call,powf
+zopfli-rs,round_trip_gzip,Unsupported Operation,Unsupported function call,qsort
+cargo-blinc,blinc::test::test_tasks_are_executed,Unsupported Operation,Unsupported function call,readdir
+fap,parse_03e70113,Unsupported Operation,Unsupported function call,regcomp
+icasadi,tests::tst_call_casadi_grad,Unsupported Operation,Unsupported function call,sin
+algorithm-problem-client,aoj::client::tests::test_find_user,Unsupported Operation,Unsupported function call,socket
+molconv,trajectory::tests::test_trajectory_num_atoms,Unsupported Operation,Unsupported function call,sprintf
+qurs,test_ccnot_gate,Unsupported Operation,Unsupported function call,sqrt
+blst,p1_multi_scalar::test_mult,Unsupported Operation,Unsupported function call,sqrx_mont_384
+blst,p2_multi_scalar::test_mult,Unsupported Operation,Unsupported function call,sqrx_mont_384x
+qurs,init_state,Unsupported Operation,Unsupported function call,srand
+lmdb-master3-sys,test_simple_64,Unsupported Operation,Unsupported function call,stat
+alcro,test_bind_async,Unsupported Operation,Unsupported function call,strchr
+aubio,pvoc::test::test,Unsupported Operation,Unsupported function call,strcmp
+bibutils-sys,tests::bibtex_to_ris,Unsupported Operation,Unsupported function call,strdup
+distill-downstream-lmdb-rkv,error::test::test_description,Unsupported Operation,Unsupported function call,strerror
+argon2-sys,argon2i_v10::case_10,Unsupported Operation,Unsupported function call,strncmp
+capstone,test::test_arch_arm64,Unsupported Operation,Unsupported function call,strncpy
+csvs_convert,converters::tests::test_large_xlsx,Unsupported Operation,Unsupported function call,strpbrk
+spine-sys,skeleton::tests::load_skeleton,Unsupported Operation,Unsupported function call,strrchr
+actix-lua,builder::tests::build_script_error,Unsupported Operation,Unsupported function call,time
+os-timer,timer::posix::tests::init_plain_fn,Unsupported Operation,Unsupported function call,timer_create
+faster-beamer,tree_traversal::tests::test_get_scope_nodes,Unsupported Operation,Unsupported function call,ts_record_calloc
+webusb,tests::test_device_blink,Unsupported Operation,Unsupported function call,uname
+aubio,onset::test::test_wrong_params,Unsupported Operation,Unsupported function call,vsnprintf
+twmap,tile_flags_ddnet_test,memory leaked,"alloc1609152 (Allocated for interop between LLI and Miri, size","0, align"
+alloca,tests::test_write,memory leaked,"alloc24820 (Allocated for interop between LLI and Miri, size","0, align"
+bchlib,tests::test_decode_err,memory leaked,"alloc25072 (Allocated in heap by LLVM, size","64, align"
+bchlib,tests::test_sync_codeword,memory leaked,"alloc25095 (Allocated in heap by LLVM, size","24, align"
+smalloca,tests::memsafety_test_clone,memory leaked,"alloc25300 (Allocated for interop between LLI and Miri, size","0, align"
+smalloca,tests::return_test,memory leaked,"alloc25347 (Allocated for interop between LLI and Miri, size","0, align"
+smalloca,tests::inner_fucntion_call_test,memory leaked,"alloc25369 (Allocated for interop between LLI and Miri, size","0, align"
+smalloca,tests::memsafety_test_default,memory leaked,"alloc25370 (Allocated for interop between LLI and Miri, size","0, align"
+mindus,data::schematic::test::block_iter,memory leaked,"alloc256299 (Allocated for interop between LLI and Miri, size","0, align"
+c-closures,tests::fn_once,memory leaked,"alloc25738 (Allocated for interop between LLI and Miri, size","0, align"
+c-closures,tests::fn_not_mut,memory leaked,"alloc25752 (Allocated for interop between LLI and Miri, size","0, align"
+c-closures,tests::fn_drop_test,memory leaked,"alloc25800 (Allocated for interop between LLI and Miri, size","0, align"
+c-closures,tests::fn_mut,memory leaked,"alloc25822 (Allocated for interop between LLI and Miri, size","0, align"
+c-closures,tests::fn_cstring,memory leaked,"alloc26292 (Allocated for interop between LLI and Miri, size","0, align"
+c-closures,tests::bad_ref_usage,memory leaked,"alloc27123 (Allocated for interop between LLI and Miri, size","0, align"
+eth-secp256k1,tests::signature_lax_der,Undefined Behavior,constructing invalid value at .value.0[0],encountered uninitialized bytes
+lucet-runtime-internals,context::tests::c_child::call_child_setcontext,Undefined Behavior,constructing invalid value at .value.__val[0],encountered uninitialized bytes
+ctaes-sys,tests::aes_gcm_encrypt_test_vectors,Undefined Behavior,constructing invalid value at .value.data.parent1.parent1.parent1.data.0[0],encountered uninitialized bytes
+dec,decnum_raw_parts,Undefined Behavior,constructing invalid value at .value.lsu[6],encountered uninitialized bytes
+xxhrs,tests::test_streaming,Undefined Behavior,constructing invalid value at .value.reserved,"encountered uninitialized memory, but expected an integer"
+speex-safe,bits::test::encodes_value,Undefined Behavior,constructing invalid value at .value.reserved1,"encountered uninitialized memory, but expected an integer"
+xxhrs,tests::test_hash_set,Undefined Behavior,constructing invalid value at .value.reserved64,"encountered uninitialized memory, but expected an integer"
+blake2_c,test::test_all_parameters_blake2s,Undefined Behavior,constructing invalid value at .value[0],encountered uninitialized bytes
+webp-animation,webp_data::tests::test_encoder,Undefined Behavior,dereferencing pointer failed,null pointer is a dangling pointer (it has no provenance)
+quickjs_regex,test_regex,Undefined Behavior,memory access failed,"alloc24748 has size 10, so pointer to 1 byte starting at offset 10 is out-of-bounds"
+crypto_pimitives,aesni_test::aesni_192_key_expansion_test,Undefined Behavior,memory access failed,"alloc24968 has size 24, so pointer to 16 bytes starting at offset 16 is out-of-bounds"
+lz4,encoder::test::test_encoder_random,Undefined Behavior,memory access failed,"alloc26535 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+lz4,encoder::test::test_favor_dec_speed,Undefined Behavior,memory access failed,"alloc26536 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+fluidlite,synth::font::test::font_and_preset,Undefined Behavior,memory access failed,"alloc26559 has size 1, so pointer to 3 bytes starting at offset 0 is out-of-bounds"
+fluidlite,settings::test::int_setting,Undefined Behavior,memory access failed,"alloc26566 has size 1, so pointer to 3 bytes starting at offset 0 is out-of-bounds"
+fluidlite,settings::test::settings_ref,Undefined Behavior,memory access failed,"alloc26567 has size 1, so pointer to 3 bytes starting at offset 0 is out-of-bounds"
+fluidlite,settings::test::settings,Undefined Behavior,memory access failed,"alloc26571 has size 1, so pointer to 3 bytes starting at offset 0 is out-of-bounds"
+lz4,encoder::test::test_encoder_send,Undefined Behavior,memory access failed,"alloc26588 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+fluidlite,settings::test::num_setting,Undefined Behavior,memory access failed,"alloc26632 has size 1, so pointer to 3 bytes starting at offset 0 is out-of-bounds"
+lz4,decoder::test::test_decoder_smoke,Undefined Behavior,memory access failed,"alloc26652 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+lz4,decoder::test::test_decoder_send,Undefined Behavior,memory access failed,"alloc26653 has size 8, so pointer to 8 bytes starting at offset 64 is out-of-bounds"
+lz4,decoder::test::test_decoder_empty,Undefined Behavior,memory access failed,"alloc26654 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+fluidlite,synth::test::synth_sf2,Undefined Behavior,memory access failed,"alloc26796 has size 1, so pointer to 3 bytes starting at offset 0 is out-of-bounds"
+lz4,decoder::test::test_decoder_smallest,Undefined Behavior,memory access failed,"alloc26880 has size 8, so pointer to 4 bytes starting at offset 264 is out-of-bounds"
+ruwren,tests::init_vm,Undefined Behavior,memory access failed,"alloc27215 has size 8, so pointer to 16 bytes starting at offset 0 is out-of-bounds"
+ruwren,tests::test_small_wren_program,Undefined Behavior,memory access failed,"alloc27231 has size 8, so pointer to 16 bytes starting at offset 0 is out-of-bounds"
+ruwren,tests::test_small_wren_program_call,Undefined Behavior,memory access failed,"alloc27262 has size 8, so pointer to 16 bytes starting at offset 0 is out-of-bounds"
+ruwren,tests::test_script_module,Undefined Behavior,memory access failed,"alloc27282 has size 8, so pointer to 16 bytes starting at offset 0 is out-of-bounds"
+bsalib,v105::tests::write_read_identity_v105_compession,Undefined Behavior,memory access failed,"alloc27676 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+smush,tests::encode_lz4,Undefined Behavior,memory access failed,"alloc27721 has size 8, so pointer to 56 bytes starting at offset 0 is out-of-bounds"
+n5,compression::lz::tests::test_write_doc_spec_block,Undefined Behavior,memory access failed,"alloc29452 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+n5,compression::lz::tests::test_read_doc_spec_block,Undefined Behavior,memory access failed,"alloc29480 has size 8, so pointer to 4 bytes starting at offset 264 is out-of-bounds"
+ruwren,tests::test_external_module,Undefined Behavior,memory access failed,"alloc29586 has size 8, so pointer to 16 bytes starting at offset 0 is out-of-bounds"
+n5,compression::lz::tests::test_rw,Undefined Behavior,memory access failed,"alloc30140 has size 8, so pointer to 56 bytes starting at offset 32 is out-of-bounds"
+dec-number-sys,test_dec_quad_remainder,Undefined Behavior,memory access failed,"alloc30637 has size 112, so pointer to 4 bytes starting at offset 110 is out-of-bounds"
+dec-number-sys,test_dec_quad_divide_fma,Undefined Behavior,memory access failed,"alloc32300 has size 112, so pointer to 4 bytes starting at offset 109 is out-of-bounds"
+picohttpparser-sys,accept_msb_chars,Undefined Behavior,memory access failed,"alloc749 has size 5, so pointer to 16 bytes starting at offset 0 is out-of-bounds"
+btreec,tests::basic,Undefined Behavior,memory access failed,null pointer is a dangling pointer (it has no provenance)
+argonautica,hasher::tests::test_hasher_0x10_2i,Undefined Behavior,out-of-bounds pointer use,0x7f874e2501e8[noalloc] is a dangling pointer (it has no provenance)
+argonautica,hasher::tests::test_hasher_0x13_2id,Undefined Behavior,out-of-bounds pointer use,0x7f87d22501d8[noalloc] is a dangling pointer (it has no provenance)
+argonautica,hasher::tests::test_hasher_0x10_2d,Undefined Behavior,out-of-bounds pointer use,0x7fa4d2250d78[noalloc] is a dangling pointer (it has no provenance)
+argonautica,hasher::tests::test_hasher_0x13_2d,Undefined Behavior,out-of-bounds pointer use,0x7fc4ba24f1d8[noalloc] is a dangling pointer (it has no provenance)
+argonautica,hasher::tests::test_hasher_0x10_2id,Undefined Behavior,out-of-bounds pointer use,0x7fe496250ba8[noalloc] is a dangling pointer (it has no provenance)
+argonautica,hasher::tests::test_hasher_0x13_2i,Undefined Behavior,out-of-bounds pointer use,0x7ffa9224fe18[noalloc] is a dangling pointer (it has no provenance)
+cf_rh320u_93_reader,change_colors,Undefined Behavior,scalar size mismatch,expected 4 bytes but got 16 bytes instead
+matrix-sdk,client::delete_devices,internal compiler error,src/tools/miri/src/diagnostics.rs,308
+hacl-star,test_aead,internal compiler error,src/tools/miri/src/shims/llvm/helpers.rs,46
