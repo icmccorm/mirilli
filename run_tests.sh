@@ -47,7 +47,7 @@ do
     TRIES_REMAINING=3
     if [ "$SUCCEEDED_DOWNLOADING" -eq "1" ]; then
         CURRENT_CRATE="$crate_name"
-        cd extracted
+        cd ./extracted
 
         echo "Compiling rustc test binary..."
         RUSTC_COMP_EXITCODE=0
@@ -56,6 +56,7 @@ do
         echo "Exit: $RUSTC_COMP_EXITCODE"
         if [ "$RUSTC_COMP_EXITCODE" -ne 0 ]; then
             echo "$RUSTC_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/failed_cargo_test_compilation.csv
+            cd ..
             continue
         fi
         
@@ -76,6 +77,7 @@ do
         echo "Exit: $MIRI_COMP_EXITCODE"
         if [ "$MIRI_COMP_EXITCODE" -ne 0 ]; then
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/failed_miri_compilation.csv
+            cd ..
             continue
         fi
         
