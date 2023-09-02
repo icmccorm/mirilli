@@ -21,10 +21,11 @@ RUN ~/.cargo/bin/rustup toolchain link miri-custom /usr/src/ffickle/rust/build/h
 RUN ~/.cargo/bin/rustup default miri-custom
 RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py build miri
 RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py install miri
+RUN ~/.cargo/bin/cargo miri setup
 WORKDIR /usr/src/ffickle/
 RUN ~/.cargo/bin/cargo search
 RUN ~/.cargo/bin/cargo install cargo-download cargo-dylint dylint-link
 RUN (cd src/early && ~/.cargo/bin/cargo build)
 RUN (cd src/late && ~/.cargo/bin/cargo build)
 ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
-ENV CC="clang --save-temps=obj"
+ENV CC="clang -g -O0 --save-temps=obj"
