@@ -6,15 +6,12 @@ rm -rf ./extracted
 mkdir -p ./data/results/execution
 mkdir -p ./data/results/execution/crates
 touch ./data/results/execution/failed_download.csv
-touch ./data/results/execution/failed_cargo_build_compilation.csv
-touch ./data/results/execution/failed_cargo_test_compilation.csv
-touch ./data/results/execution/failed_miri_compilation.csv
-touch ./data/results/execution/failed_native_run.csv
+touch ./data/results/execution/status_native_comp.csv
+touch ./data/results/execution/status_miri_comp.csv
 touch ./data/results/execution/visited.csv
 touch ./data/results/execution/status_stack.csv
 touch ./data/results/execution/status_tree.csv
 touch ./data/results/execution/status_native.csv
-
 CURRENT_CRATE=""
 TIMEOUT=3m
 while IFS=, read -r test_name crate_name version <&3;
@@ -56,9 +53,8 @@ do
         OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list 2> err)
         RUSTC_COMP_EXITCODE=$?
         echo "Exit: $RUSTC_COMP_EXITCODE"
-        if [ "$RUSTC_COMP_EXITCODE" -ne 0 ]; then
-            echo "$RUSTC_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/failed_cargo_test_compilation.csv
-        else
+        echo "$RUSTC_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/status_native_comp.csv
+        if [ "$RUSTC_COMP_EXITCODE" -eq 0 ]; then
             echo "Executing rustc test $test_name..."
             RUSTC_EXEC_EXITCODE=0
             OUTPUT=$(timeout $TIMEOUT cargo test -q "$test_name" -- --exact 2> err)
@@ -75,9 +71,8 @@ do
             OUTPUT=$(timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
             MIRI_COMP_EXITCODE=$?
             echo "Exit: $MIRI_COMP_EXITCODE"
-            if [ "$MIRI_COMP_EXITCODE" -ne 0 ]; then
-                echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/failed_miri_compilation.csv
-            else
+            echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/status_miri_comp.csv
+            if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
                 echo "Executing Miri in Stacked Borrows mode..."
                 MIRI_STACK_EXITCODE=0
                 OUTPUT=$(MIRIFLAGS=-"Zmiri-disable-isolation -Zmiri-llvm-log" timeout $TIMEOUT cargo miri test -q "$test_name" -- --exact 2> err)
