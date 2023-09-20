@@ -1,0 +1,15 @@
+error_type,n
+Internal Compiler Error (ICE),63
+LLI Internal Error,1524
+LLI interoperation error,248
+Memory Leak,9
+Miri Internal Error,8
+Stack Overflow,16
+Test Failed,41
+Test Passed,1239
+Timeout,976
+Undefined Behavior,1045
+Unknown Error,10
+Unsupported Operation,9152
+the main thread terminated without waiting for all remaining threads,1
+unknown unstable option,7

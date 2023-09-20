@@ -1,0 +1,5 @@
+error_text,n
+argument count mismatch,170
+invalid memory copy with memcpy,70
+LLVM field count mismatch,6
+Rust type mismatch,3

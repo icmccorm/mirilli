@@ -1,0 +1,13 @@
+crate_count,test_count,ub_type
+15,57,Constructing Invalid Value
+9,14,Cross-Language Deallocation
+1,1,Dereferencing Pointer Failed
+4,23,Incorrect Number Of Arguments For `Getrandom` Syscall
+24,194,Memory Access Failed
+1,6,Out-Of-Bounds Pointer Use
+7,23,Scalar Size Mismatch
+39,1066,Stacked Borrows - Failed Read
+5,36,Stacked Borrows - Failed Retag
+16,95,Stacked Borrows - Failed Write
+22,406,Uninitialized Memory
+4,115,Use-After-Free

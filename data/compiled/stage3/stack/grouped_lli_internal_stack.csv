@@ -1,0 +1,19 @@
+error_text,n
+Instruction not interpretable yet,885
+LLI does not support inline assembly.,554
+Code generator does not support intrinsic function 'llvm.x86.sse2.psrli.q'!,35
+Unhandled type for FCmp EQ instruction,25
+Code generator does not support intrinsic function 'llvm.sadd.with.overflow.i64'!,10
+Code generator does not support intrinsic function 'llvm.fshl.i64'!,4
+Code generator does not support intrinsic function 'llvm.x86.sse42.pcmpestri128'!,4
+Code generator does not support intrinsic function 'llvm.clear_cache'!,2
+Code generator does not support intrinsic function 'llvm.rint.f32'!,2
+Code generator does not support intrinsic function 'llvm.smul.with.overflow.i64'!,2
+Code generator does not support intrinsic function 'llvm.x86.aesni.aeskeygenassist'!,2
+Constant pointers to basic blocks are not supported.,2
+fmuladd intrinsic only supports float and double,2
+Code generator does not support intrinsic function 'llvm.fshl.i32'!,1
+Code generator does not support intrinsic function 'llvm.ssub.with.overflow.i64'!,1
+Code generator does not support intrinsic function 'llvm.x86.sse2.pmovmskb.128'!,1
+Unhandled type for FDiv instruction,1
+Unhandled type for FMul instruction,1
