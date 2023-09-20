@@ -1,6 +1,8 @@
+// matches nightly-09-19
+
 #![feature(rustc_private)]
 #![feature(control_flow_enum)]
-
+#![feature(let_chains)]
 extern crate rustc_arena;
 extern crate rustc_ast;
 extern crate rustc_ast_pretty;
@@ -19,14 +21,15 @@ extern crate rustc_span;
 extern crate rustc_target;
 extern crate rustc_trait_selection;
 extern crate rustc_type_ir;
+use rustc_middle::bug;
+use rustc_middle::ty::GenericArgsRef;
 use crate::hir::intravisit::FnKind;
 use crate::rustc_lint::LintContext;
 use crate::rustc_middle::ty::TypeVisitableExt;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir as hir;
 use rustc_hir::def_id::LocalDefId;
-use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
-use rustc_middle::ty::subst::SubstsRef;
+use rustc_middle::ty::layout::SizeSkeleton;
 use rustc_middle::ty::TyKind;
 use rustc_middle::ty::{self, AdtKind, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable};
 use rustc_session::Session;
@@ -224,8 +227,7 @@ pub(crate) fn nonnull_optimization_guaranteed<'tcx>(
 ) -> bool {
     tcx.has_attr(def.did(), sym::rustc_nonnull_optimization_guaranteed)
 }
-
-/// `repr(transparent)` structs can have a single non-ZST field, this function returns that
+/// `repr(transparent)` structs can have a single non-1-ZST field, this function returns that
 /// field.
 pub fn transparent_newtype_field<'a, 'tcx>(
     tcx: TyCtxt<'tcx>,
@@ -233,22 +235,19 @@ pub fn transparent_newtype_field<'a, 'tcx>(
 ) -> Option<&'a ty::FieldDef> {
     let param_env = tcx.param_env(variant.def_id);
     variant.fields.iter().find(|field| {
-        let field_ty = tcx.type_of(field.did).subst_identity();
-        let is_zst = tcx
-            .layout_of(param_env.and(field_ty))
-            .is_ok_and(|layout| layout.is_zst());
-        !is_zst
+        let field_ty = tcx.type_of(field.did).instantiate_identity();
+        let is_1zst = tcx.layout_of(param_env.and(field_ty)).is_ok_and(|layout| layout.is_1zst());
+        !is_1zst
     })
 }
 
 /// Is type known to be non-null?
-fn ty_is_known_nonnull<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>, mode: CItemKind) -> bool {
-    let tcx = cx.tcx;
+fn ty_is_known_nonnull<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, mode: CItemKind) -> bool {
     match ty.kind() {
         ty::FnPtr(_) => true,
         ty::Ref(..) => true,
         ty::Adt(def, _) if def.is_box() && matches!(mode, CItemKind::Definition) => true,
-        ty::Adt(def, substs) if def.repr().transparent() && !def.is_union() => {
+        ty::Adt(def, args) if def.repr().transparent() && !def.is_union() => {
             let marked_non_null = nonnull_optimization_guaranteed(tcx, *def);
 
             if marked_non_null {
@@ -262,8 +261,8 @@ fn ty_is_known_nonnull<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>, mode: CItemKi
 
             def.variants()
                 .iter()
-                .filter_map(|variant| transparent_newtype_field(cx.tcx, variant))
-                .any(|field| ty_is_known_nonnull(cx, field.ty(tcx, substs), mode))
+                .filter_map(|variant| transparent_newtype_field(tcx, variant))
+                .any(|field| ty_is_known_nonnull(tcx, field.ty(tcx, args), mode))
         }
         _ => false,
     }
@@ -271,15 +270,12 @@ fn ty_is_known_nonnull<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>, mode: CItemKi
 
 /// Given a non-null scalar (or transparent) type `ty`, return the nullable version of that type.
 /// If the type passed in was not scalar, returns None.
-fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'tcx>> {
-    let tcx = cx.tcx;
+fn get_nullable_type<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'tcx>> {
     Some(match *ty.kind() {
-        ty::Adt(field_def, field_substs) => {
+        ty::Adt(field_def, field_args) => {
             let inner_field_ty = {
-                let mut first_non_zst_ty = field_def
-                    .variants()
-                    .iter()
-                    .filter_map(|v| transparent_newtype_field(cx.tcx, v));
+                let mut first_non_zst_ty =
+                    field_def.variants().iter().filter_map(|v| transparent_newtype_field(tcx, v));
                 debug_assert_eq!(
                     first_non_zst_ty.clone().count(),
                     1,
@@ -288,9 +284,9 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
                 first_non_zst_ty
                     .next_back()
                     .expect("No non-zst fields in transparent type.")
-                    .ty(tcx, field_substs)
+                    .ty(tcx, field_args)
             };
-            return get_nullable_type(cx, inner_field_ty);
+            return get_nullable_type(tcx, inner_field_ty);
         }
         ty::Int(ty) => Ty::new_int(tcx, ty),
         ty::Uint(ty) => Ty::new_uint(tcx, ty),
@@ -307,6 +303,7 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
         // We should only ever reach this case if ty_is_known_nonnull is extended
         // to other types.
         ref _unhandled => {
+
             return None;
         }
     })
@@ -317,42 +314,48 @@ fn get_nullable_type<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<Ty<'t
 /// `core::ptr::NonNull`, and `#[repr(transparent)]` newtypes.
 /// FIXME: This duplicates code in codegen.
 pub(crate) fn repr_nullable_ptr<'tcx>(
-    cx: &LateContext<'tcx>,
+    tcx: TyCtxt<'tcx>,
+    param_env: ty::ParamEnv<'tcx>,
     ty: Ty<'tcx>,
     ckind: CItemKind,
 ) -> Option<Ty<'tcx>> {
-    if let ty::Adt(ty_def, substs) = ty.kind() {
+    if let ty::Adt(ty_def, args) = ty.kind() {
         let field_ty = match &ty_def.variants().raw[..] {
             [var_one, var_two] => match (&var_one.fields.raw[..], &var_two.fields.raw[..]) {
-                ([], [field]) | ([field], []) => field.ty(cx.tcx, substs),
+                ([], [field]) | ([field], []) => field.ty(tcx, args),
                 _ => return None,
             },
             _ => return None,
         };
 
-        if !ty_is_known_nonnull(cx, field_ty, ckind) {
+        if !ty_is_known_nonnull(tcx, field_ty, ckind) {
             return None;
         }
 
         // At this point, the field's type is known to be nonnull and the parent enum is Option-like.
         // If the computed size for the field and the enum are different, the nonnull optimization isn't
         // being applied (and we've got a problem somewhere).
-        let compute_size_skeleton = |t| SizeSkeleton::compute(t, cx.tcx, cx.param_env).unwrap();
-        if !compute_size_skeleton(ty).same_size(compute_size_skeleton(field_ty)) {
-            panic!("improper_ctypes: Option nonnull optimization not applied?");
+        let compute_size_skeleton = |t| SizeSkeleton::compute(t, tcx, param_env).ok();
+        if !compute_size_skeleton(ty)?.same_size(compute_size_skeleton(field_ty)?) {
+            bug!("improper_ctypes: Option nonnull optimization not applied?");
         }
 
         // Return the nullable type this Option-like enum can be safely represented with.
-        let field_ty_abi = &cx.layout_of(field_ty).unwrap().abi;
+        let field_ty_layout = tcx.layout_of(param_env.and(field_ty));
+        if field_ty_layout.is_err() && !field_ty.has_non_region_param() {
+            bug!("should be able to compute the layout of non-polymorphic type");
+        }
+
+        let field_ty_abi = &field_ty_layout.ok()?.abi;
         if let Abi::Scalar(field_ty_scalar) = field_ty_abi {
-            match field_ty_scalar.valid_range(cx) {
+            match field_ty_scalar.valid_range(&tcx) {
                 WrappingRange { start: 0, end }
-                    if end == field_ty_scalar.size(&cx.tcx).unsigned_int_max() - 1 =>
+                    if end == field_ty_scalar.size(&tcx).unsigned_int_max() - 1 =>
                 {
-                    return Some(get_nullable_type(cx, field_ty).unwrap());
+                    return Some(get_nullable_type(tcx, field_ty).unwrap());
                 }
                 WrappingRange { start: 1, .. } => {
-                    return Some(get_nullable_type(cx, field_ty).unwrap());
+                    return Some(get_nullable_type(tcx, field_ty).unwrap());
                 }
                 WrappingRange { start, end } => {
                     unreachable!("Unhandled start and end range: ({}, {})", start, end)
@@ -378,19 +381,17 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         &self,
         cache: &mut FxHashSet<Ty<'tcx>>,
         field: &ty::FieldDef,
-        substs: SubstsRef<'tcx>,
+        args: GenericArgsRef<'tcx>,
     ) -> FfiResult<'tcx> {
-        let field_ty = field.ty(self.cx.tcx, substs);
-        if field_ty.has_opaque_types() {
-            self.check_type_for_ffi(cache, field_ty)
-        } else {
-            let field_ty = self
-                .cx
-                .tcx
-                .normalize_erasing_regions(self.cx.param_env, field_ty);
-            self.check_type_for_ffi(cache, field_ty)
-        }
+        let field_ty = field.ty(self.cx.tcx, args);
+        let field_ty = self
+            .cx
+            .tcx
+            .try_normalize_erasing_regions(self.cx.param_env, field_ty)
+            .unwrap_or(field_ty);
+        self.check_type_for_ffi(cache, field_ty)
     }
+
 
     /// Checks if the given `VariantDef`'s field types are "ffi-safe".
     fn check_variant_for_ffi(
@@ -399,51 +400,51 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         ty: Ty<'tcx>,
         def: ty::AdtDef<'tcx>,
         variant: &ty::VariantDef,
-        substs: SubstsRef<'tcx>,
+        args: GenericArgsRef<'tcx>,
     ) -> FfiResult<'tcx> {
         use FfiResult::*;
 
-        let transparent_safety = def.repr().transparent().then(|| {
-            // Can assume that at most one field is not a ZST, so only check
-            // that field's type for FFI-safety.
+        let transparent_with_all_zst_fields = if def.repr().transparent() {
             if let Some(field) = transparent_newtype_field(self.cx.tcx, variant) {
-                return self.check_field_type_for_ffi(cache, field, substs);
-            } else {
-                // All fields are ZSTs; this means that the type should behave
-                // like (), which is FFI-unsafe... except if all fields are PhantomData,
-                // which is tested for below
-                FfiUnsafe {
-                    ty,
-                    reason: Reason::StructZeroSized,
+                // Transparent newtypes have at most one non-ZST field which needs to be checked..
+                match self.check_field_type_for_ffi(cache, field, args) {
+                    FfiUnsafe { ty, .. } if ty.is_unit() => (),
+                    r => return r,
                 }
+
+                false
+            } else {
+                // ..or have only ZST fields, which is FFI-unsafe (unless those fields are all
+                // `PhantomData`).
+                true
             }
-        });
-        // We can't completely trust repr(C) markings; make sure the fields are
-        // actually safe.
+        } else {
+            false
+        };
+
+        // We can't completely trust `repr(C)` markings, so make sure the fields are actually safe.
         let mut all_phantom = !variant.fields.is_empty();
         for field in &variant.fields {
-            match self.check_field_type_for_ffi(cache, &field, substs) {
-                FfiSafe => {
-                    all_phantom = false;
-                }
-                FfiPhantom(..) if !def.repr().transparent() && def.is_enum() => {
-                    return FfiUnsafe {
-                        ty,
-                        reason: Reason::EnumPhantomData,
-                    };
-                }
-                FfiPhantom(..) => {}
-                r => return transparent_safety.unwrap_or(r),
+            all_phantom &= match self.check_field_type_for_ffi(cache, &field, args) {
+                FfiSafe => false,
+                // `()` fields are FFI-safe!
+                FfiUnsafe { ty, .. } if ty.is_unit() => false,
+                FfiPhantom(..) => true,
+                r @ FfiUnsafe { .. } => return r,
             }
         }
 
         if all_phantom {
             FfiPhantom(ty)
+        } else if transparent_with_all_zst_fields {
+            return FfiUnsafe {
+                ty,
+                reason: Reason::StructZeroSized,
+            };
         } else {
-            transparent_safety.unwrap_or(FfiSafe)
+            FfiSafe
         }
     }
-
     /// Checks if the given type is "ffi-safe" (has a stable, well-defined
     /// representation which can be exported to C code).
     fn check_type_for_ffi(&self, cache: &mut FxHashSet<Ty<'tcx>>, ty: Ty<'tcx>) -> FfiResult<'tcx> {
@@ -460,7 +461,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
 
         match *ty.kind() {
-            ty::Adt(def, substs) => {
+            ty::Adt(def, args) => {
                 if def.is_box() && matches!(self.mode, CItemKind::Definition) {
                     if ty.boxed_ty().is_sized(tcx, self.cx.param_env) {
                         return FfiSafe;
@@ -511,7 +512,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                             };
                         }
 
-                        self.check_variant_for_ffi(cache, ty, def, def.non_enum_variant(), substs)
+                        self.check_variant_for_ffi(cache, ty, def, def.non_enum_variant(), args)
                     }
                     AdtKind::Enum => {
                         if def.variants().is_empty() {
@@ -524,7 +525,9 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                         if !def.repr().c() && !def.repr().transparent() && def.repr().int.is_none()
                         {
                             // Special-case types like `Option<extern fn()>`.
-                            if repr_nullable_ptr(self.cx, ty, self.mode).is_none() {
+                            if repr_nullable_ptr(self.cx.tcx, self.cx.param_env, ty, self.mode)
+                                .is_none()
+                            {
                                 return FfiUnsafe {
                                     ty,
                                     reason: Reason::EnumNoRepresentation,
@@ -549,7 +552,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                                 };
                             }
 
-                            match self.check_variant_for_ffi(cache, ty, def, variant, substs) {
+                            match self.check_variant_for_ffi(cache, ty, def, variant, args) {
                                 FfiSafe => (),
                                 r => return r,
                             }
@@ -624,27 +627,20 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                         reason: Reason::FnPtr,
                     };
                 }
-
                 let sig = tcx.erase_late_bound_regions(sig);
-                if !sig.output().is_unit() {
-                    let r = self.check_type_for_ffi(cache, sig.output());
-                    match r {
-                        FfiSafe => {}
-                        _ => {
-                            return r;
-                        }
-                    }
-                }
                 for arg in sig.inputs() {
-                    let r = self.check_type_for_ffi(cache, *arg);
-                    match r {
+                    match self.check_type_for_ffi(cache, *arg) {
                         FfiSafe => {}
-                        _ => {
-                            return r;
-                        }
+                        r => return r,
                     }
                 }
-                FfiSafe
+
+                let ret_ty = sig.output();
+                if ret_ty.is_unit() {
+                    return FfiSafe;
+                }
+
+                self.check_type_for_ffi(cache, ret_ty)
             }
 
             ty::Foreign(..) => FfiSafe,
@@ -674,7 +670,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             | ty::GeneratorWitness(..)
             | ty::GeneratorWitnessMIR(..)
             | ty::Placeholder(..)
-            | ty::FnDef(..) => panic!("unexpected type in foreign function: {:?}", ty),
+            | ty::FnDef(..) => bug!("unexpected type in foreign function: {:?}", ty),
         }
     }
 
@@ -719,7 +715,8 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         if let Some(ty) = self
             .cx
             .tcx
-            .normalize_erasing_regions(self.cx.param_env, ty)
+            .try_normalize_erasing_regions(self.cx.param_env, ty)
+            .unwrap_or(ty)
             .visit_with(&mut ProhibitOpaqueTypes)
             .break_value()
         {
@@ -730,6 +727,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
     }
 
+
     fn check_type_for_ffi_and_report_errors(
         &mut self,
         sp: Span,
@@ -737,16 +735,12 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         is_static: bool,
         is_return_type: bool,
     ) {
-        // We have to check for opaque types before `normalize_erasing_regions`,
-        // which will replace opaque types with their underlying concrete type.
         if self.check_for_opaque_ty(sp, ty) {
             // We've already emitted an error due to an opaque type.
             return;
         }
 
-        // it is only OK to use this function because extern fns cannot have
-        // any generic types right now:
-        let ty = self.cx.tcx.normalize_erasing_regions(self.cx.param_env, ty);
+        let ty = self.cx.tcx.try_normalize_erasing_regions(self.cx.param_env, ty).unwrap_or(ty);
 
         // C doesn't really support passing arrays by value - the only way to pass an array by value
         // is through a struct. So, first test that the top level isn't an array, and then
@@ -756,7 +750,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         }
 
         // Don't report FFI errors for unit return types. This check exists here, and not in
-        // `check_foreign_fn` (where it would make more sense) so that normalization has definitely
+        // the caller (where it would make more sense) so that normalization has definitely
         // happened.
         if is_return_type && ty.is_unit() {
             return;
@@ -765,22 +759,24 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         match self.check_type_for_ffi(&mut FxHashSet::default(), ty) {
             FfiResult::FfiSafe => {}
             FfiResult::FfiPhantom(ty) => {
-                self.emit_ffi_unsafe_type_lint(ty, sp, Reason::OnlyPhantomData);
+                self.emit_ffi_unsafe_type_lint(
+                    ty,
+                    sp,
+                    Reason::OnlyPhantomData,
+                );
             }
-            // If `ty` is a `repr(transparent)` newtype, and the non-zero-sized type is a generic
-            // argument, which after substitution, is `()`, then this branch can be hit.
-            FfiResult::FfiUnsafe { ty, .. } if is_return_type && ty.is_unit() => {}
             FfiResult::FfiUnsafe { ty, reason } => {
                 self.emit_ffi_unsafe_type_lint(ty, sp, reason);
             }
         }
     }
+
     /// Check if a function's argument types and result type are "ffi-safe".
     ///
     /// For a external ABI function, argument types and the result type are walked to find fn-ptr
     /// types that have external ABIs, as these still need checked.
-    fn check_fn_helper(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
-        let sig = self.cx.tcx.fn_sig(def_id).subst_identity();
+    fn check_fn(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
+        let sig = self.cx.tcx.fn_sig(def_id).instantiate_identity();
         let sig = self.cx.tcx.erase_late_bound_regions(sig);
 
         for (input_ty, input_hir) in iter::zip(sig.inputs(), decl.inputs) {
@@ -795,10 +791,9 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             }
         }
     }
-
     /// Check if a function's argument types and result type are "ffi-safe".
-    fn check_foreign_fn_helper(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
-        let sig = self.cx.tcx.fn_sig(def_id).subst_identity();
+    fn check_foreign_fn(&mut self, def_id: LocalDefId, decl: &'tcx hir::FnDecl<'_>) {
+        let sig = self.cx.tcx.fn_sig(def_id).instantiate_identity();
         let sig = self.cx.tcx.erase_late_bound_regions(sig);
 
         for (input_ty, input_hir) in iter::zip(sig.inputs(), decl.inputs) {
@@ -809,11 +804,11 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             self.check_type_for_ffi_and_report_errors(ret_hir.span, sig.output(), false, true);
         }
     }
-
-    fn check_foreign_static_helper(&mut self, id: hir::OwnerId, span: Span) {
-        let ty = self.cx.tcx.type_of(id).subst_identity();
+    fn check_foreign_static(&mut self, id: hir::OwnerId, span: Span) {
+        let ty = self.cx.tcx.type_of(id).instantiate_identity();
         self.check_type_for_ffi_and_report_errors(span, ty, true, false);
     }
+
 
     /// Find any fn-ptr types with external ABIs in `ty`.
     ///
@@ -823,18 +818,19 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
         hir_ty: &hir::Ty<'tcx>,
         ty: Ty<'tcx>,
     ) -> Vec<(Ty<'tcx>, Span)> {
+        #[allow(dead_code)]
         struct FnPtrFinder<'parent, 'a, 'tcx> {
-            _visitor: &'parent ImproperCTypesVisitor<'a, 'tcx>,
+            visitor: &'parent ImproperCTypesVisitor<'a, 'tcx>,
             spans: Vec<Span>,
             tys: Vec<Ty<'tcx>>,
         }
 
         impl<'parent, 'a, 'tcx> hir::intravisit::Visitor<'_> for FnPtrFinder<'parent, 'a, 'tcx> {
             fn visit_ty(&mut self, ty: &'_ hir::Ty<'_>) {
-                if let hir::TyKind::BareFn(hir::BareFnTy { abi, .. }) = ty.kind {
-                    if !is_internal_abi(*abi) {
-                        self.spans.push(ty.span);
-                    }
+                if let hir::TyKind::BareFn(hir::BareFnTy { abi, .. }) = ty.kind
+                    && !is_internal_abi(*abi)
+                {
+                    self.spans.push(ty.span);
                 }
 
                 hir::intravisit::walk_ty(self, ty)
@@ -845,20 +841,15 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             type BreakTy = Ty<'tcx>;
 
             fn visit_ty(&mut self, ty: Ty<'tcx>) -> ControlFlow<Self::BreakTy> {
-                if let ty::FnPtr(sig) = ty.kind() {
-                    if !is_internal_abi(sig.abi()) {
-                        self.tys.push(ty);
-                    }
+                if let ty::FnPtr(sig) = ty.kind() && !is_internal_abi(sig.abi()) {
+                    self.tys.push(ty);
                 }
+
                 ty.super_visit_with(self)
             }
         }
 
-        let mut visitor = FnPtrFinder {
-            _visitor: &*self,
-            spans: Vec::new(),
-            tys: Vec::new(),
-        };
+        let mut visitor = FnPtrFinder { visitor: &*self, spans: Vec::new(), tys: Vec::new() };
         ty.visit_with(&mut visitor);
         hir::intravisit::Visitor::visit_ty(&mut visitor, hir_ty);
 
@@ -935,10 +926,10 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         };
 
         let abi_type = if is_internal_abi(abi) {
-            vis.check_fn_helper(id, decl);
+            vis.check_fn(id, decl);
             ForeignItemType::RustABIFn
         } else {
-            vis.check_foreign_fn_helper(id, decl);
+            vis.check_foreign_fn(id, decl);
             ForeignItemType::ForeignABIFn
         };
         if !is_internal_abi(abi) {
@@ -963,7 +954,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
                 self.check_ty_maybe_containing_foreign_fnptr(
                     cx,
                     ty,
-                    cx.tcx.type_of(item.owner_id).subst_identity(),
+                    cx.tcx.type_of(item.owner_id).instantiate_identity(),
                     ForeignItemType::AliasTy,
                 );
             }
@@ -989,7 +980,7 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
         self.check_ty_maybe_containing_foreign_fnptr(
             cx,
             field.ty,
-            cx.tcx.type_of(field.def_id).subst_identity(),
+            cx.tcx.type_of(field.def_id).instantiate_identity(),
             ForeignItemType::FieldDef,
         );
     }
@@ -1005,15 +996,15 @@ impl<'tcx> LateLintPass<'tcx> for FfickleLate {
 
         let item_type = match it.kind {
             hir::ForeignItemKind::Fn(ref decl, _, _) if !is_internal_abi(abi) => {
-                vis.check_foreign_fn_helper(it.owner_id.def_id, decl);
+                vis.check_foreign_fn(it.owner_id.def_id, decl);
                 Some(ForeignItemType::ForeignABIFn)
             }
             hir::ForeignItemKind::Static(ref ty, _) if !is_internal_abi(abi) => {
-                vis.check_foreign_static_helper(it.owner_id, ty.span);
+                vis.check_foreign_static(it.owner_id, ty.span);
                 Some(ForeignItemType::StaticItem)
             }
             hir::ForeignItemKind::Fn(ref decl, _, _) => {
-                vis.check_fn_helper(it.owner_id.def_id, decl);
+                vis.check_fn(it.owner_id.def_id, decl);
                 Some(ForeignItemType::RustABIFn)
             }
             hir::ForeignItemKind::Static(..) | hir::ForeignItemKind::Type => None,
@@ -1089,7 +1080,6 @@ enum Reason {
     UnionLayout,
     StructLayout,
     Box,
-    EnumPhantomData,
     StructZeroSized,
     Array,
     OnlyPhantomData,

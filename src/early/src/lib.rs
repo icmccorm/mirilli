@@ -52,7 +52,7 @@ impl EarlyLintPass for FfickleEarly {
                 let session = &cx.sess();
                 let abi_string = sl.symbol_unescaped.as_str().to_string().replace('\"', "");
                 match lookup(&abi_string) {
-                    Some(abi) => {
+                    Ok(abi) => {
                         if !is_internal_abi(abi) {
                             self.rust_function_abis
                                 .entry(abi_string.to_string())
@@ -60,7 +60,7 @@ impl EarlyLintPass for FfickleEarly {
                                 .or_insert(vec![span_to_string(sig.span, session)]);
                         }
                     }
-                    None => self.unknown_abis.extend(vec![abi_string]),
+                    Err(_) => self.unknown_abis.extend(vec![abi_string]),
                 }
             }
         }

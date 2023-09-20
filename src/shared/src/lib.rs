@@ -13,7 +13,6 @@ pub fn is_internal_abi(abi: SpecAbi) -> bool {
     )
 }
 
-
 pub fn span_to_string(sp: Span, sess: &Session) -> String {
     let parse_sess = &sess.parse_sess;
     let source_map = &(*parse_sess).source_map();
