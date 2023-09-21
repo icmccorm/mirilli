@@ -2,6 +2,8 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
 export CC="clang --save-temps=obj"
+export NIGHTLY="nightly-2023-09-07"
+TIMEOUT=5m
 rustup --version
 rustc --version
 cargo --version
@@ -11,12 +13,11 @@ mkdir -p ./data/results
 mkdir -p ./data/results/early
 mkdir -p ./data/results/late
 mkdir -p ./data/results/tests
-
+mkdir -p ./data/results/bytecode
 touch ./data/results/failed_compilation.csv
+touch ./data/results/failed_lint.csv
 touch ./data/results/failed_download.csv
 touch ./data/results/has_bytecode.csv
-
-echo crate_name,version,ffi_c_count,ffi_count,test_count,bench_count >> ./data/results/count.csv
 
 TRIES_REMAINING=3
 while IFS=, read -r name version; 
@@ -28,29 +29,28 @@ do
         if [ "$EXITCODE" -eq "0" ]; then 
             echo "SUCCESS"
             TRIES_REMAINING=0
-            cd extracted
-            NUM_TESTS_SRC=$(grep -r "#\[test\]" ./src | wc -l | xargs)
-            NUM_TESTS_TESTS=$(grep -r "#\[test\]" ./tests | wc -l | xargs)
-            NUM_TESTS_BENCHES=$(grep -r "#\[test\]" ./benches | wc -l | xargs)
-            NUM_TESTS=$(($NUM_TESTS_SRC + $NUM_TESTS_TESTS + $NUM_TESTS_BENCHES))
-            NUM_BENCHES_SRC=$(grep -r "#\[bench\]" ./src | wc -l | xargs)
-            NUM_BENCHES_TESTS=$(grep -r "#\[bench\]" ./tests | wc -l | xargs)
-            NUM_BENCHES_BENCHES=$(grep -r "#\[bench\]" ./benches | wc -l | xargs)
-            NUM_BENCHES=$(($NUM_BENCHES_SRC + $NUM_BENCHES_TESTS + $NUM_BENCHES_BENCHES))
-            NUM_FFI_C=$(grep -r 'extern\s*\(\"\(C\)\(-unwind\)\?\"\)\?\s*\(fn\|{\)' --include '*.rs' | wc -l | xargs)
-            NUM_FFI=$(grep -r 'extern\s*\(\"\(C\|cdecl\|stdcall\|fastcall\|vectorcall\|thiscall\|aapcs\|win64\|sysv64\|ptx-kernel\|msp430-interrupt\|x86-interrupt\|amdgpu-kernel\|efiapi\|avr-interrupt\|avr-non-blocking-interrupt\|C-cmse-nonsecure-call\|wasm\|system\|platform-intrinsic\|unadjusted\)\(-unwind\)\?\"\)\?\s*\(fn\|{\)' --include '*.rs' | wc -l | xargs)
-            cd ..
-            echo "$name,$version,$NUM_FFI_C,$NUM_FFI,$NUM_TESTS,$NUM_BENCHES" >> ./data/results/count.csv
             export CC="clang --save-temps=obj"
             export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-            if ! (cd extracted && (timeout 5m cargo dylint --all 1> /dev/null)); then
+
+            rustup default "miri-custom"
+            if ! (cd extracted && (timeout $TIMEOUT cargo build 1> /dev/null)); then
                 COMP_EXIT_CODE=$?
                 echo "Writing failure to data/results/failed_compilation.csv"
                 echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
             fi
-            if [ -n "$(find ./extracted -type f -name '*.bc' -print -quit)" ]; then
+            OUTPUT=""
+            OUTPUT=$(find ./extracted -type f -name '*.bc' -print -quit)
+            # if output isn't the empty string
+            if [ -n "$OUTPUT" ]; then
                 echo "Writing visit to data/results/has_bytecode.csv"
                 echo "$name,$version" >> "data/results/has_bytecode.csv"
+                echo "$OUTPUT" > data/results/bytecode/"$name".csv
+            fi
+            rustup default "$NIGHTLY"
+            if ! (cd extracted && (timeout $TIMEOUT cargo dylint --all 1> /dev/null)); then
+                COMP_EXIT_CODE=$?
+                echo "Writing failure to data/results/failed_lint.csv"
+                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_lint.csv"
             fi
             echo "Writing visit to data/results/visited.csv"
             echo "$name,$version" >> "data/results/visited.csv"

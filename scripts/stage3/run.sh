@@ -13,7 +13,8 @@ touch ./data/results/execution/status_stack.csv
 touch ./data/results/execution/status_tree.csv
 touch ./data/results/execution/status_native.csv
 CURRENT_CRATE=""
-TIMEOUT=3m
+TIMEOUT=10m
+TIMEOUT_MIRI=5m
 while IFS=, read -r test_name crate_name version <&3;
 do
     SUCCEEDED_DOWNLOADING=0
@@ -75,7 +76,7 @@ do
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
                 echo "Executing Miri in Stacked Borrows mode..."
                 MIRI_STACK_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS=-"Zmiri-disable-isolation -Zmiri-llvm-log" timeout $TIMEOUT cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS=-"Zmiri-disable-isolation -Zmiri-llvm-log" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 echo "Exit: $MIRI_STACK_EXITCODE"
                 echo "$MIRI_STACK_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/status_stack.csv
@@ -92,7 +93,7 @@ do
 
                 echo "Executing Miri in Tree Borrows mode..."
                 MIRI_TREE_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log" timeout $TIMEOUT cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
                 echo "Exit: $MIRI_TREE_EXITCODE"
                 echo "$MIRI_TREE_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/execution/status_tree.csv

@@ -7,7 +7,8 @@ RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && sh /tmp/rustup-init.sh -y \
     && rm -rf /tmp/rustup-init.sh
 ENV PATH="$PATH:~/.cargo/bin"
-RUN ~/.cargo/bin/rustup install nightly
+ENV NIGHTLY="nightly-2023-09-07"
+RUN ~/.cargo/bin/rustup install ${NIGHTLY}
 RUN ~/.cargo/bin/rustup uninstall stable
 RUN git submodule update --init ./rust
 WORKDIR /usr/src/ffickle/rust
@@ -25,6 +26,8 @@ RUN ~/.cargo/bin/cargo miri setup
 WORKDIR /usr/src/ffickle/
 RUN ~/.cargo/bin/cargo search
 RUN ~/.cargo/bin/cargo install cargo-download cargo-dylint dylint-link
+RUN (rm -rf src/early/target/)
+RUN (rm -rf src/late/target/)
 RUN (cd src/early && ~/.cargo/bin/cargo build)
 RUN (cd src/late && ~/.cargo/bin/cargo build)
 ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
