@@ -233,7 +233,6 @@ two_versions_disallowed,cargo-vendor,0.1.23
 update_versions,cargo-vendor,0.1.23
 vendor_simple,cargo-vendor,0.1.23
 vendoring_git_crates,cargo-vendor,0.1.23
-simple,soliddb,0.1.0
 get_by_indices,soliddb,0.1.0
 unique_is_unique,soliddb,0.1.0
 add_optional_field_and_more,soliddb,0.1.0

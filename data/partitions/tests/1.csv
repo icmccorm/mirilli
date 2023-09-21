@@ -26,14 +26,6 @@ test::tst_abi,libabieos-sys,0.3.7
 test::tst_txn,libabieos-sys,0.3.7
 tests::test_can_load_grammar,tree-sitter-elsa,1.1.0
 tests::can_load_grammar,tree-sitter-svelte,0.10.2
-test_repo_initialization,git-global,0.6.0
-test_info,git-global,0.6.0
-test_list,git-global,0.6.0
-test_scan,git-global,0.6.0
-test_staged,git-global,0.6.0
-test_stashes,git-global,0.6.0
-test_status,git-global,0.6.0
-test_unstaged,git-global,0.6.0
 tests::gmtime_test,libtz,0.1.1
 timezone::tests::basics,libtz,0.1.1
 timezone::tests::default,libtz,0.1.1

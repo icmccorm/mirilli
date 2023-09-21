@@ -17,7 +17,6 @@ UnionNonExhaustive,14
 StructLayout,15
 UnionLayout,16
 Box,17
-EnumPhantomData,18
-StructZeroSized,19
-Array,20
-OnlyPhantomData,21
+StructZeroSized,18
+Array,19
+OnlyPhantomData,20
