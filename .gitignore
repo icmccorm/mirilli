@@ -13,7 +13,6 @@ sandbox.r
 data/archives
 .Rproj.user
 data/results.zip
-*.sh
 results-old-full
 instances.csv
 results
