@@ -14,13 +14,13 @@ WORKDIR /usr/src/ffickle/rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
 RUN git submodule update --init ./src/llvm-sys
-ENV LLVM_SYS_160_PREFIX=/usr/src/ffickle/rust/build/host/llvm/
-RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py build
-RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py install
+ENV LLVM_SYS_170_PREFIX=/usr/src/ffickle/rust/build/host/llvm/
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py install
 RUN ~/.cargo/bin/rustup toolchain link miri-custom /usr/src/ffickle/rust/build/host/stage2/
 RUN ~/.cargo/bin/rustup default miri-custom
-RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py build miri
-RUN LLVM_SYS_160_PREFIX=${LLVM_SYS_160_PREFIX} ./x.py install miri
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py install miri
 RUN ~/.cargo/bin/cargo miri setup
 WORKDIR /usr/src/ffickle/
 RUN ~/.cargo/bin/cargo search
