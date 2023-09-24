@@ -31,8 +31,8 @@ do
             TRIES_REMAINING=0
             export CC="clang --save-temps=obj"
             export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-            rustup default "miri-custom"
-            (cd extracted && (timeout $TIMEOUT cargo build 1> /dev/null))
+            rustup override set "miri-custom"
+            (cd extracted && (timeout $TIMEOUT cargo test -- --list 1> /dev/null))
             COMP_EXIT_CODE=$?
             echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_comp.csv"
 
@@ -44,7 +44,7 @@ do
                 echo "$OUTPUT" > data/results/bytecode/"$name".csv
             fi
 
-            rustup default "$NIGHTLY"
+            rustup override set "$NIGHTLY"
             (cd extracted && (timeout $TIMEOUT cargo dylint --all 1> /dev/null))
             COMP_EXIT_CODE=$?
             echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_lint.csv"
