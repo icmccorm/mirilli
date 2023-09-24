@@ -1,7 +1,7 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-export CC="clang --save-temps=obj"
+export CC="clang -O0 --save-temps=obj"
 export NIGHTLY="nightly-2023-09-07"
 TIMEOUT=5m
 rustup --version
@@ -14,8 +14,8 @@ mkdir -p ./data/results/early
 mkdir -p ./data/results/late
 mkdir -p ./data/results/tests
 mkdir -p ./data/results/bytecode
-touch ./data/results/failed_compilation.csv
-touch ./data/results/failed_lint.csv
+touch ./data/results/status_comp.csv
+touch ./data/results/status_lint.csv
 touch ./data/results/failed_download.csv
 touch ./data/results/has_bytecode.csv
 
@@ -31,27 +31,24 @@ do
             TRIES_REMAINING=0
             export CC="clang --save-temps=obj"
             export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-
             rustup default "miri-custom"
-            if ! (cd extracted && (timeout $TIMEOUT cargo build 1> /dev/null)); then
-                COMP_EXIT_CODE=$?
-                echo "Writing failure to data/results/failed_compilation.csv"
-                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_compilation.csv"
-            fi
+            (cd extracted && (timeout $TIMEOUT cargo build 1> /dev/null))
+            COMP_EXIT_CODE=$?
+            echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_comp.csv"
+
             OUTPUT=""
             OUTPUT=$(find ./extracted -type f -name '*.bc' -print -quit)
-            # if output isn't the empty string
             if [ -n "$OUTPUT" ]; then
                 echo "Writing visit to data/results/has_bytecode.csv"
                 echo "$name,$version" >> "data/results/has_bytecode.csv"
                 echo "$OUTPUT" > data/results/bytecode/"$name".csv
             fi
+
             rustup default "$NIGHTLY"
-            if ! (cd extracted && (timeout $TIMEOUT cargo dylint --all 1> /dev/null)); then
-                COMP_EXIT_CODE=$?
-                echo "Writing failure to data/results/failed_lint.csv"
-                echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/failed_lint.csv"
-            fi
+            (cd extracted && (timeout $TIMEOUT cargo dylint --all 1> /dev/null))
+            COMP_EXIT_CODE=$?
+            echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_lint.csv"
+
             echo "Writing visit to data/results/visited.csv"
             echo "$name,$version" >> "data/results/visited.csv"
             echo "Copying analysis output to data/results/early/$name.json"
