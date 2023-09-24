@@ -32,9 +32,17 @@ do
             export CC="clang --save-temps=obj"
             export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
             rustup override set "miri-custom"
-            (cd extracted && (timeout $TIMEOUT cargo test --tests -- --list 1> /dev/null))
+            
+            OUTPUT=""
+            cd extracted
+            OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list)
             COMP_EXIT_CODE=$?
+            cd ..
             echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_comp.csv"
+            
+            if [ -n "$OUTPUT" ]; then
+                echo "$OUTPUT" > data/results/tests/"$name".txt
+            fi
 
             OUTPUT=""
             OUTPUT=$(find ./extracted -type f -name '*.bc' -print -quit)
@@ -45,8 +53,10 @@ do
             fi
 
             rustup override set "$NIGHTLY"
-            (cd extracted && (timeout $TIMEOUT cargo dylint --all 1> /dev/null))
+            cd extracted
+            (timeout $TIMEOUT cargo dylint --all 1> /dev/null)
             COMP_EXIT_CODE=$?
+            cd ..
             echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_lint.csv"
 
             echo "Writing visit to data/results/visited.csv"
