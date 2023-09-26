@@ -11,7 +11,7 @@ while IFS=, read address _ <&3; do
     # split into status and exit code
     STATUS=$(echo $OUTPUT | cut -d ':' -f 1)
     EXIT_CODE=$(echo $OUTPUT | cut -d ':' -f 2)
-    echo "$address,$STATUS,$EXIT_CODE" >> ./pulled/status.csv
+    echo "$INDEX,$address,$STATUS,$EXIT_CODE" >> ./pulled/status.csv
     (ssh -i ~/.ssh/ffickle.pem -o "StrictHostKeyChecking=no" "ec2-user@$address" "./extract.sh results_$INDEX.zip")
     (scp -i ~/.ssh/ffickle.pem -o "StrictHostKeyChecking=no" "ec2-user@$address":~/results_$INDEX.zip ./pulled/)
     INDEX=$((INDEX+1))

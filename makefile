@@ -14,21 +14,22 @@ clean-cache:
 	@(cargo install cargo-cache 1> /dev/null)
 	@(cargo cache -a 1> /dev/null)
 	@(./scripts/clean.sh)
-clean-compile:
-	@(rm -f ./data/compiled/* 1> /dev/null)
-	@(rm -f ./data/abi_subset.csv 1> /dev/null)
-compile: clean-compile
-	@(python3 ./scripts/compile.py ./data/results ./data/compiled)
-	@(Rscript ./scripts/extract_abi_subset.r 1> /dev/null)
-	@(Rscript ./scripts/extract_miri_tests.r 1> /dev/null)
-	@(Rscript ./scripts/summarize_exec.r 1> /dev/null)
 rates:
 	@(Rscript ./data/pass_rates.r)
 extract: clean-compile
 	./scripts/extract.sh
 push:
-	@./list_instances.sh instances.csv
-	@./push.sh ./instances.csv
+	@./scripts/misc/list_instances.sh instances.csv
+	@./scripts/misc/push.sh ./instances.csv
 pull:
-	@./list_instances.sh ./instances.csv
-	@./pull.sh ./instances.csv
+	@./scripts/misc/list_instances.sh ./instances.csv
+	@./scripts/misc/pull.sh ./instances.csv
+
+extract-stage1:
+	@./scripts/stage1/extract.sh ./pulled
+	@./scripts/stage1/extract_tests.sh
+compile-stage1:
+	@rm -rf ./data/compiled/stage1/*
+	@mkdir -p ./data/compiled/stage1/lints
+	@(python3 ./scripts/stage1/compile.py ./data/results/stage1 ./data/compiled/stage1/lints)
+	@Rscript ./scripts/stage1/compile.r

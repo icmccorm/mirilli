@@ -1,63 +1,16 @@
 library(dplyr)
 library(readr)
 
-late_abis_path <- file.path("./data/compiled/late_abis.csv")
-late_abis <- read_csv(
-    late_abis_path,
-    show_col_types = FALSE
-)
+stage1_input_dir <- file.path("./data/results/stage1")
+stage1_output_dir <- file.path("./data/compiled/stage1")
 
-early_abis_path <- file.path("./data/compiled/early_abis.csv")
-early_abis <- read_csv(
-    early_abis_path,
-    show_col_types = FALSE
-)
+test_counts <- read_csv(file.path(stage1_input_dir, "has_tests.csv"), col_names = c("crate_name", "test_count"), show_col_types = FALSE)
 
-all_path <- file.path("./data/all.csv")
-all <- read_csv(
-    all_path,
-    show_col_types = FALSE
-)
+has_bytecode <- read_csv(file.path(stage1_input_dir, "has_bytecode.csv"), col_names = c("crate_name", "version"), show_col_types = FALSE)
 
-counts_path <- file.path("./data/results/count.csv")
-counts <- read_csv(
-    counts_path,
-    show_col_types = FALSE
-)
-colnames(counts) <- c(
-    "crate_name",
-    "version",
-    "ffi_c_count",
-    "ffi_count",
-    "test_count",
-    "bench_count"
-)
+has_tests_and_bytecode <- has_bytecode %>%
+    inner_join(test_counts, by = c("crate_name")) %>%
+    filter(test_count > 0) %>%
+    select(crate_name, version) %>%
+    write_csv(file.path(stage1_output_dir, "stage2.csv"), col_names = FALSE)
 
-counts %>%
-    filter(ffi_c_count > 0) %>%
-    filter((test_count + bench_count) > 0) %>%
-    write_csv(file.path("./data/compiled/grep_c_ffi_tests.csv"))
-
-counts %>%
-    filter(ffi_count > 0) %>%
-    filter((test_count + bench_count) > 0) %>%
-    write_csv(file.path("./data/compiled/grep_ffi_tests.csv"))
-
-late_names <- late_abis %>%
-    select(crate_name) %>%
-    unique()
-
-early_names <- early_abis %>%
-    select(crate_name) %>%
-    unique()
-
-captured_abi_subset <- bind_rows(late_names, early_names) %>%
-    inner_join(all, by = ("crate_name")) %>%
-    unique() %>%
-    write_csv(file.path("./data/compiled/abi_subset.csv"))
-
-early_abis %>%
-    select(crate_name) %>%
-    unique() %>%
-    inner_join(all, by = ("crate_name")) %>%
-    write_csv(file.path("./data/compiled/abi_subset_early.csv"))

@@ -8,7 +8,7 @@ if (len(sys.argv) == 1):
 walk_dir = sys.argv[1]
 
 if (len(sys.argv) < 3):
-    out_dir = "./data/compiled"
+    out_dir = "./data/compiled/stage1/lints"
 else:
     out_dir = sys.argv[2]
 
@@ -26,6 +26,8 @@ lint_status_info = "crate_name,defn_disabled,decl_disabled\n"
 CAT_FOREIGN_FN = "foreign_functions"
 CAT_STATIC_ITEM = "static_items"
 CAT_RUST_FN = "rust_functions"
+CAT_ALIAS_TYS = "alias_tys"
+CAT_UNKNOWN = "unknown"
 
 def read_json(path, name):
     fd = open(path, "r")
@@ -122,7 +124,7 @@ if (os.path.isdir(walk_dir)):
                 decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
                 lint_status_info += f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n'
                 err_info += process_error_info(name, late_result_json)
-                for category in [CAT_FOREIGN_FN, CAT_RUST_FN, CAT_STATIC_ITEM]:
+                for category in [CAT_FOREIGN_FN, CAT_RUST_FN, CAT_STATIC_ITEM, CAT_ALIAS_TYS]:
                     data = process_error_category(
                         name, category, decl_lint_disabled, late_result_json
                     )
