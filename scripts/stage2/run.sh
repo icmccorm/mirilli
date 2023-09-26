@@ -2,7 +2,6 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 rm -rf ./data/results/tests
 rm -rf ./extracted
-
 STATUS_RUSTC_CSV="./data/results/tests/status_rustc_comp.csv"
 STATUS_MIRI_CSV="./data/results/tests/status_miri_comp.csv"
 FAILED_DOWNLOAD_CSV="./data/results/tests/failed_download.csv"
@@ -16,6 +15,7 @@ touch $VISITED_CSV
 touch ./data/results/tests/logs/
 TIMEOUT=10m
 TIMEOUT_MIRI=5m
+rustup override set "miri-custom"
 while IFS=, read -r crate_name version <&3; 
 do
     unset -v IFS
