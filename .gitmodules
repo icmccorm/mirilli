@@ -1,3 +1,5 @@
 [submodule "rust"]
 	path = rust
 	url = https://github.com/icmccorm/rust
+	branch = miri
+	shallow = true
