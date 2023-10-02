@@ -3024,7 +3024,6 @@ rive-cache-inmemory,false,false
 fnrs,false,false
 figgy,false,false
 permissions,false,false
-irox-egui-extras,false,false
 backtraceio,false,false
 kyushu,false,false
 fern-dashboard,false,false
@@ -4089,7 +4088,6 @@ odot,false,false
 sectok,false,false
 usec,false,false
 azure_mgmt_databox,false,false
-sway-core,false,false
 enum-from-functions,false,false
 zkt,false,false
 racer-interner,false,false
@@ -6193,7 +6191,6 @@ stack-machine,false,false
 encap_enum,false,false
 pakcli,false,false
 tuifw-screen-ncurses,false,false
-phetch,false,false
 fund-me-core,false,false
 ft6x36,false,false
 pranav_minigrep,false,false
@@ -6407,7 +6404,6 @@ algonaut_did,false,false
 lossyq,false,false
 gndr_rust,false,false
 makectl,false,false
-vegafusion-dataframe,false,false
 json2toml,false,false
 swc-coverage-instrument,false,false
 fil_actor_verifreg_v8,false,false
@@ -7440,6 +7436,7 @@ epaste_,false,false
 synapse,false,false
 str-buf,false,false
 hakoniwa,false,false
+re_viewer,false,false
 zenith-rs,false,false
 vl53l1,false,false
 sfs-cli,false,false
@@ -8231,7 +8228,6 @@ vapid,false,false
 sgx,false,false
 ic_helper,false,false
 tempeh_voxel,false,false
-swayfmt,false,false
 buildinfy,false,false
 rumbrella-rdk-ffi-c,false,false
 minnow,false,false
@@ -8601,7 +8597,6 @@ webkit2gtk5-webextension-sys,false,false
 loaf,false,false
 async-native-tls-alpn,false,false
 roxido_macro,false,false
-acme2-slim,false,false
 a9742eefab52d8d7fc22d33429fa08ad68a7b7f880f087d1f4543b7db,false,false
 rxor,false,false
 price-gatherer-db,false,false
@@ -9278,7 +9273,6 @@ rm-lines,false,false
 youtube-dl-parser,false,false
 wedpr_l_bulletproofs,false,false
 nearly_eq,false,false
-derive_validator,false,false
 sbp-settings,false,false
 with-api,false,false
 io_bluetooth,false,false
@@ -10275,7 +10269,6 @@ async_trait_proto,false,false
 xhSleepFor,false,false
 rust_transit_derive,false,false
 ezjs,false,false
-revm-precompile,false,false
 read-logger,false,false
 parstream,false,false
 date,false,false
@@ -13739,7 +13732,6 @@ solitaire-assets,false,false
 asciifier,false,false
 parterm,false,false
 tinylj,false,false
-yew-cosmo,false,false
 liboci-cli,false,false
 netzwork-api,false,false
 as_num,false,false
@@ -16001,6 +15993,7 @@ tp-consensus-pow,false,false
 foot-gun,false,false
 eternity-rs,false,false
 wl-clipboard-rs,false,false
+julia-set,false,false
 bitrw,false,false
 pb-imgsize,false,false
 nisargthakkar_hello_world,false,false
@@ -16461,6 +16454,7 @@ serde_ipld_dagcbor,false,false
 aht20,false,false
 polkadot-runtime-constants,false,false
 theshy_server,false,false
+constellation-rs,false,false
 numbered_titles_sorter,false,false
 efm32wg232-pac,false,false
 morq,false,false
@@ -22191,6 +22185,7 @@ adf-template,false,false
 shallow-debug,false,false
 vecrem,false,false
 slot_machine,false,false
+turf,false,false
 nazgul,false,false
 libquartz,false,false
 qnicorn,false,false
@@ -23340,6 +23335,7 @@ audiopus,false,false
 augr-core,false,false
 download_file_my_demo,false,false
 fpool,false,false
+async-graphql-tide,false,false
 run-in-roblox,false,false
 trash-utils,false,false
 guppy,false,false
@@ -23520,7 +23516,6 @@ ccl-fxhash,false,false
 atomecs-derive,false,false
 web3ui-compose,false,false
 embassy-sync,false,false
-httpflv,false,false
 walrus-macro,false,false
 align_tools,false,false
 snaplog,false,false
@@ -23547,6 +23542,7 @@ include-lua-macro,false,false
 futures-join,false,false
 dbent,false,false
 mvc_traits,false,false
+javascript-mel,false,false
 toiletcli,false,false
 infuse,false,false
 spor,false,false
@@ -24921,7 +24917,6 @@ endian_codec,false,false
 simple-uuid,false,false
 corollary-support,false,false
 gst-plugin-gtk4,false,false
-hls,false,false
 split_tokens,false,false
 fetch_mediawiki_configuration,false,false
 hd44780-driver,false,false
@@ -25328,7 +25323,6 @@ sif-rtree,false,false
 rustc-ap-rustc_cratesio_shim,false,false
 magic-switcheroo,false,false
 avifil32-sys,false,false
-clay-utils,false,false
 claim-ip,false,false
 instant-glicko-2,false,false
 first_cargo_package,false,false
@@ -27870,6 +27864,7 @@ biying_cli,false,false
 boringssl-src,false,false
 mixed,false,false
 perplex,false,false
+pineappl,false,false
 windows-kernel-sys,false,false
 curves3d,false,false
 efbuilder,false,false
@@ -28113,7 +28108,6 @@ tinyvector,false,false
 dairy,false,false
 readable-name-generator,false,false
 fsio,false,false
-allot_asm,false,false
 sc-consensus-epochs,false,false
 rust-binary-install,false,false
 asciicast,false,false
@@ -28878,7 +28872,6 @@ maikor-asm-parser,false,false
 foundation-codecs,false,false
 hello_from_christian,false,false
 multi-party-computation,false,false
-oca-dag,false,false
 qcow,false,false
 asd,false,false
 jpre,false,false
@@ -31390,7 +31383,6 @@ fluo-async-std,false,false
 mpc-bench,false,false
 blurslice,false,false
 chain-registry,false,false
-derive_validify,false,false
 flaky,false,false
 df_ls_structure,false,false
 protofish,false,false
@@ -32075,6 +32067,7 @@ penumbra-crypto,false,false
 rustutils-core,false,false
 confik,false,false
 lcs-png-diff,false,false
+lambdaworks-crypto,false,false
 hpn-client,false,false
 triable,false,false
 dono-cli,false,false
@@ -33429,6 +33422,7 @@ pallet-authorship,false,false
 mimxrt595s,false,false
 minisign-verify,false,false
 go-spawn,false,false
+oxidash,false,false
 nanorpc-http,false,false
 whitelist-immutable,false,false
 ramp,false,false
@@ -34869,7 +34863,6 @@ xalg-bin,false,false
 mz_rusoto_imagebuilder,false,false
 bazaar-dirstate,false,false
 typedmap,false,false
-rust-ssvm,false,false
 mio-extras,false,false
 verify_macro,false,false
 logic-form,false,false
@@ -34983,7 +34976,6 @@ cue,false,false
 ergo,false,false
 nitrokey-test,false,false
 moretypes,false,false
-revm-interpreter,false,false
 crossbeam_requests,false,false
 fitrs,false,false
 pbf_font_tools,false,false
@@ -35326,7 +35318,6 @@ kaspa-wasm,false,false
 my_public_ip,false,false
 mtemp,false,false
 crate_demo,false,false
-safe_ocl,false,false
 modpow,false,false
 gst-plugin-togglerecord,false,false
 equihash,false,false
@@ -36149,7 +36140,6 @@ reui,false,false
 starchart-backends,false,false
 fitparser,false,false
 fungui_syntax,false,false
-allot_lib,false,false
 forgetful,false,false
 polar-wasm-api,false,false
 wpslugify,false,false
@@ -38273,6 +38263,7 @@ huskyup,false,false
 bfuck,false,false
 simconnect-sdk-derive,false,false
 apollo-cw-asset,false,false
+dlib-face-recognition-cv,false,false
 steamidfx,false,false
 rpm-sequoia,false,false
 i18n-build,false,false
@@ -41332,7 +41323,6 @@ html_query_parser,false,false
 pov-distribution,false,false
 fungui,false,false
 txtframe,false,false
-xrtsp,false,false
 kolas,false,false
 mbox-reader,false,false
 blasoxide-cpuinfo,false,false
@@ -41878,7 +41868,6 @@ todocommander,false,false
 mfplat_vista-sys,false,false
 serdeval,false,false
 ilc,false,false
-ocl-stream,false,false
 pipewarp,false,false
 brug-macros,false,false
 medea-coturn-telnet-client,false,false
@@ -43171,6 +43160,7 @@ config-logger,false,false
 weechat-sys,false,false
 omg-cool,false,false
 rust-ad-core-macros,false,false
+drogue-esp8266,false,false
 stage-rs-fujia,false,false
 slo-converter,false,false
 cargo-mommy-ce,false,false
@@ -46055,6 +46045,7 @@ reference-box,false,false
 uu_du,false,false
 rustgenius,false,false
 gloo-storage,false,false
+nativeshell,false,false
 imxrt1062-iomuxc-gpr,false,false
 promptor,false,false
 dav-server,false,false
@@ -49821,6 +49812,7 @@ dvach_api,false,false
 asyncworker,false,false
 hello-foo-rs,false,false
 scannedpdf,false,false
+names,false,false
 ui,false,false
 lact_status,false,false
 fisco-bcos-service,false,false
@@ -50555,6 +50547,7 @@ toxiproxy_rust,false,false
 time_compat,false,false
 arcdps,false,false
 streetsweeper,false,false
+boa_runtime,false,false
 tilde-expand,false,false
 cap-net-ext,false,false
 btw-nl,false,false
@@ -54117,7 +54110,6 @@ in,false,false
 irust_repl,false,false
 memeinator,false,false
 shfolder-sys,false,false
-yew-patternfly-v3,false,false
 memory-cache-rs,false,false
 identconv,false,false
 tournament,false,false
@@ -55201,6 +55193,7 @@ user,false,false
 aws_greengrass_core_rust,false,false
 runtime_injector_actix,false,false
 filmborders,false,false
+fnichol-cime,false,false
 adb_client,false,false
 atlantis,false,false
 perfect-hash,false,false
@@ -57016,7 +57009,6 @@ atrium-xrpc,false,false
 sparkl3d,false,false
 polyhorn,false,false
 typed-num,false,false
-labview-interop,false,false
 aptos-infallible-link,false,false
 tesuto,false,false
 hypertask_cli,false,false
@@ -57143,6 +57135,7 @@ sqlite3,false,false
 multipart-stream,false,false
 actiondb,false,false
 der_derive,false,false
+turf_macros,false,false
 inexor-rgf-core-di,false,false
 git-version,false,false
 nrf24-rs,false,false
@@ -59190,7 +59183,6 @@ windows-webview2,false,false
 lfu,false,false
 twtar,false,false
 fixnite-lib,false,false
-interceptor-rs,false,false
 soundex,false,false
 liboj-cgroups,false,false
 freertos-rust,false,false
@@ -59450,7 +59442,6 @@ dypdl,false,false
 interactive-dag,false,false
 czl-hello-cargo,false,false
 juri-macros,false,false
-pl011_qemu,false,false
 waffles-solana-frozen-abi,false,false
 async-timeout,false,false
 pastel_colours,false,false
@@ -59739,7 +59730,6 @@ simple-ldap,false,false
 pg-client-config,false,false
 rust-quiz,false,false
 colibri,false,false
-sway-lsp,false,false
 thing,false,false
 unic-ucd-hangul,false,false
 tries,false,false
@@ -62026,7 +62016,6 @@ slideshow,false,false
 unisocket,false,false
 wit-codegen,false,false
 improved_slice_patterns,false,false
-theshy_local,false,false
 ic-cdk,false,false
 dyadic,false,false
 compact_bitset,false,false
@@ -64215,7 +64204,6 @@ threshold_crypto_ce,false,false
 rclite,false,false
 embassy-net-driver,false,false
 robma_builder,false,false
-allot_runtime,false,false
 screen-buffer-ui,false,false
 axum-range,false,false
 granny,false,false
@@ -65334,7 +65322,6 @@ minorhacks_chess,false,false
 densearray_kernels,false,false
 lens-rs_derive,false,false
 rdkafka-wrap,false,false
-release_plz_core,false,false
 acpi_client,false,false
 fun_time,false,false
 stdinix,false,false
@@ -67735,7 +67722,6 @@ eink_waveshare_rs,false,false
 wireguard-vanity-address,false,false
 neum-parse,false,false
 parst,false,false
-ocl-extras,false,false
 microsoft,false,false
 bdwgc-alloc,false,false
 stringconverter,false,false
@@ -68047,6 +68033,7 @@ progress,false,false
 smolhttp,false,false
 ectoken,false,false
 lsm6ds33,false,false
+neotron-os,false,false
 c2_histograms,false,false
 tempeh_window,false,false
 ya-sb-util,false,false
@@ -69989,7 +69976,6 @@ html-compare,false,false
 bscscan_wrapper,false,false
 sigi,false,false
 fat32,false,false
-abstract-dex-adapter-traits,false,false
 line-span,false,false
 hyper-timeout,false,false
 slamburger,false,false
@@ -71318,7 +71304,6 @@ reed,false,false
 ajars,false,false
 wpr,false,false
 stormbase,false,false
-zint,false,false
 devicetree,false,false
 regex-translator,false,false
 grovedb-path,false,false
@@ -73335,7 +73320,6 @@ fluent-comparisons,false,false
 aurochs,false,false
 lightning-net-tokio,false,false
 tedit,false,false
-ex3-core-registry-client,false,false
 civil,false,false
 esp32c3,false,false
 rusoto_signer,false,false
@@ -73729,7 +73713,6 @@ obi-derive-internal,false,false
 mlx,false,false
 ysl,false,false
 ninja-files-talosctl,false,false
-rtmp,false,false
 quorum,false,false
 init-token,false,false
 struqture,false,false
@@ -75589,6 +75572,7 @@ shuf-rs,false,false
 sqlx-macros-oldapi,false,false
 breda-render-backend-api-types,false,false
 xui,false,false
+garage,false,false
 code_snippet_generator,false,false
 cargo-geiger-serde,false,false
 mc-sgx-sdk-tools,false,false
@@ -75766,6 +75750,7 @@ bevy_retrograde_dylib,false,false
 libuci-sys,false,false
 coord2d,false,false
 retty-io,false,false
+rsvg-sys,false,false
 llama-rs,false,false
 final,false,false
 reqwest-eventsource,false,false
@@ -76358,7 +76343,6 @@ banka,false,false
 thiserror-no-std,false,false
 grep-in-file,false,false
 warg-crypto,false,false
-tension,false,false
 dipa,false,false
 world_dispatcher,false,false
 cueue,false,false
@@ -76698,7 +76682,6 @@ quotient-filter,false,false
 ssb-validate,false,false
 gt-graph-path,false,false
 clamav-tcp,false,false
-vegafusion-sql,false,false
 apiary,false,false
 ligo,false,false
 gix-archive,false,false
@@ -81463,7 +81446,6 @@ kube-secrets,false,false
 onlinecode,false,false
 all4art-authservice-domain,false,false
 cetkaik_calculate_hand,false,false
-uckb-jsonrpc-client,false,false
 kani,false,false
 extendhash,false,false
 jerry,false,false
@@ -82805,6 +82787,7 @@ hatty,false,false
 ttrpc,false,false
 dunge,false,false
 metasploit,false,false
+vpncloud,false,false
 thrive,false,false
 bitpanda-csv,false,false
 gdhttp,false,false
@@ -83646,7 +83629,6 @@ disjoint-sets,false,false
 rutenspitz_macro,false,false
 pretty_toa,false,false
 handshake-encoding,false,false
-vegafusion-datafusion-udfs,false,false
 pushb,false,false
 ene-core,false,false
 btmgmt-packet,false,false
@@ -84947,7 +84929,6 @@ fdo-data-formats,false,false
 claves,false,false
 sims-far,false,false
 linkedlist,false,false
-abstract-staking-adapter-traits,false,false
 exch_rate,false,false
 tempeh_shapes,false,false
 go-heap-rs,false,false
@@ -87006,6 +86987,7 @@ tree-sitter-nqc,false,false
 ewin-prom,false,false
 dmntk-atto,false,false
 slack-bk,false,false
+yerpc-tide,false,false
 libatasmart-sys,false,false
 bytey,false,false
 bit_fiddler,false,false
@@ -90073,7 +90055,6 @@ pdqhash,false,false
 error-chain-mini-derive,false,false
 capo,false,false
 fasthash-sys,false,false
-ex3-canister-named-canisters,false,false
 artful,false,false
 zenoh-plugin-ros1,false,false
 softbus,false,false
@@ -91157,7 +91138,6 @@ charwise,false,false
 rustpi_io,false,false
 gitui,false,false
 deoksuyi,false,false
-clay-viewer,false,false
 wtransport-proto,false,false
 tysh-derive,false,false
 velodyne,false,false
@@ -91617,7 +91597,6 @@ mh,false,false
 tesseract-native,false,false
 serde_archive,false,false
 mz_rusoto_mediaconvert,false,false
-abstract-api,false,false
 nmapx,false,false
 mparsed,false,false
 ink_primitives,false,false
@@ -91921,6 +91900,7 @@ eosio_macros,false,false
 csnmp,false,false
 slim-futures,false,false
 bevy_simple_stat_bars,false,false
+st7920,false,false
 ojcmp,false,false
 ngenate-editor,false,false
 runiter-wot,false,false

@@ -25,7 +25,7 @@ comp_status %>% filter(exit_code == 101) %>% nrow()
 comp_status %>% group_by(exit_code) %>% summarize(n= n())
 test_counts <- read_csv(file.path(stage1_input_dir, "has_tests.csv"), col_names = c("crate_name", "test_count"), show_col_types = FALSE)
 
-has_bytecode <- read_csv(file.path(stage1_input_dir, "has_bytecode.csv"), col_names = c("crate_name", "version"), show_col_types = FALSE)
+has_bytecode <- read_csv(file.path(stage1_input_dir, "has_bytecode.csv"), col_names = c("crate_name", "version"), show_col_types = FALSE) %>% arrange(crate_name)
 
 has_tests_and_bytecode <- has_bytecode %>%
     inner_join(test_counts, by = c("crate_name")) %>%

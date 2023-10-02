@@ -32,4 +32,4 @@ compile-stage1:
 	@rm -rf ./data/compiled/stage1/*
 	@mkdir -p ./data/compiled/stage1/lints
 	@(python3 ./scripts/stage1/compile.py ./data/results/stage1 ./data/compiled/stage1/lints)
-	@Rscript ./scripts/stage1/compile.r
+	@Rscript ./scripts/stage1/summarize.r
