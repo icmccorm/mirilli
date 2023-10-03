@@ -31,4 +31,4 @@ has_tests_and_bytecode <- has_bytecode %>%
     inner_join(test_counts, by = c("crate_name")) %>%
     filter(test_count > 0) %>%
     select(crate_name, version) %>%
-    write_csv(file.path(stage1_output_dir, "stage2.csv"), col_names = FALSE)
+    write_csv(file.path(stage1_output_dir, ".csv"), col_names = FALSE)
