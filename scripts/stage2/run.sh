@@ -1,18 +1,18 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
-rm -rf ./data/results/tests
+rm -rf ./data/results/stage2
 rm -rf ./extracted
-STATUS_RUSTC_CSV="./data/results/tests/status_rustc_comp.csv"
-STATUS_MIRI_CSV="./data/results/tests/status_miri_comp.csv"
-FAILED_DOWNLOAD_CSV="./data/results/tests/failed_download.csv"
-VISITED_CSV="./data/results/tests/visited.csv"
-mkdir -p ./data/results/tests
-mkdir -p ./data/results/tests/info
+STATUS_RUSTC_CSV="./data/results/stage2/status_rustc_comp.csv"
+STATUS_MIRI_CSV="./data/results/stage2/status_miri_comp.csv"
+FAILED_DOWNLOAD_CSV="./data/results/stage2/failed_download.csv"
+VISITED_CSV="./data/results/stage2/visited.csv"
+mkdir -p ./data/results/stage2
+mkdir -p ./data/results/stage2/info/
+mkdir -p ./data/results/stage2/logs/
 touch $FAILED_DOWNLOAD_CSV
 touch $STATUS_MIRI_CSV
 touch $STATUS_RUSTC_CSV
 touch $VISITED_CSV
-touch ./data/results/tests/logs/
 TIMEOUT=10m
 TIMEOUT_MIRI=5m
 rustup override set "miri-custom"
@@ -31,18 +31,18 @@ do
             RUSTC_FAILED=0
             cd extracted || return
             echo "Getting test list from rustc"
-            RUSTC_TEST_OUTPUT=$(timeout $TIMEOUT cargo test -- --list 2> err)
+            RUSTC_TEST_OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list 2> err)
             RUSTC_EXIT_CODE=$?
             echo "$RUSTC_TEST_OUTPUT" | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > rustc_list.txt
-            echo "$crate_name,$version,$RUSTC_EXIT_CODE" >> "../data/results/tests/status_rustc_comp.csv"
+            echo "$crate_name,$version,$RUSTC_EXIT_CODE" >> "../data/results/stage2/status_rustc_comp.csv"
             if [ "$RUSTC_EXIT_CODE" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
                 echo "Precompiling miri"
-                timeout $TIMEOUT cargo miri test -q -- --list > /dev/null
+                timeout $TIMEOUT cargo miri test --tests -q -- --list > /dev/null
                 MIRI_EXIT_CODE=$?
-                echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/tests/status_miri_comp.csv"
+                echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/stage2/status_miri_comp.csv"
                 if [ "$MIRI_EXIT_CODE" -eq "0" ]; then
-                    OUTPUT_FILE="../data/results/tests/info/$crate_name.csv"
-                    OUTPUT_DIR="../data/results/tests/logs/$crate_name/"
+                    OUTPUT_FILE="../data/results/stage2/info/$crate_name.csv"
+                    OUTPUT_DIR="../data/results/stage2/logs/$crate_name/"
                     echo "Logging tests to $OUTPUT_FILE"
                     mkdir -p "$OUTPUT_DIR"
                     cp ./rustc_list.txt "$OUTPUT_DIR/all.csv"
@@ -62,14 +62,13 @@ do
                             continue
                         else
                             echo "Running NORMAL test, $test_name..."
-                            OUTPUT=$(MIRIFLAGS=-Zmiri-disable-isolation timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                            OUTPUT=$(MIRIFLAGS="-Zmiri-disable-bc -Zmiri-disable-isolation" timeout $TIMEOUT_MIRI cargo miri test --tests -q "$test_name" -- --exact 2> err)
+                            EXITCODE=$?
                         fi
                         echo "$OUTPUT" > "$OUTPUT_DIR/$test_name.out.log"
                         cp ./err "$OUTPUT_DIR/$test_name.err.log"
-                        EXITCODE=$?
                         if [ "$EXITCODE" -ne 0 ]; then
                             echo "Exit code is $EXITCODE"
-                            echo "Output was: $OUTPUT"
                             grep -q "error: unsupported operation: can't call foreign function" ./err
                             HAD_FFI=$?
                             if [ "$HAD_FFI" -eq "0" ]; then
@@ -95,7 +94,7 @@ do
         else
             echo "FAILED (exit $EXITCODE)"
             if [ "$TRIES_REMAINING" -eq "0" ]; then
-                echo "$crate_name,$version,$EXITCODE" >> "./data/results/tests/failed_download.csv"
+                echo "$crate_name,$version,$EXITCODE" >> "./data/results/stage2/failed_download.csv"
             else
                 echo "PAUSE..."
                 sleep 10
