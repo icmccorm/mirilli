@@ -33,7 +33,8 @@ do
             echo "SUCCESS"
             TRIES_REMAINING=0
 	    export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-            export CC="clang-16 $DEFAULT_FLAGS"
+            export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+	    export CC="clang-16 $DEFAULT_FLAGS"
             export CXX="clang++-16 $DEFAULT_FLAGS"
             OUTPUT=""
             cd extracted

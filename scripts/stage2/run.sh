@@ -1,4 +1,7 @@
 #!/bin/bash
+export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+export CC="clang-16 $DEFAULT_FLAGS"
+export CXX="clang++-16 $DEFAULT_FLAGS"
 export PATH="$HOME/.cargo/bin:$PATH"
 rm -rf ./data/results/stage2
 rm -rf ./extracted
@@ -31,12 +34,18 @@ do
             RUSTC_FAILED=0
             cd extracted || return
             echo "Getting test list from rustc"
+	    export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+	    export CC="clang-16 $DEFAULT_FLAGS"
+	    export CXX="clang++-16 $DEFAULT_FLAGS"
             RUSTC_TEST_OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list 2> err)
             RUSTC_EXIT_CODE=$?
             echo "$RUSTC_TEST_OUTPUT" | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > rustc_list.txt
             echo "$crate_name,$version,$RUSTC_EXIT_CODE" >> "../data/results/stage2/status_rustc_comp.csv"
             if [ "$RUSTC_EXIT_CODE" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
-                echo "Precompiling miri"
+                export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+            	export CC="clang-16 $DEFAULT_FLAGS"
+            	export CXX="clang++-16 $DEFAULT_FLAGS"
+		echo "Precompiling miri"
                 timeout $TIMEOUT cargo miri test --tests -q -- --list > /dev/null
                 MIRI_EXIT_CODE=$?
                 echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/stage2/status_miri_comp.csv"
@@ -62,7 +71,10 @@ do
                             continue
                         else
                             echo "Running NORMAL test, $test_name..."
-                            OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation" timeout $TIMEOUT_MIRI cargo miri test --tests -q "$test_name" -- --exact 2> err)
+                            export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+                            export CC="clang-16 $DEFAULT_FLAGS"
+            		    export CXX="clang++-16 $DEFAULT_FLAGS"
+			    OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation" timeout $TIMEOUT_MIRI cargo miri test --tests -q "$test_name" -- --exact 2> err)
                             EXITCODE=$?
                         fi
                         echo "$OUTPUT" > "$OUTPUT_DIR/$test_name.out.log"
