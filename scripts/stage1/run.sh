@@ -26,18 +26,14 @@ TRIES_REMAINING=3
 while IFS=, read -r name version; 
 do
     while [ "$TRIES_REMAINING" -gt "0" ]; do
-        cargo-download -x "$name==$version" --output ./extracted
+        (cargo-download -x "$name==$version" --output ./extracted)
         EXITCODE=$?
         TRIES_REMAINING=$(( TRIES_REMAINING - 1 ))
         if [ "$EXITCODE" -eq "0" ]; then 
             echo "SUCCESS"
             TRIES_REMAINING=0
-	    export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-            export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
-	    export CC="clang-16 $DEFAULT_FLAGS"
-            export CXX="clang++-16 $DEFAULT_FLAGS"
             OUTPUT=""
-            cd extracted
+            cd extracted || exit
             OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list)
             COMP_EXIT_CODE=$?
             cd ..
@@ -55,7 +51,7 @@ do
                 echo "$OUTPUT" > data/results/bytecode/"$name".csv
             fi
 
-            cd extracted
+            cd extracted || exit
             (timeout $TIMEOUT cargo dylint --all 1> /dev/null)
             COMP_EXIT_CODE=$?
             cd ..

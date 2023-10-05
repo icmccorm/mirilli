@@ -1,6 +1,8 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
-export CC="clang -g -O0 --save-temps=obj"
+export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+export CC="clang-16 $DEFAULT_FLAGS"
+export CXX="clang++-16 $DEFAULT_FLAGS"
 rm -rf ./data/results/execution
 rm -rf ./extracted
 mkdir -p ./data/results/execution
