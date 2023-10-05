@@ -2,7 +2,7 @@ FROM ubuntu:23.04 as setup
 
 WORKDIR /usr/src/ffickle
 COPY . .
-RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang-16 llvm-16 make cmake git ninja-build vim -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm clang-16 llvm-16 make cmake git ninja-build vim -y
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && chmod +x /tmp/rustup-init.sh \
     && sh /tmp/rustup-init.sh -y \

@@ -1,7 +1,9 @@
 #!/bin/bash
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-export CC="clang -O0 --save-temps=obj"
+export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
+export CC="clang-16 $DEFAULT_FLAGS"
+export CXX="clang++-16 $DEFAULT_FLAGS"
 export NIGHTLY="nightly-2023-09-25"
 TIMEOUT=5m
 rustup --version
@@ -30,9 +32,9 @@ do
         if [ "$EXITCODE" -eq "0" ]; then 
             echo "SUCCESS"
             TRIES_REMAINING=0
-            export CC="clang --save-temps=obj"
-            export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-            
+	    export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
+            export CC="clang-16 $DEFAULT_FLAGS"
+            export CXX="clang++-16 $DEFAULT_FLAGS"
             OUTPUT=""
             cd extracted
             OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list)
