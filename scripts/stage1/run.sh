@@ -2,7 +2,7 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
 export CC="clang -O0 --save-temps=obj"
-export NIGHTLY="nightly-2023-09-07"
+export NIGHTLY="nightly-2023-09-25"
 TIMEOUT=5m
 rustup --version
 rustc --version
@@ -19,6 +19,7 @@ touch ./data/results/status_lint.csv
 touch ./data/results/failed_download.csv
 touch ./data/results/has_bytecode.csv
 
+rustup override set "$NIGHTLY"
 TRIES_REMAINING=3
 while IFS=, read -r name version; 
 do
@@ -31,7 +32,6 @@ do
             TRIES_REMAINING=0
             export CC="clang --save-temps=obj"
             export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
-            rustup override set "miri-custom"
             
             OUTPUT=""
             cd extracted
@@ -52,7 +52,6 @@ do
                 echo "$OUTPUT" > data/results/bytecode/"$name".csv
             fi
 
-            rustup override set "$NIGHTLY"
             cd extracted
             (timeout $TIMEOUT cargo dylint --all 1> /dev/null)
             COMP_EXIT_CODE=$?

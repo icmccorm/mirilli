@@ -668,7 +668,6 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
             | ty::Closure(..)
             | ty::Generator(..)
             | ty::GeneratorWitness(..)
-            | ty::GeneratorWitnessMIR(..)
             | ty::Placeholder(..)
             | ty::FnDef(..) => bug!("unexpected type in foreign function: {:?}", ty),
         }
@@ -1104,7 +1103,7 @@ const fn tykind_discriminant(value: &rustc_middle::ty::TyKind) -> usize {
         rustc_middle::ty::TyKind::Dynamic(..) => 14,
         rustc_middle::ty::TyKind::Closure(_, _) => 15,
         rustc_middle::ty::TyKind::Generator(_, _, _) => 16,
-        rustc_middle::ty::TyKind::GeneratorWitness(_) => 17,
+        rustc_middle::ty::TyKind::GeneratorWitness(..) => 17,
         rustc_middle::ty::TyKind::Never => 18,
         rustc_middle::ty::TyKind::Tuple(_) => 19,
         rustc_type_ir::TyKind::Alias(_, _) => 20,
@@ -1113,6 +1112,5 @@ const fn tykind_discriminant(value: &rustc_middle::ty::TyKind) -> usize {
         rustc_middle::ty::TyKind::Placeholder(_) => 23,
         rustc_middle::ty::TyKind::Infer(_) => 24,
         rustc_middle::ty::TyKind::Error(_) => 25,
-        rustc_type_ir::TyKind::GeneratorWitnessMIR(_, _) => 26,
     }
 }

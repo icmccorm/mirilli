@@ -8,9 +8,10 @@ RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && sh /tmp/rustup-init.sh -y \
     && rm -rf /tmp/rustup-init.sh
 ENV PATH="/root/.cargo/bin:${PATH}"
-ENV NIGHTLY="nightly-2023-09-07"
+ENV NIGHTLY="nightly-2023-09-25"
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
+RUN rustup component add miri
 RUN rustup install nightly
 RUN git submodule update --init ./rust
 

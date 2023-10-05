@@ -15,7 +15,7 @@ touch $STATUS_RUSTC_CSV
 touch $VISITED_CSV
 TIMEOUT=10m
 TIMEOUT_MIRI=5m
-rustup override set "miri-custom"
+rustup override set nightly-2023-09-25
 while IFS=, read -r crate_name version <&3; 
 do
     unset -v IFS
@@ -62,7 +62,7 @@ do
                             continue
                         else
                             echo "Running NORMAL test, $test_name..."
-                            OUTPUT=$(MIRIFLAGS="-Zmiri-disable-bc -Zmiri-disable-isolation" timeout $TIMEOUT_MIRI cargo miri test --tests -q "$test_name" -- --exact 2> err)
+                            OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation" timeout $TIMEOUT_MIRI cargo miri test --tests -q "$test_name" -- --exact 2> err)
                             EXITCODE=$?
                         fi
                         echo "$OUTPUT" > "$OUTPUT_DIR/$test_name.out.log"
