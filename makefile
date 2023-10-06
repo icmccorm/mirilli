@@ -34,4 +34,3 @@ compile-stage1:
 	@mkdir -p ./data/compiled/stage1/lints
 	@(python3 ./scripts/stage1/compile.py ./data/results/stage1 ./data/compiled/stage1/lints)
 	@Rscript ./scripts/stage1/summarize.r
-	@psql -d crates -f ./scripts/stage1/collect_order.sql

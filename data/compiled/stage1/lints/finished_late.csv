@@ -51,7 +51,6 @@ labello
 caocao
 yeslogic-ucd-parse
 ysbell
-before
 practice_rust
 tonemap
 pure_cell
@@ -79,7 +78,6 @@ lightingrust
 imohash
 rust-seq2kminmers
 blendr
-csvs_convert
 bmfont_parser
 gen_value
 video_hash_filesystem_cache
@@ -317,7 +315,6 @@ katcp_derive
 bmk_linux
 localize
 desk-command
-stripe-rs
 tokio-stream-extra
 tilr
 srws
@@ -837,7 +834,6 @@ ckb-gen-types
 cool
 secondary-crate
 hyperpixel
-westend-runtime
 glux
 define
 fxtypemap
@@ -1412,6 +1408,7 @@ display-as
 coolwcl
 kli
 dearbitrary
+matrix-pickle
 winrt_macros
 jarit
 webrtc-util
@@ -1451,6 +1448,7 @@ panic_monitor
 thirtyfour_sync
 scule
 localoco
+sass-rs
 polyhorn-layout
 line
 nanocld_client
@@ -1908,7 +1906,6 @@ safe-regex
 zsim-hooks
 figma-html
 hello-rust-olso
-snitch-protos
 ironmq-client
 ampapi
 speedy2d-audio
@@ -2103,7 +2100,6 @@ eccodes-sys
 wirs
 x12-types
 cyt4dn_b
-luminance-glutin
 ccg
 pixel-canvas
 discombobulate
@@ -2452,7 +2448,6 @@ uu_head
 time-utils
 windows-define
 luaparse
-ex3-balance-vault-public-types
 cashaddr
 liquid-layout
 lace_codebook
@@ -2619,7 +2614,6 @@ whereiam
 serde_canonical_json
 yw
 taginfo
-ex3-wallet-registry-public-types
 mono-clock
 transmission-client
 eatnodemodules
@@ -3305,7 +3299,6 @@ ezexec
 ieee-apsqrt
 metrical
 ppg
-dos
 snakeoil
 unity-native-plugin
 so-defi-token-list
@@ -3456,7 +3449,6 @@ passive
 sumer
 xylo
 fastperm
-ex3-canister-named-principals
 fudge
 folda
 tb_row
@@ -3591,7 +3583,6 @@ chfft
 rustplotlib
 mock_rw
 zigbee2mqtt_types_vendor_miboxer
-esl01-dag
 cnnks
 elephantry-extras
 pyo3
@@ -3966,7 +3957,6 @@ motorola_68000_cpu
 pipspeak
 veriform
 sylasteven
-total
 rnote-cli
 lnr
 cooklang
@@ -4203,6 +4193,7 @@ librollenspielsache
 algods
 async-encrypted-stream
 my_lib_hello
+nightlight
 fallacy-arc
 parenthesized_c
 oauth2-twitter
@@ -4291,7 +4282,6 @@ camgi
 os_units
 a653rs_macros
 http-server-middleware
-additional
 wasmflow-traits
 soa_derive
 fuel-dummy-test-subcrate-c
@@ -5171,7 +5161,6 @@ arsc
 implib
 kube-conf
 gst-plugin-mpegps
-oauth-api
 xiel
 unshorten
 typescript-definitions-ufo-patch
@@ -5700,7 +5689,6 @@ chectarine
 async-sse
 cargo-autobindings
 liquid-json
-convert
 testbench
 diff-ba-rs
 yeslogic-ucd-generate
@@ -6191,6 +6179,7 @@ stack-machine
 encap_enum
 pakcli
 tuifw-screen-ncurses
+phetch
 fund-me-core
 ft6x36
 pranav_minigrep
@@ -6813,7 +6802,6 @@ mdlint-cli
 near
 mysqldump-mutator
 syncterm
-clause
 crate-publish-test
 atomic-env-rs
 swc_plugin_build
@@ -7304,7 +7292,6 @@ bounded-vec
 rs
 envvar
 checked_ops
-git-branchless-opts
 test_ci
 prost-derive
 meat
@@ -7364,7 +7351,6 @@ dync
 penumbra-custody
 solana-test
 johnnydecimal
-onnx-protobuf
 lolid
 embassy-lpc
 libscmp
@@ -7482,7 +7468,6 @@ wasm-sign
 git-find
 wg-mod
 ctrlc_fnonce
-begin
 copa
 akiaki-fcgi
 mouserat
@@ -7526,7 +7511,6 @@ lelet-task-queue
 rubert
 plank_ecs
 bl702-pac
-rococo-runtime
 hp203b
 ina219_rs
 cargo-furnace
@@ -7954,7 +7938,6 @@ euphony
 efm32gg900-pac
 d3_geo_rs
 sh0r7
-ex3-canister-constant
 sfs-core
 hamming
 waper
@@ -8086,7 +8069,6 @@ rome_parser
 rsmatrix
 function_string_builder
 wasi-worker-cli
-git-branchless-test
 text-rts
 motore
 qrcode-generator
@@ -8143,7 +8125,6 @@ fastxdr
 aligned-array
 trust-graph-distro-test
 termini
-sjtu
 nalar
 aes-keywrap
 atlas-coverage
@@ -8258,7 +8239,6 @@ try-push
 flutter_rust_bridge_macros
 rawloader
 mdbook-open-on-gh
-jaq-interpret
 aingle_wasmer_common
 safecoin-frozen-abi-macro
 rusty-release
@@ -8932,7 +8912,6 @@ zoom-sdk-windows-sys
 mackerel_client
 lunesweb
 tract-libcli
-savan
 cargo-remote
 easy_cargo_dep_B
 cube2rust
@@ -9489,7 +9468,6 @@ cargo-yubikey
 embedded-counters
 deno-libffi-sys
 hemtt-error
-gst-plugin-webrtchttp
 icm42670
 ypwt
 mysql_async
@@ -9639,7 +9617,6 @@ argon2-kdf
 deser-debug
 webforge
 io-hal
-blackboxmc_bungee
 drm-macros
 wasmer-wit-bindgen-rust-impl
 tokio-tungstenite-wasm
@@ -10106,7 +10083,6 @@ aws-credential-types
 fil_ls
 rs_ripemd_160
 Rustic_Hangman
-git-branchless-revset
 gunzip-split
 typst-library
 zigbee2mqtt_types_vendor_micro_matic_norge_as
@@ -10439,7 +10415,6 @@ fuz_json_parser
 plagiarismbasic_lib
 rust-impls
 pancake-db-client
-git-branchless-reword
 dekoder
 flashtext
 brio
@@ -11380,6 +11355,7 @@ bp256t1
 rustneat
 ltx
 iceyee_random
+memflow-coredump
 ommui_broadcast
 rajd
 imgui-sdl2-support
@@ -12786,7 +12762,6 @@ ahc
 tiny_oauth
 hesse
 jest_workaround
-dmntk-feel-temporal
 fuel-dummy-test
 kistro
 serde_derive_internals
@@ -13110,7 +13085,6 @@ dyn-wall-rs
 shinyframework_state
 deferred
 contact-tracing
-dora-cli
 cargo-gba
 oxinscribe
 annex
@@ -13738,7 +13712,6 @@ as_num
 wslpath
 colinterp
 nonlinear
-associate
 readable-inlined-date
 sqlx-models-derive
 future-by-example
@@ -13874,7 +13847,6 @@ plusapi
 wasm-feature-detect-sys
 spellingbee
 sparkl2d-core
-dmntk-gendoc
 nom
 decoded-char
 distrand
@@ -14577,7 +14549,6 @@ dotman
 list_comprehension
 av-format
 oidc-discovery
-luminance-front
 nft-metadata
 mogwai-js-framework-benchmark
 btwo
@@ -15195,7 +15166,6 @@ yew-components
 mailstrom
 windows-applicationmodel-store
 activitist
-git-branchless-record
 rusty-bind-build
 cfm
 gusto
@@ -15726,7 +15696,6 @@ volcell
 shen
 solana-reed-solomon-erasure
 tetcore-session
-image-reducer
 imap
 batadase-macros
 movies
@@ -16160,7 +16129,6 @@ crate-_-name
 tc-executor-twasmi
 auditable-info
 lore
-git-branchless-navigation
 ndev
 iffy
 bevy_diagnostics_explorer
@@ -16454,7 +16422,6 @@ serde_ipld_dagcbor
 aht20
 polkadot-runtime-constants
 theshy_server
-constellation-rs
 numbered_titles_sorter
 efm32wg232-pac
 morq
@@ -16520,7 +16487,6 @@ md-designer
 levin
 zigbee2mqtt_types_vendor_viessmann
 phigbot
-liftoff
 vk_deps
 solid
 anstyle-stream
@@ -17350,7 +17316,6 @@ scim_proto
 source_map_gen
 spacebadgers-utils
 my_dependencies
-dora-operator-api-types
 treereduce-javascript
 jbcrs-basic
 loggestd
@@ -17887,6 +17852,7 @@ ufmclient
 mxml
 stackbt_automata_impl
 desync
+rustemo-compiler
 rutls
 solana-foundation-delegation-program-registry
 linen
@@ -18177,7 +18143,6 @@ Algorithms-Illuminated
 mcai_ftp
 releasecheck
 mgf
-maybe-dangling
 json_errors
 irc-channel
 k8s-tpl
@@ -18823,7 +18788,6 @@ disrust
 ttf-firacode
 vortiTestProject
 mime_4
-vorbis_rs
 motp
 imag-grep
 chickenwire
@@ -19199,7 +19163,6 @@ fuel-indexer-lib
 cw-nameservice
 sp-transaction-pool
 fe-semantics
-wasm-opt
 zmq-ffi
 ndarray-unit
 argo-cd-crds
@@ -19259,7 +19222,6 @@ cogo
 cargo-spell
 frozenset
 cw-fable
-ex3-wallet-registry-factory-client
 moxie-web
 indigo-structopt-derive
 cuco
@@ -19391,7 +19353,6 @@ mz_rusoto_detective
 gd
 alpha-bleeder
 ra_ap_proc-macro-srv-cli
-wechatpay
 itchy
 geoip2-codegen
 vvm
@@ -20226,7 +20187,6 @@ eth2_ssz_derive
 rsnowboy
 rsrl_domains
 ockam_node_attribute
-libffi
 garlandtools
 fftconvolve
 modified
@@ -20268,7 +20228,6 @@ singleton-cell
 mangolib
 rive
 mcoffin-option-ext
-git-branchless-submit
 rimu-eval
 pwm
 catalytic_query_parser
@@ -20968,7 +20927,6 @@ umap
 foobar
 amazon-cloudfront-client-routing-lib
 nibbstack
-shellymetry
 bevy_panorbit_camera
 evac
 spectrum-analyzer
@@ -21677,7 +21635,6 @@ query-string-builder
 clockctrl
 binding_macro
 publish_test
-attribute
 csv-export
 graphstack
 linera-crypto
@@ -22514,6 +22471,7 @@ logo-renderer
 lpc55-pac
 sysadmin-bindings
 geojson-antimeridian-cut
+memflow-kvm
 cw-orchestrate
 fold
 guion_sdl2
@@ -22663,7 +22621,6 @@ argosy-store
 async-hsm
 piston-gfx_texture
 panic-msp430
-oca-parser-xls
 pontem-blockchain
 hst-tw-utils
 imxrt1062-enc1
@@ -22845,7 +22802,6 @@ chiraldb
 lnpbp_bech32
 adxl345-eh-driver
 libhashfindutils
-luminance-sdl2
 backtrace-ext
 mh-zx-driver
 nom_bencode
@@ -23145,7 +23101,6 @@ xdelta3
 simplify
 sonatina-triple
 esp-idf-bindgen
-axum-starter
 ncmcli
 kff
 spout_texture_share
@@ -24247,7 +24202,6 @@ serde-aux
 ex3-balance-vault-factory-public-types
 askama_shared
 raw-image
-gmt_dos-clients_domeseeing
 cents
 points_between
 clarity-vm
@@ -25028,7 +24982,6 @@ calculator_functions
 stats_utils
 memory-balloon
 sqisign
-other
 sudo_pair
 eight-puzzle-core
 perf-event-open-sys2
@@ -25233,7 +25186,6 @@ new_debug_unreachable
 ag_file_system_scanner
 dexscreener
 distance-pairs
-contracts-node-runtime
 tower-vm
 aws-lc-ring
 polynomial
@@ -25242,7 +25194,6 @@ regex_env
 optparse
 vec_security
 i2cdev-bmp180
-plutus
 jetro
 minigrep_cargo_publish_example
 basic_functions
@@ -26045,7 +25996,6 @@ ws2818-rgb-led-spi-driver
 syslog-c
 cxxbridge-macro
 guile-sys
-ale
 tflite
 rsys
 fil_actor_power_v8
@@ -26055,7 +26005,6 @@ faizii
 cc_license
 malachite-bigint
 tonic-types
-currently
 srce
 madeline
 hexagonal_pathfinding_astar
@@ -26181,7 +26130,6 @@ getsb
 opensles-sys
 serde_fmt
 gvnc-sys
-substrate-wasm-builder
 sfml-build
 hugepage-rs
 ae-renderable
@@ -26715,7 +26663,6 @@ log4rs-cases
 rusty-machine
 on_demand
 flexpiler
-Harvard
 JWST
 nix-ptsname_r-shim
 astral_reflection
@@ -26957,7 +26904,6 @@ tokengen-cli
 reason
 enum-iterator-derive
 jessica
-grpcio-health
 jss
 path-router
 honk
@@ -27864,7 +27810,6 @@ biying_cli
 boringssl-src
 mixed
 perplex
-pineappl
 windows-kernel-sys
 curves3d
 efbuilder
@@ -27964,6 +27909,7 @@ baskerville_macro
 option-lock
 getline
 timely
+scanflow-cli
 mangopay
 base64-rs
 pkbuffer_derive
@@ -28952,13 +28898,11 @@ libqabu
 getdown
 dhall
 example_dylib
-blackboxmc_java
 asyncgit
 duners
 mugen-snd
 basteh-redb
 cargo-local-registry
-safe-tensors-loader
 rmarshal
 dynasm-lib
 inkpad-seal
@@ -29372,7 +29316,6 @@ frst
 r2api
 wasm-gen
 ranum
-fudan
 concurrent_arena
 paste_rs-cli
 cord-message
@@ -29397,7 +29340,6 @@ opencc-rs
 penumbra-tct
 json-writer
 handy
-sure
 webtransport
 forage
 restest_macros
@@ -29506,7 +29448,6 @@ endpointsecurity
 glr-parser
 cache_tags
 tatl
-drink-cli
 unix_socket2
 ritenn
 azure_svc_servicefabric
@@ -30432,7 +30373,6 @@ data-buffer
 pseudoterm
 blob-uuid
 osmnodecache
-starting
 butane_codegen
 tmac
 cargo-what
@@ -32383,7 +32323,6 @@ jtd-codegen
 solders-keypair
 gst-plugin-raptorq
 mashup-impl
-crypto-msg-parser
 rustji99
 src-dst-clarifier
 revolt-permissions
@@ -32494,7 +32433,6 @@ median_three_quicksort
 proqnt
 localnative_cli
 opentok-rs-sys
-zinkup
 number-names
 ecto
 wyhash2
@@ -32827,7 +32765,6 @@ polyhorn-build-android
 static-pubkey
 syn_query
 demigod
-ex3-secret-vault-public-types
 rive-http
 ceres-runtime
 libbfi
@@ -33422,7 +33359,6 @@ pallet-authorship
 mimxrt595s
 minisign-verify
 go-spawn
-oxidash
 nanorpc-http
 whitelist-immutable
 ramp
@@ -33628,7 +33564,6 @@ datavzrd
 sdl2_mixer
 ch32v2
 dharithri-price-aggregator-sc
-git-branchless-move
 i3-focus-last
 todolsp
 irox-networking
@@ -33734,7 +33669,6 @@ service
 tokio-rw-stream-sink
 enum
 rumbrella-rdk-doc
-cargo-partisia-contract
 grad
 kantan
 bp-bridge-hub-rococo
@@ -33794,7 +33728,6 @@ scholar
 glsl-layout
 dolly
 unrust
-fuzzcheck_common
 wrend
 sinner
 drifter
@@ -34480,7 +34413,6 @@ upside-down
 robloxapi-s
 translitrs
 minigrep_bander
-currying
 atomic_float
 jupiter_common
 rust-cate
@@ -34542,7 +34474,6 @@ syenite
 guessing_game_
 llpr
 efm32g280-pac
-google-cloud-rust-raw
 leptos_icons
 tm-derive
 channels
@@ -34863,6 +34794,7 @@ xalg-bin
 mz_rusoto_imagebuilder
 bazaar-dirstate
 typedmap
+rust-ssvm
 mio-extras
 verify_macro
 logic-form
@@ -35807,7 +35739,6 @@ compactmap
 dsconv
 bevy_despawn_with
 nacos-api_macro
-redox_uefi_std
 webbundle
 binaryornot
 smoosh
@@ -36098,7 +36029,6 @@ markdown-rs
 permutations_iter
 dessert
 minilzo
-fsbex
 guessing_game_cz
 ratch
 cuprate-p2p
@@ -36224,7 +36154,6 @@ openai-gpt-client
 roid
 sealrs
 chapter-8-exercises
-akv
 openvr_sys
 neonorigami
 raui-json-renderer
@@ -36298,7 +36227,6 @@ jenkinsctl
 renderling_ui
 os-id
 azure_mgmt_intune
-git-branchless-hook
 rustsourcebundler
 md2jira
 pydantic-logfire
@@ -36569,7 +36497,6 @@ lipsum
 source-demo-tool
 anoma
 async_async_io
-allot_bytecode
 omnipaxos_storage
 slog-json-concur
 bee-ledger-types
@@ -36581,7 +36508,6 @@ serde_ignored
 cargo-tally
 logitech-lcd
 zkinterface-libsnark
-staging-kusama-runtime
 biorust
 promise_out
 gluon_base
@@ -38103,7 +38029,6 @@ fuel-core-poa
 utp2
 libirc
 fuzzcheck_mutators
-dmntk-recognizer
 ipc-queue
 enum-code
 pink-extension
@@ -38149,7 +38074,6 @@ symbolics_core
 http_server_tiny
 unwrap
 deepspace
-pku
 wasmflow-entity
 bitpacker
 arrow-string
@@ -39177,7 +39101,6 @@ quickbms-lsp
 enontekio
 chariot_palette
 tree-sitter-cmake
-anychain-tron
 qg
 proto-vulcan-macros
 xml-data
@@ -39750,6 +39673,7 @@ serum-borsh-derive-internal
 ellie_bytecode
 crate-compile-test
 r-seher
+rhai-memflow
 read-primitives
 minigrep0444
 docmatic
@@ -40161,7 +40085,6 @@ phpm
 curdleproofs
 armv6k
 fd-queue
-grpcio
 cueball-static-resolver
 uckb-jsonrpc-core
 cfdi_use_mx
@@ -41767,7 +41690,6 @@ hexponent
 cust_derive
 graph-core
 clia-ntex-identity
-dmntk-feel-number
 agsol-common-derive
 scesrv-sys
 solana_rbpf
@@ -41780,7 +41702,6 @@ raft-consensus
 booby
 fp-ts
 cargo-mod
-fsr
 rt-rtai
 lattice-graph
 tin-lang
@@ -42640,7 +42561,6 @@ dioxus-logger
 barn-rs
 sana_core
 ord_subset
-polkadot-runtime
 red_asn1
 salo
 bevy_vox_mesh
@@ -43036,6 +42956,7 @@ fst-regex
 literate-crypto
 obws
 predicate-macros
+ash-tray
 dialectic-tokio-serde
 wet
 rumio
@@ -43160,7 +43081,6 @@ config-logger
 weechat-sys
 omg-cool
 rust-ad-core-macros
-drogue-esp8266
 stage-rs-fujia
 slo-converter
 cargo-mommy-ce
@@ -43389,7 +43309,6 @@ scythe
 if_chain
 seaqs
 twilight-util
-git-branchless-smartlog
 tari_bulletproofs_plus
 holochain_websocket
 json-gettext
@@ -44055,7 +43974,6 @@ delharc
 wasium
 mkl-src
 rust-health-endpoint
-git-branchless-lib
 candy-rs
 rol
 wal-browser
@@ -44075,6 +43993,7 @@ authoscope
 simple-dht11
 hq9_plus_rs
 finl-charsub
+tree-sitter-stack-graphs
 d2_iterators_rychan14
 asset_lru
 io-error
@@ -44724,7 +44643,6 @@ apt-cache
 bevy_retro_macros
 pretty_logger
 giga
-dfp-number
 esp32s2
 evmap-derive
 y-dash
@@ -44864,7 +44782,6 @@ bevy-pigeon
 bandar-log
 rsconnect
 lineq
-pchain_compile
 moni
 csaparser
 breadth-first-zip-macros
@@ -45407,7 +45324,6 @@ target-test-dir-macro
 glim
 mirror-rs
 vec3D
-mailhog-rs
 steam_shortcuts_util
 transiter
 postgrest-query-parser
@@ -46045,7 +45961,6 @@ reference-box
 uu_du
 rustgenius
 gloo-storage
-nativeshell
 imxrt1062-iomuxc-gpr
 promptor
 dav-server
@@ -47198,7 +47113,6 @@ twamm
 rle_vec
 altitude
 diesel_codegen
-available
 tmp
 etclient-core
 test001
@@ -47255,7 +47169,6 @@ bevy_polyx
 subslice
 marker_api
 bootleg
-cld2
 causal-length
 tikv-jemalloc-ctl
 batch-loader
@@ -47910,7 +47823,6 @@ reminisce
 atsamv71q19b
 imxrt1062-tmr1
 urid-derive
-cmu
 meio-connect
 display_buffered
 usbd-webusb
@@ -48389,7 +48301,6 @@ dprint-plugin-jsonc
 hic
 stm32-uart-loader
 qt_core_custom_events
-Cambridge
 racer-cargo-metadata
 azalea-block-macros
 quiet
@@ -50037,7 +49948,6 @@ roo-cli
 clineup
 sensor-scd30
 quantumgravity
-blackboxmc_bukkit
 abcrypt
 lysutil
 presser
@@ -50436,7 +50346,6 @@ envy-toml
 crate-test-xxx
 ethereum-trie-test
 skima
-full
 vkxml
 tracing-cloudwatch
 simple-semver
@@ -51184,7 +51093,6 @@ openpol
 file_systems
 http-field
 initramfs
-deno_ffi
 alsa_ioctl
 paramiko
 chatter
@@ -52036,7 +51944,6 @@ ragnar
 mss_saliency
 audio_plugin
 apub-openssl
-klein
 oro-config
 computer
 embassy-rp
@@ -52505,7 +52412,6 @@ rweb-openapi
 Arweave
 unite
 imbl-sized-chunks
-crypto-message
 yew-style-in-rs-macro
 pypi-search
 hexbomb
@@ -53998,7 +53904,6 @@ polyfuse-sys
 enum_stringify
 number_range
 cubist-config
-reactive-messaging
 wasmtime-vfs-keyfs
 priority-inheriting-lock
 tms9918a_emu
@@ -54494,7 +54399,6 @@ Rust-wasm
 golem-rpc-macros
 gnal_tsur
 efm32tg11b140-pac
-loam-soroban-sdk
 algae-trees
 loan
 sourcefile
@@ -54741,7 +54645,6 @@ integral_constant
 everscale-types
 problemdetails
 memconstruct_macros
-rs-edunode-sdk
 rusoto_clouddirectory
 typo
 levitate
@@ -54952,7 +54855,6 @@ svc-conference-events
 bakkesmod-macros
 rtm-csv
 copernicium
-dmntk-model
 uiuifree-image-convert
 neo4j_cypher
 gedcomx
@@ -55158,7 +55060,6 @@ astyle
 sm-ext
 ruchat-storage
 pfds
-git-branchless-query
 sphinxad
 kine
 ormlib_derive
@@ -55635,7 +55536,6 @@ factory
 scalesocket
 tempeh_pathing
 kwap-common
-grpcio-proto
 mz_rusoto_appconfig
 snowplow_tracker
 deptypes
@@ -55834,7 +55734,6 @@ quine
 de_controller
 mill
 yomo_derive
-safer-ffi-gen
 vcard_parser
 servoflow
 signal-hook-sys
@@ -56072,7 +55971,6 @@ mapwords
 crates-index-diff
 aria2-rs
 ceiling
-ucb
 oxhttp
 medea-control-api-proto
 workflow-terminal
@@ -56468,6 +56366,7 @@ arrows_common
 serde-resp
 tx-from-scratch
 cblas-sys
+unveil-rs
 paws
 dbr
 ada-url
@@ -56724,7 +56623,6 @@ ofd
 nws-rs
 as_core
 system-graph
-stanford
 linux-embedded-hal
 kv-par-merge-sort
 ic-core-module
@@ -56977,7 +56875,6 @@ normalize-url-rs
 tuix_internal
 package-bootstrap
 file-utils
-fuzzcheck
 libp2p
 younger_minigrep
 omniswap
@@ -58241,6 +58138,7 @@ xt
 rusteval-derive
 tomb
 ksuser-sys
+assert_cfg
 grrsfdakljs
 smartcrop
 tracing_storage_logger
@@ -58458,7 +58356,6 @@ tessie
 canparse
 malloced
 wit-native
-jaq-core
 telestes
 moltenvk-sys
 nrf_dfu
@@ -59522,7 +59419,6 @@ winter-crypto
 wasmtime-winch
 telemetry
 k0s
-border-py-gym-env
 flo_sparse_array
 prost-helper
 keynotes
@@ -59627,7 +59523,6 @@ tcp-channel-client
 eiffel
 stack-stack
 eoflint
-beginning
 twitch_oauth2
 rustmex_matlab800
 tomiko
@@ -59945,7 +59840,6 @@ saturn
 str_overlap
 theta
 wget
-git-branchless-init
 dialtone_sqlx_macros
 square-api-client
 toml-spanned-value
@@ -60140,7 +60034,6 @@ kate
 css-compare
 cargo-sh
 postgres-native-tls
-such
 biscuit-auth
 rpick
 ab_glyph_rasterizer
@@ -60205,7 +60098,6 @@ zvezda
 pub_this
 fedimint-bitcoind
 tq-code-generator-core
-Oxford
 modus_ponens
 clap4shell
 jvm-assembler
@@ -60618,6 +60510,7 @@ tazui
 oomplay
 extargsparse_codegen
 rust-sdk
+env-sort
 waffles-solana-measure
 xlsxfin
 hdr10plus
@@ -61097,6 +60990,7 @@ tudelft-nes-test
 input-macro
 sll
 awaur
+sitegen
 planet
 enumTutor
 rustlings
@@ -61295,7 +61189,6 @@ ros2-client
 sample2
 snarkvm-fields
 tau-engine
-rustpython-jit
 laron-crypto
 rpn_calc_tamecat
 hebi_diag
@@ -61557,6 +61450,7 @@ askalono-cli
 bitarray-naive
 can
 esp_idf_build
+imaged
 tokio-postgres-migration
 paferafileserver
 time-stream
@@ -62016,6 +61910,7 @@ slideshow
 unisocket
 wit-codegen
 improved_slice_patterns
+theshy_local
 ic-cdk
 dyadic
 compact_bitset
@@ -62548,7 +62443,6 @@ tetcoin-test-service
 wot
 buffalo
 land-sdk-macro
-oraiswap
 concision-macros
 e131
 cargolifter-core
@@ -62732,7 +62626,6 @@ flatpak_gtk_themer
 intbits
 unix-ts-macros
 smart_quotes
-ic-wasm
 swc_plugin_macro
 get-year
 blackbird
@@ -62888,7 +62781,6 @@ fasteval-repl
 serde-gff
 ntstc_msvcrt-sys
 unf
-solders-transaction
 port
 soroban-spec-json
 elise-derive
@@ -63768,7 +63660,6 @@ crates-test
 rgs_models
 lnd_grpc_rust
 pixels_primitives
-modif
 ux-webmachine
 thalo-inmemory
 nebula-fbthrift-common-v2
@@ -64170,7 +64061,6 @@ dioptre-derive
 change_stream
 ina226
 async-actor
-gmt_dos-clients
 tangram_table
 cassandra-proto
 bilgi
@@ -64466,7 +64356,6 @@ cosmwasm-storage
 string-inspector
 qrtool
 ambientcg
-dittolive-ditto
 crate-token
 sibyl
 sndfile
@@ -64894,6 +64783,7 @@ comms
 rgeometry
 dddk_macro
 welder
+memflow-ffi
 test-fuzz-dirs
 mudskipper
 dbgprint
@@ -66517,7 +66407,6 @@ order-stat
 windy-daily-utils-lib
 mamenoki
 safe_unwrap
-modify
 cryptoauthlib-sys
 logind-zbus
 tree-sitter-mozcpp
@@ -66993,7 +66882,6 @@ counts
 robusta-codegen
 cargo-pdx
 vnstat_parse
-dmntk-feel
 jmc-tools
 weresocool_analyze
 rpi3
@@ -67576,6 +67464,7 @@ chksum-hash
 byte-strings-proc_macros
 expander
 mcserverstatus
+webapp-frontend
 xassembler
 bevy_switch
 gl
@@ -68033,7 +67922,6 @@ progress
 smolhttp
 ectoken
 lsm6ds33
-neotron-os
 c2_histograms
 tempeh_window
 ya-sb-util
@@ -68130,7 +68018,6 @@ cringify
 batbox-collection-derive
 stampiotic
 gst-plugin-cdg
-zlib_stream
 media-type-impl-utils
 fxprof-processed-profile
 epilog
@@ -68524,8 +68411,6 @@ ctjs_macros
 cargo-s
 handshake-types
 bevy_hot_reload
-soroban-auth
-title
 call-contract
 asyncsync
 safelog
@@ -69502,7 +69387,6 @@ razer-ws
 rusky
 rgep
 ciseaux_client
-rbx_xml
 logical_clock
 lua-macro-impl
 formal
@@ -69695,7 +69579,6 @@ multisol-collector
 ddlog-lsp
 daisuke
 synced
-bakeit
 nannou_wgpu
 koa
 spellcheck
@@ -70193,6 +70076,7 @@ goe-sharding
 tetsy-vapory
 kenv
 file_filler
+scanflow
 pinyin-parser
 hdf5-bitshuffle
 puffpastry
@@ -70880,7 +70764,6 @@ canada_sin
 command-manager
 srfngout
 unconst_trait_impl
-orcxx_derive
 iop-vault
 bitsets
 ornstein-uhlenbeck
@@ -71313,7 +71196,6 @@ swarm-derive
 opencl-sys
 foo132
 rapid
-tsinghua
 bazaar-groupcompress
 token-metadata-descriptor
 rustypex
@@ -72025,7 +71907,6 @@ reactive
 dragnit-schemes
 sinkhole-core
 tokio-utils
-returned
 crabkeyduck
 rubble-templates-core
 solr
@@ -72200,6 +72081,7 @@ aquarium-info-macros
 jj-cli
 nxlang-script
 remutex
+memflow-native
 eseb
 weathergov
 ttcore_def
@@ -72440,7 +72322,6 @@ inline-xml
 rbtag
 sp-npos-elections-compact
 indiscriminant_impl_byte_str
-different
 sequence-generator-rust
 rsinetd
 nuts-rs
@@ -72451,6 +72332,7 @@ sixel-rs
 cold-io
 full-stop
 aktoro-flow-core
+construe
 intname
 dapnet-api
 oxigen
@@ -72789,7 +72671,6 @@ r18
 comcart
 bio
 va_list-rs
-dora-operator-api
 busybody
 rows
 anchor-attribute-state
@@ -72997,7 +72878,6 @@ blink-cli
 zilean
 midi-types
 tiny-bench
-provide
 Secondwelcome
 check_urls
 drunx
@@ -73145,7 +73025,6 @@ fill_canvas
 flatbuffers-tools
 dharithri-chain-scenario-format
 oasis-borsh-derive-internal
-rustli
 contraband_codegen
 tokio-async-io
 x86_ata
@@ -73562,7 +73441,6 @@ jsonnet
 prototype
 named-tup
 any-map
-cw20-ics20-msg
 capella
 gix-transport
 py_fstr
@@ -74674,7 +74552,6 @@ reddit-api
 multi_reader
 bevy_retro_camera
 squid
-git-branchless-invoke
 qaf-router
 interface
 ratman-types
@@ -74702,7 +74579,6 @@ zlelaunch
 libscroll
 ncollide3d-updated
 spatialite-rs
-git-branchless-undo
 system-tray
 scale_signature_interfaces
 space-filling
@@ -74745,6 +74621,7 @@ whats-a-png
 bff
 bit-cursor
 consts
+web-bundler
 config-diag
 forecast-async
 androidy-log
@@ -74851,7 +74728,6 @@ near-vm-errors-v3
 sn_data_types
 binstall
 bitvec_helpers
-cuckoo_miner
 fuel-core-types
 yarn-lock-parser
 sys-datetime
@@ -74893,7 +74769,6 @@ lazy-settings-macros
 rust-unify
 llel
 test_publish_cargo
-pressing
 argparse
 proofmarshal
 trillium-prometheus
@@ -75157,7 +75032,6 @@ owned-buf
 lamport
 misc_utils
 drone-rs
-luminance-gl
 rust_sls
 zse
 tallymarks
@@ -75179,7 +75053,6 @@ max3263x
 poison-pool
 jamml
 code-lines
-dora-operator-api-c
 rpn_calc0000123
 ad5328
 government
@@ -75572,7 +75445,6 @@ shuf-rs
 sqlx-macros-oldapi
 breda-render-backend-api-types
 xui
-garage
 code_snippet_generator
 cargo-geiger-serde
 mc-sgx-sdk-tools
@@ -75619,7 +75491,6 @@ perl
 approveapi
 tracing-logfmt
 redrust
-google-cloud-rust
 iyzipay-rust
 asnom
 google-kgsearch1
@@ -75671,7 +75542,6 @@ zigbee2mqtt_types_vendor_tubeszb
 maidenhead
 hshe
 chroniker
-ckb-rocksdb
 tokio-serde-json-mirror
 angelscript
 txrx
@@ -75760,7 +75630,6 @@ yakia
 knock
 libaria2-sys
 top-gg
-ustc
 snarkvm-ledger-block
 myn
 slip10
@@ -76004,7 +75873,6 @@ bdf
 wcal
 griblib_rust
 forker
-statement
 managed-thread
 torch
 scarb-metadata
@@ -76053,6 +75921,7 @@ only_torch
 proc_unroll
 minilzo3
 kraft
+memflow-kcore
 pallet-timestamp
 cyberdeck-client-web-sys
 quest-sys
@@ -76394,7 +76263,6 @@ adv_random
 trillium-tera
 fce-module-info-parser
 contrac
-git-branchless
 tet-finality-grandpa
 bevy-trait-resource-macro
 bsonsplit
@@ -76429,7 +76297,6 @@ objc2
 pavo-traits
 varu64
 memap2
-github
 sourcepawn_lexer
 relearn_derive
 GPS_project_aisha
@@ -76469,7 +76336,6 @@ rusty-torch
 agency
 winrt-graphics-sys
 atomic-dbg
-need
 hrpc-proc-macro
 sinput
 tc_redis
@@ -76536,6 +76402,7 @@ hello_world_rust_wenhaozhao
 git-gud
 symagen
 madder
+tree-sitter-graph
 embed-nu
 m6coll
 sqlite-hashes
@@ -77523,7 +77390,6 @@ pptree
 road_pe
 nannou_osc
 zigbee2mqtt_types_vendor_m_elec
-look
 rd
 tplx
 npgl
@@ -78657,7 +78523,6 @@ adafruit-kb2040
 tsukuyomi-service
 mmap-append
 makepad-live-id-macros
-tor-hsclient
 kicad_parse_gen
 servedir
 mc-sgx-io-untrusted
@@ -78882,7 +78747,6 @@ by
 quilt_multimap
 scursor
 attck
-positioning
 win32-data
 java-properties
 vsp
@@ -78970,7 +78834,6 @@ lipl
 badsort
 rokol_derive
 sntp
-tape
 nude
 dsa_sport
 weft
@@ -79106,7 +78969,6 @@ texcreate
 my_crate_iamlearningrustgfkdsldsfsdrrzeczeczeacrzrgrdsfgds
 libaster
 globalmaptiles-rs
-risc0-zkvm-circuit-gen
 memorydb
 dist_tx
 benchpmc
@@ -80794,7 +80656,6 @@ kaiju-compiler-core
 risc0-binfmt
 gnulightning-sys
 graphene-core
-teensy
 idcontain
 mesh-generation
 generate_sql
@@ -81152,7 +81013,6 @@ sha2-derive-proc-macro
 pince
 bigs
 complete-pic
-argument
 acute_input
 dscfg-server
 rm-node
@@ -81709,7 +81569,6 @@ proc-macro-hack
 tiny-docs-se
 olympia
 alass-util
-solders-message
 git-cz
 mag3110
 poisson-ticker
@@ -81922,7 +81781,6 @@ lightgbm3
 tracing-macros
 gluesql_sled_storage
 formality
-soroban-token-spec
 flexi_logger
 ngenate-audio
 ssr
@@ -82787,7 +82645,6 @@ hatty
 ttrpc
 dunge
 metasploit
-vpncloud
 thrive
 bitpanda-csv
 gdhttp
@@ -82840,7 +82697,6 @@ netmod-mem
 lc-render
 density
 tk-listen
-being
 road_elf
 mincache-impl
 atomptr
@@ -84256,7 +84112,6 @@ mining-pool
 candidate-selection
 plate-macros
 fastid
-cloudflare-zlib
 keybear-core
 open-coroutine-timer
 gitql-parser
@@ -84344,7 +84199,6 @@ serde-json-wasm
 dependabot-generator
 dbin
 neum
-soroban-contracts
 fast-srgb8
 ofb-mode
 cql
@@ -85024,7 +84878,6 @@ time-event
 byte-slab-derive
 shortuuid
 bioneer
-texture
 rxing-cli
 encoding_c
 aleph-bft-types
@@ -85117,7 +84970,6 @@ have
 rube
 minigrep_shivams906
 lcm
-omics-tools
 polytope
 parse_api
 bencodex-rs
@@ -85742,6 +85594,7 @@ rugistry
 dash2html
 matrix_uri
 aoc-runner
+tuifw
 shmemfdrs
 rusoto_iot_data
 fitsio-derive
@@ -86044,7 +85897,6 @@ adafruit-bluefruit-protocol
 yaserde
 license-gen
 xlogic-core
-nvptx-panic
 cryptostream
 rotary
 cranelift-wasm
@@ -86966,7 +86818,6 @@ othello
 maia-httpd
 messenger-rs
 ellie_renderer_utils
-dubbo-registry-nacos
 rust_learn
 an-cache
 oasis-game-core
@@ -87022,7 +86873,6 @@ lognplot
 oozz
 air-interpreter-wasm
 oxygen_emission
-tor-dirmgr
 rawcmd
 iceberg_catalog_rest_client
 bitcoin-consensus-derive
@@ -87381,6 +87231,7 @@ gara
 sharkdown
 async-socket
 cratename
+mcpat
 async-dnssd
 cenv_core
 wheel-resample
@@ -87636,7 +87487,6 @@ gallop
 arg_enum_proc_macro
 building_blocks_vox
 nvfbc
-umash
 rdxl_internals
 shell2batch
 dargo
@@ -88266,7 +88116,6 @@ assert-unmoved
 gitmap
 nasmi
 rust_icu_ecma402
-definition
 casm-be
 async-session-types
 async-atomic
@@ -88633,7 +88482,6 @@ maze-image
 rcom
 xtest-data
 ssh-types
-tensorflow-protobuf
 swagstract
 flare
 diligent-date-parser
@@ -89024,6 +88872,7 @@ rectangles
 xxhrs
 wbg-rand
 hyperlane-cardano-rpc-rust-client
+tuifw-window
 sonnenbrille
 truesocks
 obj-exporter
@@ -90253,7 +90102,6 @@ paxos
 error_hook_attr
 clia-ntex-files
 boloney
-ken
 quandl-v3
 bruteforce-macros
 siege-math
@@ -90704,7 +90552,6 @@ mini-rxtx
 praytimes
 httpfile-build
 heapsize_derive
-tor-dirclient
 adaptive_backoff
 kfc_crazy_thus
 bit_seq
@@ -90727,7 +90574,6 @@ own-ref
 brev
 goglob-common
 tokio_tasks_shutdown
-border-derive
 eng-wasm-derive
 mini-lsm
 guff-ida
@@ -90961,7 +90807,6 @@ bies
 test_crate_test
 ctr128
 fuel-indexer-macro-utils
-fhe-math
 duplicate
 swass
 self_encryption
@@ -91336,7 +91181,6 @@ moonshine-save
 wordlist
 secure_remove
 ipv4-display
-coerce-redis
 cargo-temp
 repodb_parser
 filecoin-forest
@@ -91755,7 +91599,6 @@ google-api-proto
 wasmdome-mech-sdk
 sv-parser-pp
 little
-tor-circmgr
 istio-crds
 rtlola-hir
 nbtrock
@@ -91900,7 +91743,6 @@ eosio_macros
 csnmp
 slim-futures
 bevy_simple_stat_bars
-st7920
 ojcmp
 ngenate-editor
 runiter-wot

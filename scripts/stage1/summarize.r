@@ -22,13 +22,15 @@ if (percent_lint_passed < 50 || percent_comp_passed < 50) {
 
 comp_status %>% filter(exit_code == 124) %>% nrow()
 comp_status %>% filter(exit_code == 101) %>% nrow()
+
 comp_status %>% group_by(exit_code) %>% summarize(n= n())
+
 test_counts <- read_csv(file.path(stage1_input_dir, "has_tests.csv"), col_names = c("crate_name", "test_count"), show_col_types = FALSE)
-
 has_bytecode <- read_csv(file.path(stage1_input_dir, "has_bytecode.csv"), col_names = c("crate_name", "version"), show_col_types = FALSE) %>% arrange(crate_name)
-
+passed <- comp_status %>% filter(exit_code %in% c(0, 2) ) %>% select(crate_name, version) %>% arrange(crate_name)
 has_tests_and_bytecode <- has_bytecode %>%
+    inner_join(passed, by = c("crate_name", "version")) %>%
     inner_join(test_counts, by = c("crate_name")) %>%
     filter(test_count > 0) %>%
     select(crate_name, version) %>%
-    write_csv(file.path(stage1_output_dir, ".csv"), col_names = FALSE)
+    write_csv(file.path(stage1_output_dir, "stage2.csv"), col_names = FALSE)
