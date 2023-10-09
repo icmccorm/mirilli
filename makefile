@@ -34,3 +34,9 @@ compile-stage1:
 	@mkdir -p ./data/compiled/stage1/lints
 	@(python3 ./scripts/stage1/compile.py ./data/results/stage1 ./data/compiled/stage1/lints)
 	@Rscript ./scripts/stage1/summarize.r
+
+extract-stage2:
+	@./scripts/stage2/extract.sh ./pulled
+
+compile-stage2:
+	@Rscript ./scripts/stage2/summarize.r
