@@ -17,5 +17,6 @@ if (file.exists("./data/results/stage2/tests.csv")) {
         filter(had_ffi == 0, exit_code == 1) %>%
         select(test_name, crate_name) %>%
         inner_join(population, by = c("crate_name"))
+    failed_miri_ffi %>% select(crate_name) %>% unique() %>% nrow()
     failed_miri_ffi %>% write_csv(file.path("./data/compiled/stage2/stage3.csv"), col_names = FALSE)
 }
