@@ -18,3 +18,5 @@ instances.csv
 results
 pulled
 pulled-old
+*.tar
+*.txt

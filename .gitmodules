@@ -3,3 +3,6 @@
 	url = https://github.com/icmccorm/rust.git
 	branch = miri
 	shallow = true
+[submodule "rllvm-as"]
+	path = rllvm-as
+	url = https://github.com/icmccorm/rllvm-as
