@@ -48,7 +48,9 @@ do
     fi
     TRIES_REMAINING=3
     if [ "$SUCCEEDED_DOWNLOADING" -eq "1" ]; then
+
         CURRENT_CRATE="$crate_name"
+        mkdir -p ./data/results/stage3/crates/"$crate_name"/
         cd ./extracted || exit
 
         echo "Compiling rustc test binary..."
@@ -57,7 +59,9 @@ do
         RUSTC_COMP_EXITCODE=$?
         echo "Exit: $RUSTC_COMP_EXITCODE"
         echo "$RUSTC_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_native_comp.csv
+        
         if [ "$RUSTC_COMP_EXITCODE" -eq 0 ]; then
+
             echo "Executing rustc test $test_name..."
             RUSTC_EXEC_EXITCODE=0
             OUTPUT=$(timeout $TIMEOUT cargo test -q "$test_name" -- --exact 2> err)
@@ -69,6 +73,19 @@ do
             rm err
             echo "$RUSTC_EXEC_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_native.csv
 
+            if [ ! -f "./$crate_name.sum.bc" ]; then
+                echo "Assembling bytecode files..."
+                rllvm-as "./$crate_name.sum.bc"
+                RLLVM_AS_EXITCODE=$?
+                echo "Exit: $RLLVM_AS_EXITCODE"    
+                if [ "$RLLVM_AS_EXITCODE" -ne 0 ]; then
+                    exit 1
+                fi
+                if [ ! -f "../data/results/stage3/crates/$crate_name/llvm_bc.csv" ]; then
+                    cp ./llvm_bc.csv ../data/results/stage3/crates/"$crate_name"/
+                fi
+            fi
+
             echo "Compiling miri test binary..."
             MIRI_COMP_EXITCODE=0
             OUTPUT=$(timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
@@ -76,9 +93,10 @@ do
             echo "Exit: $MIRI_COMP_EXITCODE"
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_miri_comp.csv
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
+
                 echo "Executing Miri in Stacked Borrows mode..."
                 MIRI_STACK_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS=-"Zmiri-disable-isolation -Zmiri-llvm-log" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS=-"Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-llvm-bc-singular=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 echo "Exit: $MIRI_STACK_EXITCODE"
                 echo "$MIRI_STACK_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_stack.csv
@@ -89,13 +107,10 @@ do
 
                 mv ./llvm_calls.csv "$test_name".csv
                 cp "$test_name".csv ../data/results/stage3/crates/"$crate_name"/stack/
-                if [ ! -f "../data/results/stage3/crates/$crate_name/bc.csv" ]; then
-                    cp ./llvm_bc.csv ../data/results/stage3/crates/"$crate_name"/
-                fi
 
                 echo "Executing Miri in Tree Borrows mode..."
                 MIRI_TREE_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log -Zmiri-llvm-bc-singular=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
                 echo "Exit: $MIRI_TREE_EXITCODE"
                 echo "$MIRI_TREE_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_tree.csv

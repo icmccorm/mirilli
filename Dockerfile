@@ -30,6 +30,13 @@ WORKDIR /usr/src/ffickle/rust
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri && ./x.py install miri
 RUN cargo miri setup
 
+FROM miri-compile as rllvm-as-compile
+WORKDIR /usr/src/ffickle/rllvm-as
+RUN git submodule update --init ./src/inkwell
+RUN git submodule update --init ./src/llvm-sys
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
+ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
+
 FROM miri-compile as ffickle-compile
 WORKDIR /usr/src/ffickle/
 RUN cargo search
