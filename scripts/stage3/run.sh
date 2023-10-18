@@ -3,9 +3,9 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
 export CC="clang-16 $DEFAULT_FLAGS"
 export CXX="clang++-16 $DEFAULT_FLAGS"
-rm -rf ./data/results/execution
+rm -rf ./data/results/stage3
 rm -rf ./extracted
-mkdir -p ./data/results/execution
+mkdir -p ./data/results/stage3
 mkdir -p ./data/results/stage3/crates
 touch ./data/results/stage3/failed_download.csv
 touch ./data/results/stage3/status_native_comp.csv

@@ -1,12 +1,12 @@
-rm -f ./data/results/execution/errors_stack.csv
-rm -f ./data/results/execution/errors_tree.csv
-rm -f ./data/results/execution/engaged_stack.csv
-rm -f ./data/results/execution/engaged_tree.csv
-touch ./data/results/execution/errors_stack.csv
-touch ./data/results/execution/errors_tree.csv
-touch ./data/results/execution/engaged_stack.csv
-touch ./data/results/execution/engaged_tree.csv
-RESULT_DIR=./data/results/execution
+rm -f ./data/results/stage3/errors_stack.csv
+rm -f ./data/results/stage3/errors_tree.csv
+rm -f ./data/results/stage3/engaged_stack.csv
+rm -f ./data/results/stage3/engaged_tree.csv
+touch ./data/results/stage3/errors_stack.csv
+touch ./data/results/stage3/errors_tree.csv
+touch ./data/results/stage3/engaged_stack.csv
+touch ./data/results/stage3/engaged_tree.csv
+RESULT_DIR=./data/results/stage3
 function unpack_errors() {
     ERROR_ROOT_DIR=$1
     OUTPUT_CSV=$2
