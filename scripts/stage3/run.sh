@@ -96,7 +96,7 @@ do
 
                 echo "Executing Miri in Stacked Borrows mode..."
                 MIRI_STACK_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-llvm-bc-singular=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 echo "Exit: $MIRI_STACK_EXITCODE"
                 echo "$MIRI_STACK_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_stack.csv
@@ -111,7 +111,7 @@ do
 
                 echo "Executing Miri in Tree Borrows mode..."
                 MIRI_TREE_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log -Zmiri-llvm-bc-singular=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
                 echo "Exit: $MIRI_TREE_EXITCODE"
                 echo "$MIRI_TREE_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_tree.csv
