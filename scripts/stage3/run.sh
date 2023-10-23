@@ -96,7 +96,7 @@ do
 
                 echo "Executing Miri in Stacked Borrows mode..."
                 MIRI_STACK_EXITCODE=0
-                OUTPUT=$(MIRIFLAGS=-"Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-llvm-bc-singular=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-llvm-bc-singular=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 echo "Exit: $MIRI_STACK_EXITCODE"
                 echo "$MIRI_STACK_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_stack.csv
@@ -104,9 +104,10 @@ do
                 cp err "../data/results/stage3/crates/$crate_name/stack/$test_name.err.log"
                 echo "$OUTPUT" > "../data/results/stage3/crates/$crate_name/stack/$test_name.out.log"
                 rm err
-
-                mv ./llvm_calls.csv "$test_name".csv
-                cp "$test_name".csv ../data/results/stage3/crates/"$crate_name"/stack/
+                if [ -f "./llvm_calls.csv" ]; then
+                    mv ./llvm_calls.csv "$test_name".csv
+                    cp "$test_name".csv ../data/results/stage3/crates/"$crate_name"/stack/
+                fi
 
                 echo "Executing Miri in Tree Borrows mode..."
                 MIRI_TREE_EXITCODE=0
@@ -118,9 +119,10 @@ do
                 cp err "../data/results/stage3/crates/$crate_name/tree/$test_name.err.log"
                 echo "$OUTPUT" > "../data/results/stage3/crates/$crate_name/tree/$test_name.out.log"
                 rm err
-
-                mv ./llvm_calls.csv "$test_name".csv
-                cp "$test_name".csv ../data/results/stage3/crates/"$crate_name"/tree/
+                if [ -f "./llvm_calls.csv" ]; then
+                    mv ./llvm_calls.csv "$test_name".csv
+                    cp "$test_name".csv ../data/results/stage3/crates/"$crate_name"/tree/
+                fi
             fi
         fi
         cd ..

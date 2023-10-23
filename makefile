@@ -40,3 +40,7 @@ extract-stage2:
 
 compile-stage2:
 	@Rscript ./scripts/stage2/summarize.r
+
+compile-stage3:
+	python3 ./scripts/stage3/collate.py ./data/results
+	
