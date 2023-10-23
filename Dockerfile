@@ -32,12 +32,12 @@ RUN cargo miri setup
 
 FROM miri-compile as rllvm-as-compile
 WORKDIR /usr/src/ffickle/rllvm-as
-RUN git submodule update --init ./src/inkwell
-RUN git submodule update --init ./src/llvm-sys
+RUN git submodule update --init ./inkwell
+RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
 ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
 
-FROM miri-compile as ffickle-compile
+FROM rllvm-as-compile as ffickle-compile
 WORKDIR /usr/src/ffickle/
 RUN cargo search
 RUN cargo install cargo-download cargo-dylint dylint-link
