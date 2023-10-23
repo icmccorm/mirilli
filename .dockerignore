@@ -1,3 +1,4 @@
 ./rust/build/
 ./src/early/target/
 ./src/late/target/
+./rllvm-as/target/
