@@ -16,7 +16,7 @@ touch ./data/results/stage3/status_tree.csv
 touch ./data/results/stage3/status_native.csv
 CURRENT_CRATE=""
 TIMEOUT=10m
-TIMEOUT_MIRI=5m
+TIMEOUT_MIRI=3m
 while IFS=, read -r test_name crate_name version <&3;
 do
     SUCCEEDED_DOWNLOADING=0
