@@ -112,6 +112,10 @@ do
                     mv ./llvm_conversions.csv "$test_name".convert.csv
                     cp "$test_name".convert.csv ../data/results/stage3/crates/"$crate_name"/stack/
                 fi
+                if [ -f "./llvm_upcasts.csv" ]; then
+                    mv ./llvm_upcasts.csv "$test_name".upcast.csv
+                    cp "$test_name".upcast.csv ../data/results/stage3/crates/"$crate_name"/stack/
+                fi
                 echo "Executing Miri in Tree Borrows mode..."
                 MIRI_TREE_EXITCODE=0
                 OUTPUT=$(MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-tree-borrows -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
@@ -129,6 +133,10 @@ do
                 if [ -f "./llvm_conversions.csv" ]; then
                     mv ./llvm_conversions.csv "$test_name".convert.csv
                     cp "$test_name".convert.csv ../data/results/stage3/crates/"$crate_name"/tree/
+                fi
+                if [ -f "./llvm_upcasts.csv" ]; then
+                    mv ./llvm_upcasts.csv "$test_name".upcast.csv
+                    cp "$test_name".upcast.csv ../data/results/stage3/crates/"$crate_name"/tree/
                 fi
             fi
         fi
