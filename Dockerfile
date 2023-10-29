@@ -27,23 +27,24 @@ RUN rustup default miri-custom
 
 FROM rust-compile as miri-compile
 WORKDIR /usr/src/ffickle/rust
-RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri && ./x.py install miri
-RUN cargo miri setup
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py install miri
+#RUN cargo miri setup
 
-FROM miri-compile as rllvm-as-compile
-WORKDIR /usr/src/ffickle/rllvm-as
-RUN git submodule update --init ./inkwell
-RUN git submodule update --init ./llvm-sys
-RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
-ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
+#FROM miri-compile as rllvm-as-compile
+#WORKDIR /usr/src/ffickle/rllvm-as
+#RUN git submodule update --init ./inkwell
+#RUN git submodule update --init ./llvm-sys
+#RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
+#ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
 
-FROM rllvm-as-compile as ffickle-compile
-WORKDIR /usr/src/ffickle/
-RUN cargo search
-RUN cargo install cargo-download cargo-dylint dylint-link
-RUN (rm -rf src/early/target/)
-RUN (rm -rf src/late/target/)
-RUN (cd src/early && cargo build)
-RUN (cd src/late && cargo build)
-ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
+#FROM rllvm-as-compile as ffickle-compile
+#WORKDIR /usr/src/ffickle/
+#RUN cargo search
+#RUN cargo install cargo-download cargo-dylint dylint-link
+#RUN (rm -rf src/early/target/)
+#RUN (rm -rf src/late/target/)
+#RUN (cd src/early && cargo build)
+#RUN (cd src/late && cargo build)
+#ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
 ENV CC="clang -g -O0 --save-temps=obj"
