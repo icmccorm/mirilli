@@ -1,0 +1,7 @@
+tests::gen_uplc::acceptance_test_18_or_else,aiken-project,1.0.16-alpha
+rule_tests::remove_empty_do::remove_empty_do_with_token_based_generator::empty_do_statement_in_numeric_for,darklua,0.10.2
+transaction::tests::test_transaction_build,actaeon,0.2.1
+key::test::test_bad_deserialize,aigc_secp256k1zkp,0.7.12
+rule_tests::remove_compound_assignment::remove_compound_assignment_with_token_based_generator::mod_identifier,darklua,0.10.2
+tests::gen_uplc::acceptance_test_4_concat_no_anon_func,aiken-project,1.0.16-alpha
+tests::gen_uplc::expect_head_discard_tail,aiken-project,1.0.16-alpha

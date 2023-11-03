@@ -1,0 +1,7 @@
+tests::gen_uplc::acceptance_test_27,aiken-project,1.0.16-alpha
+pedersen::tests::test_to_pubkey,aigc_secp256k1zkp,0.7.12
+test_tcp_message,actaeon,0.2.1
+test_auto_messaging,actaeon,0.2.1
+blueprint::validator::tests::list_2_tuples_as_map,aiken-project,1.0.16-alpha
+codeforces::client::tests::test_fetch_problems,algorithm-problem-client,0.6.0
+tests::gen_uplc::acceptance_test_16_drop,aiken-project,1.0.16-alpha

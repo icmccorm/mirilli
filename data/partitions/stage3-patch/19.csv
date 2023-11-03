@@ -1,0 +1,7 @@
+tests::gen_uplc::expect_head_cast_data_with_tail,aiken-project,1.0.16-alpha
+tests::gen_uplc::pass_constr_as_function,aiken-project,1.0.16-alpha
+codechef::client::tests::test_fetch_problem_list,algorithm-problem-client,0.6.0
+router::tests::test_element_split_near,actaeon,0.2.1
+stream::tests::must_stream_tokio,actix-bililive,0.1.0-beta.8
+router::tests::test_element_remove_collaps,actaeon,0.2.1
+aoj::client::tests::problems,algorithm-problem-client,0.6.0

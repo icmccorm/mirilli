@@ -1,0 +1,7 @@
+stream::tests::must_hb_tokio,actix-bililive,0.1.0-beta.8
+codeforces::client::tests::test_fetch_submissions,algorithm-problem-client,0.6.0
+message::tests::test_message_decrypt,actaeon,0.2.1
+tests::nxp_t_begin,ahrs-fusion,0.4.0
+key::test::test_pubkey_serialize,aigc_secp256k1zkp,0.7.12
+router::tests::test_element_split_far,actaeon,0.2.1
+router::tests::test_element_get_empty,actaeon,0.2.1

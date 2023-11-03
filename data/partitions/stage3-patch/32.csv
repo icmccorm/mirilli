@@ -1,0 +1,7 @@
+db_bsky::test_bsky_feeds,adenosine-pds,0.4.0
+tests::test_mixed_precision,Brains,0.2.0
+node::tests::test_node_serialize,actaeon,0.2.1
+tests::gen_uplc::opaque_value_in_test,aiken-project,1.0.16-alpha
+blueprint::validator::tests::nested_data,aiken-project,1.0.16-alpha
+tests::gen_uplc::acceptance_test_11_map_filled,aiken-project,1.0.16-alpha
+order::tests::test_download_and_save_cert,acme-lite,0.0.2

@@ -1,0 +1,7 @@
+extkey_bip32::tests::test_vector_2,aigc_keychain,5.1.2
+tests::gen_uplc::acceptance_test_19_map_wrap_void,aiken-project,1.0.16-alpha
+client::test::test_devices,adbutils,0.1.1
+tests::gen_uplc::list_clause_with_guard,aiken-project,1.0.16-alpha
+tests::gen_uplc::acceptance_test_2_repeat,aiken-project,1.0.16-alpha
+tests::test_recov_sig_serialize_compact,aigc_secp256k1zkp,0.7.12
+aoj::client::tests::test_find_user,algorithm-problem-client,0.6.0

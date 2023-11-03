@@ -1,0 +1,7 @@
+db::tests::migrations_test,adenosine-pds,0.4.0
+add_files_to_commit,cuddle-please,0.1.0
+mysql_db_tests::test_mysql_db,akd_mysql,0.8.9
+tests::gen_uplc::acceptance_test_30,aiken-project,1.0.16-alpha
+tests::gen_uplc::expect_head3_no_tail,aiken-project,1.0.16-alpha
+tests::test_low_s,aigc_secp256k1zkp,0.7.12
+aoj::client::tests::test_users,algorithm-problem-client,0.6.0

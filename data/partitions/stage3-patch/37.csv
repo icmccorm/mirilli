@@ -1,0 +1,7 @@
+router::tests::test_split_in_range_far,actaeon,0.2.1
+key::test::test_multiplication,aigc_secp256k1zkp,0.7.12
+test_known_maps,adenosine,0.4.0
+aggsig::tests::test_aggsig_exchange,aigc_secp256k1zkp,0.7.12
+handler::tests::test_connection_life,actaeon,0.2.1
+key::test::test_pk_combination,aigc_secp256k1zkp,0.7.12
+snapshot_process_help_command,darklua,0.10.2

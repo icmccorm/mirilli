@@ -1,0 +1,7 @@
+transaction::tests::test_wire_from_bytes,actaeon,0.2.1
+tests::gen_uplc::expect_head_no_tail,aiken-project,1.0.16-alpha
+key::test::skey_clear_on_drop,aigc_secp256k1zkp,0.7.12
+pedersen::tests::test_verify_commit_sum_random_keys_switch,aigc_secp256k1zkp,0.7.12
+use_name_section,alexcrichton-cranelift-wasm,0.53.0
+key::test::test_out_of_range,aigc_secp256k1zkp,0.7.12
+bucket::tests::test_bucket_add_disregard,actaeon,0.2.1

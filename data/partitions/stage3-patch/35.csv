@@ -1,0 +1,7 @@
+atcoder::client::tests::test_fetch_contest_list,algorithm-problem-client,0.6.0
+transaction::tests::test_wire_as_bytes,actaeon,0.2.1
+rule_tests::remove_empty_do::remove_empty_do_with_token_based_generator::empty_do_statement_in_generic_for,darklua,0.10.2
+tests::gen_uplc::acceptance_test_25_void_equal,aiken-project,1.0.16-alpha
+types::test::split_blinding_factor,aigc_keychain,5.1.2
+tests::gen_uplc::when_tuple_deconstruction,aiken-project,1.0.16-alpha
+message::tests::from_lua,actix-lua,0.7.0
