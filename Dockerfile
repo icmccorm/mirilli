@@ -27,7 +27,8 @@ RUN rustup default miri-custom
 
 FROM rust-compile as miri-compile
 WORKDIR /usr/src/ffickle/rust
-RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri && ./x.py install miri
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri
+RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py install miri
 RUN cargo miri setup
 
 FROM miri-compile as rllvm-as-compile
