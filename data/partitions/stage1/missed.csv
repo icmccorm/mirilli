@@ -311,3 +311,4 @@ tracing-fluent-assertions,0.3.0
 prima_datadog,0.5.0
 janetrs_version,0.1.0
 GSL-sys,3.0.0
+wasm-bindgen-gc,0.2.34
