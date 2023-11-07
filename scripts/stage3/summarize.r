@@ -85,6 +85,9 @@ tree_errors_labeled %>%
     write_csv(file.path("./data/compiled/stage3/tree/errors_unique.csv"))
 
 all_errors <- read_csv(file.path("./data/compiled/stage2/stage3.csv"), show_col_types = FALSE, col_names = c("test_name", "crate_name", "version"))
+
+
+
 timed_out_stack <- stack_borrow_status %>% filter(exit_code == 124)
 timed_out_tree <- tree_borrow_status %>% filter(exit_code == 124)
 timed_out <- timed_out_stack %>% bind_rows(timed_out_tree) %>% select(test_name, crate_name) %>% unique() %>% inner_join(all, by=("crate_name"))
