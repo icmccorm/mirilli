@@ -21,13 +21,13 @@ for file in "$1"/*.zip; do
     if [ -d "./temp/$filename" ]; then
         ROOT="./temp/$filename"
     else
-        ROOT="./temp/results"
+        ROOT="./temp/results/stage1"
     fi
     echo "$file"
-    cp -r "$ROOT"/early/* "$RESULT_DIR/early/"
-    cp -r "$ROOT"/late/* "$RESULT_DIR/late"
-    cp -r "$ROOT"/tests/* "$RESULT_DIR/tests"
-    cp -r "$ROOT"/bytecode/* "$RESULT_DIR/bytecode"
+    for file in "$ROOT"/early/*; do cp "$file" "$RESULT_DIR/"; done
+    for file in "$ROOT"/late/*; do cp "$file" "$RESULT_DIR/"; done
+    for file in "$ROOT"/tests/*; do cp "$file" "$RESULT_DIR/"; done
+    for file in "$ROOT"/bytecode/*; do cp "$file" "$RESULT_DIR/"; done
     cat "$ROOT"/status_comp.csv >> "$RESULT_DIR/status_comp.csv"
     cat "$ROOT"/status_lint.csv >> "$RESULT_DIR/status_lint.csv"
     cat "$ROOT"/failed_download.csv >> "$RESULT_DIR/failed_download.csv"
@@ -35,3 +35,4 @@ for file in "$1"/*.zip; do
     cat "$ROOT"/has_bytecode.csv >> "$RESULT_DIR/has_bytecode.csv"
     rm -rf ./temp
 done
+

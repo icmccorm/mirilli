@@ -10,17 +10,12 @@ touch "$RESULT_DIR"/status_miri_comp.csv
 touch "$RESULT_DIR"/status_stack.csv
 touch "$RESULT_DIR"/status_tree.csv
 touch "$RESULT_DIR"/status_native.csv
-echo "exit_code,crate_name,test_name" >> "$RESULT_DIR"/status_native_comp.csv
-echo "exit_code,crate_name,test_name" >> "$RESULT_DIR"/status_miri_comp.csv
-echo "exit_code,crate_name,test_name" >> "$RESULT_DIR"/status_stack.csv
-echo "exit_code,crate_name,test_name" >> "$RESULT_DIR"/status_tree.csv
-echo "exit_code,crate_name,test_name" >> "$RESULT_DIR"/status_native.csv
-echo "crate_name,version" >> "$RESULT_DIR"/visited.csv
+
 
 for FILE in "$1"/*.zip; do
     echo "Unzipping $FILE..."
     unzip -q "$FILE"
-    ROOT="./results/stage3"  
+    ROOT="./home/ec2-user/results/stage3"  
     for CRATE_DIR in "$ROOT"/crates/*; do
         echo "Visiting $CRATE_DIR..."
         CRATE_NAME=$(basename "$CRATE_DIR")
@@ -52,5 +47,5 @@ for FILE in "$1"/*.zip; do
     cat $ROOT/status_tree.csv >> "$RESULT_DIR/status_tree.csv"
     cat $ROOT/status_native.csv >> "$RESULT_DIR/status_native.csv"
     cat $ROOT/visited.csv >> "$RESULT_DIR/visited.csv"
-    rm -rf ./results
+    rm -rf ./home
 done
