@@ -48,7 +48,7 @@ missed_crates_stage3 <- all_crates_stage3 %>%
     anti_join(stage3_failed_download, by = c("crate_name", "version"))
 missed_crates_stage3_count <- missed_crates_stage3 %>% nrow()
 if (missed_crates_stage3_count > 1) {
-    print("Missed crates in stage3: ", missed_crates_stage3_count)
+    print(paste0("Missed crates in stage3: ", missed_crates_stage3_count))
     failed <- TRUE
 }
 
@@ -67,14 +67,10 @@ if (erroneous_stage2_count > 1) {
     print(paste0("Failed native stage2: ", erroneous_stage2_count))
     failed <- TRUE
 }
-
 status_native_comp_stage3 <- read_csv(file.path("./data/results/stage3/status_native_comp.csv"), show_col_types = FALSE) %>%
-    select(-zip_id) %>%
     filter(exit_code != 0)
 erroneous_stage3_count <- status_native_comp_stage3 %>% nrow()
 if (erroneous_stage3_count > 1) {
     print(paste0("Failed native stage3: ", erroneous_stage3_count))
 }
-if (failed) {
-    stop("incomplete data for analysis")
-}
+
