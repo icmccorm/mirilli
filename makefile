@@ -41,8 +41,15 @@ extract-stage2:
 compile-stage2:
 	@Rscript ./scripts/stage2/summarize.r
 
+extract-stage3:
+	@./scripts/stage3/extract.sh ./pulled
+
 compile-stage3:
 	./scripts/stage3/parse.sh
 	python3 ./scripts/stage3/collate.py ./data/results
 	Rscript ./scripts/stage3/summarize.r
+
+
+
+
 	

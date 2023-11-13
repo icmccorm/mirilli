@@ -32,7 +32,7 @@ do
         TRIES_REMAINING=3
         while [ "$TRIES_REMAINING" -gt "0" ]; do
             echo "Downloading $crate_name@$version..."
-            cargo-download -x "$crate_name==$version" --output ./extracted
+            ./scripts/misc/cargo-download.sh "$crate_name" "$version"
             EXITCODE=$?
             TRIES_REMAINING=$(( TRIES_REMAINING - 1 ))
             if [ "$EXITCODE" -eq "0" ]; then

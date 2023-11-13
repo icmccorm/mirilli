@@ -41,7 +41,7 @@ ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
 FROM rllvm-as-compile as ffickle-compile
 WORKDIR /usr/src/ffickle/
 RUN cargo search
-RUN cargo install cargo-download cargo-dylint dylint-link
+RUN cargo install cargo-dylint dylint-link
 RUN (rm -rf src/early/target/)
 RUN (rm -rf src/late/target/)
 RUN (cd src/early && cargo build)
