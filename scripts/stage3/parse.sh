@@ -1,20 +1,18 @@
-rm -f ./data/results/stage3/errors_stack.csv
-rm -f ./data/results/stage3/errors_tree.csv
-touch ./data/results/stage3/errors_stack.csv
-touch ./data/results/stage3/errors_tree.csv
-RESULT_DIR=./data/results/stage3
+ROOT_DIR=$1
+rm -f "$ROOT_DIR/errors_stack.csv"
+rm -f "$ROOT_DIR/errors_tree.csv"
+touch "$ROOT_DIR/errors_stack.csv"
+touch "$ROOT_DIR/errors_tree.csv"
 function unpack_errors() {
     ERROR_ROOT_DIR=$1
     OUTPUT_CSV=$2
-    ENGAGED_CSV=$3
     echo "Parsing errors for '$ERROR_ROOT_DIR'..."
-    for CRATE_DIR in "$RESULT_DIR"/crates/*; do
+    for CRATE_DIR in "$ROOT_DIR"/crates/*; do
         CRATE_NAME=$(basename "$CRATE_DIR")
         echo "Unpacking '$1' errors for $CRATE_NAME..."
         # if the directory isn't empty
         if [ "$(ls -A "$CRATE_DIR"/"$ERROR_ROOT_DIR")" ]; then
             for LOG in "$CRATE_DIR"/"$ERROR_ROOT_DIR"/*.err.log; do
-                CURR_DIR="$CRATE_DIR"/"$ERROR_ROOT_DIR"
                 TEST_NAME=$(basename "$LOG" .err.log)
 
                 FATAL_RUNTIME_LINE=$(cat "$LOG" | grep -n '^fatal runtime error: stack overflow' | head -n 1)
@@ -72,8 +70,8 @@ function unpack_errors() {
         fi
     done
 }
-echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext" >> $RESULT_DIR/errors_stack.csv
-echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext" >> $RESULT_DIR/errors_tree.csv
-unpack_errors "stack" "$RESULT_DIR/errors_stack.csv" "$RESULT_DIR/engaged_stack.csv"
-unpack_errors "tree" "$RESULT_DIR/errors_tree.csv" "$RESULT_DIR/engaged_tree.csv"
+echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext" >> $ROOT_DIR/errors_stack.csv
+echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext" >> $ROOT_DIR/errors_tree.csv
+unpack_errors "stack" "$ROOT_DIR/errors_stack.csv" "$ROOT_DIR/engaged_stack.csv"
+unpack_errors "tree" "$ROOT_DIR/errors_tree.csv" "$ROOT_DIR/engaged_tree.csv"
 echo "Finished!"

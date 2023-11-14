@@ -9,10 +9,9 @@ def failed():
 if(len(sys.argv) != 2):
     failed()
 
-root_dir = os.path.join(sys.argv[1], "stage3")
+root_dir = sys.argv[1]
 if not os.path.exists(root_dir):
     failed()
-
 data_dir = os.path.join(root_dir, "crates")
 
 # ensure that the directory stage3/crates exists in walk_dir
