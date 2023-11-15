@@ -1,0 +1,5 @@
+admin_can_entrust_secret_info_to_content_secret,crew-rs,0.1.0
+it_hashes_directory_with_ignored_subdirectory,paq,1.0.1
+test_cursor_sequential_memory_small_options,grebedb,1.0.0
+test_create_only,grebedb,1.0.0
+pe::test_coverage_pe_libyara_079a472d,boreal,0.3.0

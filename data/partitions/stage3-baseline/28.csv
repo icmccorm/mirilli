@@ -1,0 +1,5 @@
+testnet3::test_powers_of_beta_27_usrs,snarkvm-parameters,0.14.6
+pe::test_coverage_pe_1561_align_40,boreal,0.3.0
+test::test_cifar_10_loader_rs,cifar_10_loader,0.2.0
+module_creation,rustc-llvm-proxy,0.2.0
+dep::parse::invalid,pkgcraft-tools,0.0.11

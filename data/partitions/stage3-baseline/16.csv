@@ -1,0 +1,5 @@
+it_hashes_directory_with_ignored_file,paq,1.0.1
+test_export,grebedb,1.0.0
+test_name,crate_name,version
+version::compare::args,pkgcraft-tools,0.0.11
+it_hashes_directory_relative_symlink_without_following,paq,1.0.1

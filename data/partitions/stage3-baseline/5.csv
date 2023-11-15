@@ -1,0 +1,5 @@
+webp_data::tests::test_encoder,webp-animation,0.8.0
+page::tests::test_page_table_update,grebedb,1.0.0
+highlight::test::test_plain_text,tpnote-lib,0.22.8
+scalar::tests::mul,p256k1,5.4.1
+pe::test_coverage_pe_libyara_pe_mingw,boreal,0.3.0

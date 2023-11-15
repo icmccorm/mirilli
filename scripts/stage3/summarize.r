@@ -1,128 +1,134 @@
 library(dplyr)
 library(readr)
 library(stringr)
+library(tidyr)
+stage3_root <- file.path("./data/compiled/stage3/")
+if (!dir.exists(stage3_root)) {
+    dir.create(stage3_root)
+}
+deduplicate_error_text <- function(df) {
+    df <- df %>%
+        mutate(error_text = str_replace(error_text, "alloc[0-9]+", "alloc")) %>%
+        mutate(error_text = str_replace(error_text, "<[0-9]+>", "<>"))
+    return(df)
+}
+
+all <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
 
 compile_errors <- function(dir) {
     # get the last directory in the path
     basename <- basename(dir)
     print(basename)
+
     stage3_root <- file.path("./data/compiled/stage3/", basename)
+
     if (!dir.exists(stage3_root)) {
         dir.create(stage3_root)
     }
-    stage3_root_stack <- file.path(stage3_root, "stack")
-    if (!dir.exists(stage3_root_stack)) {
-        dir.create(stage3_root_stack)
-    }
-    stage3_root_tree <- file.path(stage3_root, "tree")
-    if (!dir.exists(stage3_root_tree)) {
-        dir.create(stage3_root_tree)
-    }
-
-    create_error_candidates <- function(df) {
-        df <- df %>%
-            filter(!(error_type %in% c("LLI Internal Error", "Unsupported Operation"))) %>%
-            mutate(full_error_text = str_replace(full_error_text, "alloc[0-9]+", "alloc")) %>%
-            mutate(full_error_text = str_replace(full_error_text, "<[0-9]+>", "<>"))
-        df <- df %>%
-            group_by(crate_name, full_error_text, error_root) %>%
-            mutate(error_id = cur_group_id()) %>%
-            ungroup()
-        max_group_id <- df %>%
-            summarize(max_group_id = max(error_id)) %>%
-            pull(max_group_id)
-        df_dependent <- df %>% filter(str_detect(error_root, "^/root/.cargo/registry/src/"))
-        df <- df %>% filter(!(error_id %in% df_dependent$error_id))
-        df_dependent <- df_dependent %>%
-            group_by(crate_name, full_error_text, error_root) %>%
-            mutate(error_id = cur_group_id() + max_group_id) %>%
-            ungroup()
-        df %>%
-            bind_rows(df_dependent) %>%
-            select(error_id, crate_name, version, test_name, error_type, error_text, full_error_text)
-    }
-    all <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
-
     source_root <- file.path(dir)
-    tree_borrow_status <- read_csv(file.path(source_root, "status_tree.csv"), show_col_types = FALSE, col_name = c("exit_code", "crate_name", "test_name"))
-    stack_borrow_status <- read_csv(file.path(source_root, "status_stack.csv"), show_col_types = FALSE, col_name = c("exit_code", "crate_name", "test_name"))
-
-    passed_in_tree_borrows <- tree_borrow_status %>%
-        filter(exit_code == 0) %>%
-        select(crate_name, test_name) %>%
-        distinct() %>%
-        mutate(passed_in_tree_borrows = TRUE)
-
-    passed_in_stack_borrows <- stack_borrow_status %>%
-        filter(exit_code == 0) %>%
-        select(crate_name, test_name) %>%
-        distinct() %>%
-        mutate(passed_in_stack_borrows = TRUE)
-
-    stack_errors <- read_csv(file.path(source_root, "errors_stack.csv"), show_col_types = FALSE) %>%
-        inner_join(all, by = c("crate_name"))
-
-    stack_errors_llvm <- stack_errors %>%
-        filter(error_type == "LLI Internal Error") %>%
-        select(crate_name, test_name)
-
-    stack_errors_roots <- read_csv(file.path(source_root, "stack_error_roots.csv"), show_col_types = FALSE)
-    stack_roots_engaged <- stack_errors_roots %>%
-        select(crate_name, test_name) %>%
-        distinct()
-    stack_errors_labeled <- stack_errors %>%
-        left_join(stack_errors_roots, by = c("crate_name", "test_name")) %>%
-        create_error_candidates() %>%
-        left_join(passed_in_tree_borrows, by = c("crate_name", "test_name")) %>%
-        mutate(passed_in_tree_borrows = ifelse(is.na(passed_in_tree_borrows), FALSE, passed_in_tree_borrows)) %>%
-        write_csv(file.path(stage3_root_stack, "errors.csv"))
-
-    stack_errors_labeled %>%
-        group_by(error_id) %>%
-        mutate(num_occurrences = n()) %>%
-        slice(1) %>%
-        ungroup() %>%
-        write_csv(file.path(stage3_root_stack, "errors_unique.csv"))
-
-    tree_errors <- read_csv(file.path(source_root, "errors_tree.csv"), show_col_types = FALSE) %>%
-        inner_join(all, by = c("crate_name"))
-    tree_errors_llvm <- tree_errors %>%
-        filter(error_type == "LLI Internal Error") %>%
-        select(crate_name, test_name)
-
-    tree_errors_roots <- read_csv(file.path(source_root, "tree_error_roots.csv"), show_col_types = FALSE)
-    tree_roots_engaged <- tree_errors_roots %>%
-        select(crate_name, test_name) %>%
-        distinct()
-    tree_errors_labeled <- tree_errors %>%
-        left_join(tree_errors_roots, by = c("crate_name", "test_name")) %>%
-        create_error_candidates() %>%
-        left_join(passed_in_stack_borrows, by = c("crate_name", "test_name")) %>%
-        mutate(passed_in_stack_borrows = ifelse(is.na(passed_in_stack_borrows), FALSE, passed_in_stack_borrows)) %>%
-        write_csv(file.path(stage3_root_tree, "errors.csv"))
-    tree_errors_labeled %>%
-        group_by(error_id) %>%
-        mutate(num_occurrences = n()) %>%
-        slice(1) %>%
-        ungroup() %>%
-        write_csv(file.path(stage3_root_tree, "errors_unique.csv"))
-    activated_tree <- read_csv(file.path(source_root, "tree_metadata.csv"), show_col_types = FALSE) %>%
+    stack_errors <- file.path(dir, "errors_stack.csv") %>%
+        read_csv(show_col_types = FALSE) %>%
         inner_join(all, by = c("crate_name")) %>%
-        select(crate_name, test_name) %>%
-        bind_rows(tree_errors_llvm) %>%
-        bind_rows(tree_roots_engaged) %>%
-        unique()
-    activated_stack <- read_csv(file.path(source_root, "stack_metadata.csv"), show_col_types = FALSE) %>%
+        mutate(borrow_mode = "stack")
+
+    stack_error_roots <- file.path(dir, "stack_error_roots.csv") %>%
+        read_csv(show_col_types = FALSE)
+
+    stack_meta <- file.path(dir, "stack_metadata.csv") %>%
+        read_csv(show_col_types = FALSE)
+
+    tree_errors <- file.path(dir, "errors_tree.csv") %>%
+        read_csv(show_col_types = FALSE) %>%
         inner_join(all, by = c("crate_name")) %>%
+        mutate(borrow_mode = "tree")
+
+    tree_error_roots <- file.path(dir, "tree_error_roots.csv") %>%
+        read_csv(show_col_types = FALSE)
+
+    tree_meta <- file.path(dir, "tree_metadata.csv") %>%
+        read_csv(show_col_types = FALSE)
+
+    tree_errors <- tree_errors %>%
+        full_join(tree_error_roots, by = c("crate_name", "test_name")) %>%
+        full_join(tree_meta, by = c("crate_name", "test_name")) %>%
+        deduplicate_error_text()
+
+    stack_errors <- stack_errors %>%
+        full_join(stack_error_roots, by = c("crate_name", "test_name")) %>%
+        full_join(stack_meta, by = c("crate_name", "test_name")) %>%
+        deduplicate_error_text()
+
+    activated_tree <- tree_meta %>%
+        inner_join(all, by = c("crate_name")) %>%
+        filter(llvm_engaged == TRUE) %>%
         select(crate_name, test_name) %>%
-        bind_rows(stack_errors_llvm) %>%
-        bind_rows(stack_roots_engaged) %>%
         unique()
-    bind_rows(activated_tree, activated_stack) %>%
-        unique() %>%
-        write_csv(file.path(stage3_root, "activated.csv"))
+    activated_stack <- stack_meta %>%
+        inner_join(all, by = c("crate_name")) %>%
+        filter(llvm_engaged == TRUE) %>%
+        select(crate_name, test_name) %>%
+        unique()
+    activated <- bind_rows(activated_tree, activated_stack) %>%
+        unique()
+    activated %>% write_csv(file.path(dir, "activated.csv"))
+    test_failed_natively <- read_csv(file.path(dir, "status_native.csv"), col_names = c("exit_code", "crate_name", "test_name"), show_col_types = FALSE) %>%
+        filter(exit_code != 0) %>%
+        filter(exit_code != 124) %>%
+        select(crate_name, test_name) %>%
+        unique()
+    missing_activation <- bind_rows(stack_errors, tree_errors) %>%
+        anti_join(bind_rows(activated_tree, activated_stack), by = c("crate_name", "test_name")) %>%
+        unique()
+    missing_activation_ub <- missing_activation %>%
+        filter(error_type %in% c("Undefined Behavior", "Stack Overflow"))
+    missing_activation_erroneous_failure <- missing_activation %>%
+        filter(error_type %in% c("Test Failed")) %>%
+        anti_join(test_failed_natively, by = c("crate_name", "test_name"))
+    missing_activation <- bind_rows(missing_activation_ub, missing_activation_erroneous_failure) %>%
+        unique()
+    write_csv(missing_activation, file.path(dir, "missing_activation.csv"))
+    errors <- bind_rows(stack_errors, tree_errors) %>%
+        filter(error_type != "Unsupported Operation") %>%
+        filter(error_type != "LLI Internal Error") %>%
+        select(crate_name, test_name, borrow_mode, error_type, error_text, error_root)
+    errors_ub <- errors %>% filter(error_type != "Test Failed")
+    errors_erroneous_failure <- errors %>%
+        filter(error_type == "Test Failed") %>%
+        anti_join(test_failed_natively, by = c("crate_name", "test_name"))
+    errors <- bind_rows(errors_ub, errors_erroneous_failure) %>%
+        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, error_root)) %>%
+        group_by(crate_name, error_text_stack, error_text_tree, error_root_stack, error_root_tree) %>%
+        mutate(error_id = cur_group_id()) %>%
+        ungroup()
+    return(errors)
 }
-dirs <- list.dirs("./data/results/stage3", recursive = FALSE)
-for (dir in dirs) {
-    compile_errors(dir)
-}
+zeroed <- compile_errors("./data/results/stage3/zeroed")
+zeroed_deduplicated <- zeroed %>%
+    group_by(error_id) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(-error_id)
+uninit <- compile_errors("./data/results/stage3/uninit")
+uninit_deduplicated <- uninit %>%
+    group_by(error_id) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(-error_id)
+zeroed_labelled <- zeroed %>% mutate(mode = "zeroed")
+uninit_labelled <- uninit %>% mutate(mode = "uninit")
+all_errors <- bind_rows(zeroed_labelled, uninit_labelled) %>%
+    write_csv(file.path(stage3_root, "errors.csv"))
+
+same_for_both <- zeroed_deduplicated %>%
+    inner_join(uninit_deduplicated, by = join_by(crate_name, test_name, error_type_stack, error_type_tree, error_text_stack, error_text_tree, error_root_stack, error_root_tree)) %>%
+    arrange(crate_name, test_name) %>%
+    mutate(unique_error_id = paste0("U", row_number())) %>%
+    inner_join(all, by = c("crate_name")) %>%
+    select(unique_error_id, crate_name, version, test_name, error_type_stack, error_type_tree, error_text_stack, error_text_tree)
+same_for_both %>% write_csv(file.path(stage3_root, "errors_unique.csv"))
+different_for_uninit <- uninit_deduplicated %>%
+    anti_join(same_for_both) %>%
+    write_csv(file.path("./error_in_uninit.csv"))
+different_for_zeroed <- zeroed_deduplicated %>%
+    anti_join(same_for_both) %>%
+    write_csv(file.path("./error_in_zeroed.csv"))

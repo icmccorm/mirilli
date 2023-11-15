@@ -1,0 +1,5 @@
+testnet3::test_shifted_powers_of_beta_27_usrs,snarkvm-parameters,0.14.6
+f128::tests::f128_signaling,softfloat-wrapper,0.3.4
+elf::test_coverage_elf_x64_file,boreal,0.3.0
+kats_picnic3_l1,libpicnic-sys,0.1.0+3.0.18
+it_hashes_directory_from_any_path,paq,1.0.1

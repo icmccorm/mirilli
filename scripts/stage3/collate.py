@@ -28,7 +28,7 @@ def extract_lines(text):
         if line.startswith("----------------------------"):
             in_trace = False
             continue
-        if in_trace:
+        if in_trace and not (line.startswith("@")) and not (line.strip() == ""):
             lines.append(line)
     return lines
 

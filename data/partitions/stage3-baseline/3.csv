@@ -1,0 +1,5 @@
+it_hashes_directory,paq,1.0.1
+kats_picnic_l1_full,libpicnic-sys,0.1.0+3.0.18
+data::ciphertext::parse::tests::test_parse,snarkvm-console-program,0.14.6
+pe::test_coverage_pe_libyara_mtxex,boreal,0.3.0
+test_no_file_locking,grebedb,1.0.0
