@@ -1,7 +1,3 @@
-tests::gen_uplc::list_clause_with_assign2,aiken-project,1.0.16-alpha
-key::test::test_negate,aigc_secp256k1zkp,0.7.12
-tests::test_initial,Brains,0.2.0
-aggsig::tests::test_aggsig_single,aigc_secp256k1zkp,0.7.12
-router::tests::test_element_remove_root,actaeon,0.2.1
-tests::gen_uplc::opaque_value_in_datum,aiken-project,1.0.16-alpha
-snapshot_help_command,darklua,0.10.2
+avx_tests::test_sub_horizontal_m256d,safe_arch,0.7.1
+control::tests::generate_scripts_generates_missing_maintainer_scripts_for_unit_in_workspace_package,cargo-deb,2.0.0-rc.1
+ssse3_tests::test_add_horizontal_i32_m128i,safe_arch,0.7.1

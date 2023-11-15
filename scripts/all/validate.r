@@ -3,13 +3,13 @@ suppressWarnings(suppressMessages(suppressPackageStartupMessages({
     library(readr)
     library(stringr)
 })))
-
+logging_dir <- file.path("./validation")
 # if the directory 'build' exists, remove it
-if (dir.exists("./build")) {
-    unlink("./build", recursive = TRUE)
+if (dir.exists(logging_dir)) {
+    unlink(logging_dir, recursive = TRUE)
 }
 # create the directory 'build'
-dir.create("./build")
+dir.create(logging_dir)
 
 failed <- FALSE
 
@@ -63,7 +63,7 @@ missed_tests_stage3 <- all_tests_stage3 %>%
     anti_join(visited_tests, by = c("crate_name", "test_name"))
 missed_tests_stage3 %>% 
     select("test_name", "crate_name", "version") %>%
-    write_csv(file.path("./build/missed_tests_stage3.csv"), col_names = FALSE)
+    write_csv(file.path(logging_dir, "missed_tests_stage3.csv"), col_names = FALSE)
 missed_tests_stage3_count <- missed_tests_stage3 %>% nrow()
 if (missed_tests_stage3_count > 1) {
     print(paste0("Missed tests in stage3: ", missed_tests_stage3_count))
@@ -99,3 +99,19 @@ get_activated <- function(dir) {
 
 activated_baseline <- get_activated("./data/results/stage3/baseline")
 activated_zeroed <- get_activated("./data/results/stage3/zeroed")
+
+diff_baseline_zeroed <- activated_baseline %>% anti_join(activated_zeroed, by = c("test_name", "crate_name"))
+diff_baseline_zeroed_count <- diff_baseline_zeroed %>% nrow()
+if (diff_baseline_zeroed_count > 1) {
+    print(paste0("There are ", diff_baseline_zeroed_count, " tests that activated during baseline didn't activate in zeroed."))
+    failed <- TRUE
+}
+error_status <- diff_baseline_zeroed %>% 
+    inner_join(, by = c("crate_name")) %>%
+    select(test_name, crate_name, exit_code) %>%
+    unique()
+
+zeroed_stack_errors_llvm <- read_csv(file.path("./data/results/stage3/zeroed/errors_stack.csv"), show_col_types = FALSE)
+
+diff_baseline_zeroed %>% write_csv(file.path(logging_dir, "diff_baseline_zeroed.csv"), col_names = FALSE)
+

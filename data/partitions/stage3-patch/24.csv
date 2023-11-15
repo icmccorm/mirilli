@@ -1,7 +1,3 @@
-builder::tests::must_build_real_config_tokio,actix-bililive,0.1.0-beta.8
-blueprint::validator::tests::generics,aiken-project,1.0.16-alpha
-tests::gen_uplc::acceptance_test_11_map_empty,aiken-project,1.0.16-alpha
-tests::gen_uplc::when_bool_is_false,aiken-project,1.0.16-alpha
-db_bsky::test_bsky_profile,adenosine-pds,0.4.0
-rule_tests::remove_compound_assignment::remove_compound_assignment_with_token_based_generator::multiply_identifier,darklua,0.10.2
-router::tests::test_element_split,actaeon,0.2.1
+avx_tests::test_round_m256,safe_arch,0.7.1
+control::tests::generate_scripts_generates_missing_maintainer_scripts_for_unit_in_root_package,cargo-deb,2.0.0-rc.1
+ssse3_tests::test_sign_apply_i16_m128i,safe_arch,0.7.1

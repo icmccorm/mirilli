@@ -1,7 +1,0 @@
-tests::signature_serialize_roundtrip,aigc_secp256k1zkp,0.7.12
-tests::gen_uplc::acceptance_test_5_direct_head,aiken-project,1.0.16-alpha
-blueprint::validator::tests::mint_parameterized,aiken-project,1.0.16-alpha
-atcoder::client::tests::test_fetch_problem_list,algorithm-problem-client,0.6.0
-tests::gen_uplc::expect_head3_cast_data_no_tail,aiken-project,1.0.16-alpha
-router::tests::test_split_collaps_working,actaeon,0.2.1
-message::tests::from_lua_error,actix-lua,0.7.0

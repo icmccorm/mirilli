@@ -1,7 +1,3 @@
-blueprint::validator::tests::tuples,aiken-project,1.0.16-alpha
-apply_default_config_to_specific_file,darklua,0.10.2
-tests::gen_uplc::acceptance_test_10_map_some,aiken-project,1.0.16-alpha
-tests::gen_uplc::acceptance_test_26_foldr,aiken-project,1.0.16-alpha
-pedersen::tests::rewind_message,aigc_secp256k1zkp,0.7.12
-aggsig::tests::test_aggsig_fuzz,aigc_secp256k1zkp,0.7.12
-rule_tests::remove_empty_do::remove_empty_do_with_readable_generator::empty_do_statement_in_numeric_for,darklua,0.10.2
+sse3_tests::test_add_horizontal_m128,safe_arch,0.7.1
+avx_tests::test_store_masked_m256d,safe_arch,0.7.1
+rdseed_tests::test_rdseed_u64,safe_arch,0.7.1

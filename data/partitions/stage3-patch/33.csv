@@ -1,7 +1,3 @@
-tests::gen_uplc::acceptance_test_8_is_empty,aiken-project,1.0.16-alpha
-key::test::invalid_secret_key,aigc_secp256k1zkp,0.7.12
-rule_tests::remove_empty_do::remove_empty_do_with_dense_generator::empty_do_statements_in_local_function,darklua,0.10.2
-tests::test_create,alloca,0.4.0
-test_rules_multipacket,a2s,0.5.2
-order::tests::test_get_authorizations,acme-lite,0.0.2
-pedersen::tests::test_from_pubkey,aigc_secp256k1zkp,0.7.12
+ssse3_tests::test_sign_apply_i32_m128i,safe_arch,0.7.1
+avx_tests::test_blend_varying_m256,safe_arch,0.7.1
+run_cargo_deb_command_on_example_dir_with_separate_debug_symbols,cargo-deb,2.0.0-rc.1

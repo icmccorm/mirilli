@@ -1,7 +1,3 @@
-test_topic_random,actaeon,0.2.1
-test_rules_multipacket2,a2s,0.5.2
-bucket::tests::test_bucket_remove_empty,actaeon,0.2.1
-bucket::tests::test_bucket_add_error_lim,actaeon,0.2.1
-pedersen::tests::test_range_proof,aigc_secp256k1zkp,0.7.12
-tests::signature_lax_der,aigc_secp256k1zkp,0.7.12
-use_fallthrough_return,alexcrichton-cranelift-wasm,0.53.0
+avx_tests::test_addsub_m256,safe_arch,0.7.1
+avx_tests::test_shuffle_av_f32_all_m128,safe_arch,0.7.1
+avx_tests::test_round_m256d,safe_arch,0.7.1

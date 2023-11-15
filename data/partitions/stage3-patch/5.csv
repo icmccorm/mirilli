@@ -1,7 +1,3 @@
-tests::gen_uplc::acceptance_test_5_direct_2_heads,aiken-project,1.0.16-alpha
-tests::gen_uplc::record_update_output_1_val,aiken-project,1.0.16-alpha
-key::test::pubkey_hash,aigc_secp256k1zkp,0.7.12
-rule_tests::remove_empty_do::remove_empty_do_with_readable_generator::empty_do_statement_in_generic_for,darklua,0.10.2
-tests::gen_uplc::acceptance_test_6_if_else,aiken-project,1.0.16-alpha
-client::test::test_connect,adbutils,0.1.1
-dir::tests::test_create_account,acme-lite,0.0.2
+avx_tests::test_load_masked_m128,safe_arch,0.7.1
+avx_tests::test_dot_product_m256,safe_arch,0.7.1
+ssse3_tests::test_sub_horizontal_saturating_i16_m128i,safe_arch,0.7.1

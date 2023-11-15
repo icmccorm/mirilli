@@ -1,7 +1,3 @@
-client::test::test_path,adbutils,0.1.1
-pedersen::tests::test_commit_sum,aigc_secp256k1zkp,0.7.12
-order::auth::tests::test_get_challenges,acme-lite,0.0.2
-tests::set_and_get_quaternion,ahrs-fusion,0.4.0
-tests::gen_uplc::acceptance_test_7_unzip,aiken-project,1.0.16-alpha
-tests::gen_uplc::when_tuple_empty_lists,aiken-project,1.0.16-alpha
-pedersen::tests::test_verify_commit_sum_random_keys,aigc_secp256k1zkp,0.7.12
+sse3_tests::test_add_horizontal_m128d,safe_arch,0.7.1
+ssse3_tests::test_add_horizontal_i16_m128i,safe_arch,0.7.1
+avx_tests::test_load_m128_splat_m256,safe_arch,0.7.1

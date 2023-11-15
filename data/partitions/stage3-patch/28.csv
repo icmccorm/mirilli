@@ -1,7 +1,2 @@
-node::tests::test_address_from_bytes,actaeon,0.2.1
-apply_default_config_in_place,darklua,0.10.2
-blueprint::validator::tests::recursive_generic_types,aiken-project,1.0.16-alpha
-key::test::test_pubkey_from_bad_slice,aigc_secp256k1zkp,0.7.12
-router::tests::test_safe_random,actaeon,0.2.1
-tests::sign_and_verify_extreme,aigc_secp256k1zkp,0.7.12
-tests::bad_recovery,aigc_secp256k1zkp,0.7.12
+dependencies::resolve_test,cargo-deb,2.0.0-rc.1
+sse4_2_tests::test_crc32_u32,safe_arch,0.7.1

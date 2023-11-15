@@ -1,7 +1,3 @@
-rule_tests::remove_empty_do::remove_empty_do_with_dense_generator::multiple_empty_do_statements,darklua,0.10.2
-tests::gen_uplc::test_init_3,aiken-project,1.0.16-alpha
-rule_tests::remove_empty_do::remove_empty_do_with_readable_generator::multiple_empty_do_statements,darklua,0.10.2
-node::tests::test_address_xor_zero,actaeon,0.2.1
-router::tests::test_split_add_near_top,actaeon,0.2.1
-tests::sign_and_verify_fail,aigc_secp256k1zkp,0.7.12
-acc::tests::test_create_order,acme-lite,0.0.2
+bmi1_tests::test_bit_extract_u64,safe_arch,0.7.1
+rdseed_tests::test_rdseed_u32,safe_arch,0.7.1
+bmi2_tests::test_population_deposit_u64,safe_arch,0.7.1

@@ -1,7 +1,3 @@
-key::test::test_bad_serde_deserialize,aigc_secp256k1zkp,0.7.12
-tests::gen_uplc::acceptance_test_6_equals,aiken-project,1.0.16-alpha
-node::tests::test_to_address_bytes,actaeon,0.2.1
-tests::gen_uplc::expect_empty_list_on_filled_list,aiken-project,1.0.16-alpha
-tests::capabilities,aigc_secp256k1zkp,0.7.12
-order::tests::test_finalize,acme-lite,0.0.2
-key::test::test_inverse,aigc_secp256k1zkp,0.7.12
+avx_tests::test_addsub_m256d,safe_arch,0.7.1
+ssse3_tests::test_add_horizontal_saturating_i16_m128i,safe_arch,0.7.1
+ssse3_tests::test_mul_i16_scale_round_m128i,safe_arch,0.7.1

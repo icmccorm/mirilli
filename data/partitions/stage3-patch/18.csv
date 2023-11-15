@@ -1,7 +1,3 @@
-router::tests::test_property_in_range,actaeon,0.2.1
-tests::gen_uplc::list_clause_with_guard2,aiken-project,1.0.16-alpha
-test::test_make_directory,acme-lite,0.0.2
-tests::gen_uplc::acceptance_test_12_filter_even,aiken-project,1.0.16-alpha
-pedersen::tests::rewind_empty_message,aigc_secp256k1zkp,0.7.12
-router::tests::test_element_add_to_leaf,actaeon,0.2.1
-tests::invalid_pubkey,aigc_secp256k1zkp,0.7.12
+avx_tests::test_max_m256,safe_arch,0.7.1
+avx_tests::test_shuffle_av_f64_all_m128d,safe_arch,0.7.1
+bmi2_tests::test_population_extract_u64,safe_arch,0.7.1

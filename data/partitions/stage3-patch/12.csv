@@ -1,7 +1,3 @@
-extkey_bip32::tests::test_vector_3,aigc_keychain,5.1.2
-key::test::test_add_exp_bad_context,aigc_secp256k1zkp,0.7.12
-pedersen::tests::test_sign_with_pubkey_from_commitment,aigc_secp256k1zkp,0.7.12
-errors::snapshot_multiple_configuration_file_found,darklua,0.10.2
-repo::test_repo_mst,adenosine,0.4.0
-key::test::test_serialize,aigc_secp256k1zkp,0.7.12
-aggsig::tests::test_aggsig_multisig,aigc_secp256k1zkp,0.7.12
+avx_tests::test_add_horizontal_m256,safe_arch,0.7.1
+avx_tests::test_convert_to_i32_m128i_from_m256d,safe_arch,0.7.1
+adx_tests::test_add_carry_u32,safe_arch,0.7.1

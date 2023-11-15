@@ -1,7 +1,3 @@
-test_rules,a2s,0.5.2
-test_default_style,aflak_imgui-sys,0.18.1
-pedersen::tests::test_bullet_proof_single,aigc_secp256k1zkp,0.7.12
-tests::apply_settings,actix-settings,0.6.0
-rule_tests::remove_empty_do::remove_empty_do_with_dense_generator::empty_do_statement_in_generic_for,darklua,0.10.2
-builder::tests::build_script_error,actix-lua,0.7.0
-tests::gen_uplc::acceptance_test_17_take,aiken-project,1.0.16-alpha
+ssse3_tests::atoi_test,safe_arch,0.7.1
+avx_tests::test_sub_horizontal_m256,safe_arch,0.7.1
+avx_tests::test_cmp_op_mask_m256d,safe_arch,0.7.1

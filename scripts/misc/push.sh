@@ -1,5 +1,5 @@
 #!/bin/bash
-INDEX=1
+INDEX=51
 while IFS=, read address _ <&3; do 
   echo "Starting job $INDEX on EC2 instance $address"
   ssh -o "StrictHostKeyChecking=no" -i ~/.ssh/ffickle.pem ec2-user@$address "screen -d -m ./stage3.sh ./data/partitions/stage3-activated/$INDEX.csv"

@@ -1,7 +1,3 @@
-bucket::tests::test_bucket_remove,actaeon,0.2.1
-router::tests::test_split_add_deep,actaeon,0.2.1
-router::tests::test_full_stress,actaeon,0.2.1
-tests::gen_uplc::expect_empty_list_on_new_list,aiken-project,1.0.16-alpha
-tests::test_norm_net,Brains,0.2.0
-tests::gen_uplc::expect_head_cast_data_no_tail,aiken-project,1.0.16-alpha
-message::tests::test_message_encrypt,actaeon,0.2.1
+control::tests::generate_scripts_augments_maintainer_scripts_for_unit_in_root_package,cargo-deb,2.0.0-rc.1
+run_cargo_deb_command_on_example_dir_with_version,cargo-deb,2.0.0-rc.1
+rdrand_tests::test_rdrand_u16,safe_arch,0.7.1

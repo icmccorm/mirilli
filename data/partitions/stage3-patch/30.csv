@@ -1,7 +1,2 @@
-aggsig::tests::test_aggsig_batch,aigc_secp256k1zkp,0.7.12
-record::tests::test_bucket_subscribe,actaeon,0.2.1
-router::tests::test_should_be_local_manual,actaeon,0.2.1
-transaction::tests::test_transaction_from_bytes,actaeon,0.2.1
-tests::test_debug_output,aigc_secp256k1zkp,0.7.12
-key::test::skey_from_slice,aigc_secp256k1zkp,0.7.12
-test_auto_bootstrap,actaeon,0.2.1
+avx_tests::test_add_horizontal_m256d,safe_arch,0.7.1
+bmi1_tests::test_bit_extract2_u64,safe_arch,0.7.1

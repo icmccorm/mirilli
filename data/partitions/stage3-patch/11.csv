@@ -1,7 +1,3 @@
-router::tests::test_element_try_add,actaeon,0.2.1
-rule_tests::remove_compound_assignment::remove_compound_assignment_with_token_based_generator::increase_true_in_parenthese_for_index,darklua,0.10.2
-bucket::tests::test_bucket_dedup,actaeon,0.2.1
-ecdh::tests::ecdh,aigc_secp256k1zkp,0.7.12
-fetch::credentials::test::credentials_build_form_test,advocat,3.0.0
-apply_default_config_to_output_with_nested_content,darklua,0.10.2
-transaction::tests::test_transaction_age,actaeon,0.2.1
+avx_tests::test_permute2z_m256i,safe_arch,0.7.1
+avx_tests::test_reciprocal_sqrt_m256,safe_arch,0.7.1
+avx_tests::test_store_masked_m128,safe_arch,0.7.1

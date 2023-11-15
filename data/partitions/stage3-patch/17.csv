@@ -1,7 +1,3 @@
-rule_tests::remove_compound_assignment::remove_compound_assignment_with_token_based_generator::nested_field_expressions,darklua,0.10.2
-tests::sign_with_recovery,aigc_secp256k1zkp,0.7.12
-blueprint::validator::tests::opaque_singleton_variants,aiken-project,1.0.16-alpha
-db_bsky::test_bsky_thread,adenosine-pds,0.4.0
-test_interface,actaeon,0.2.1
-test_tcp_outgoing,actaeon,0.2.1
-yukicoder::tests::test_fetch_problems,algorithm-problem-client,0.6.0
+rdrand_tests::test_rdrand_u32,safe_arch,0.7.1
+avx_tests::test_load_m128d_splat_m256d,safe_arch,0.7.1
+avx_tests::test_permute2z_m256,safe_arch,0.7.1

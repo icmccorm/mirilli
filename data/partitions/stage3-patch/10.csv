@@ -1,7 +1,3 @@
-tests::instantiate_nxp,ahrs-fusion,0.4.0
-transaction::tests::test_wire_to_transaction,actaeon,0.2.1
-keychain::test::secret_key_addition,aigc_keychain,5.1.2
-node::tests::test_address_random,actaeon,0.2.1
-snapshot_minify_help_command,darklua,0.10.2
-router::tests::test_element_get_top,actaeon,0.2.1
-apply_default_config_to_specific_file_and_output_to_directory,darklua,0.10.2
+build_workspaces,cargo-deb,2.0.0-rc.1
+avx_tests::test_max_m256d,safe_arch,0.7.1
+control::tests::generate_scripts_does_nothing_if_maintainer_scripts_is_not_set,cargo-deb,2.0.0-rc.1
