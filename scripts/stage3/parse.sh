@@ -3,6 +3,7 @@ rm -f "$ROOT_DIR/errors_stack.csv"
 rm -f "$ROOT_DIR/errors_tree.csv"
 touch "$ROOT_DIR/errors_stack.csv"
 touch "$ROOT_DIR/errors_tree.csv"
+
 function unpack_errors() {
     ERROR_ROOT_DIR=$1
     OUTPUT_CSV=$2
@@ -17,19 +18,19 @@ function unpack_errors() {
 
                 FATAL_RUNTIME_LINE=$(cat "$LOG" | grep -n '^fatal runtime error: stack overflow' | head -n 1)
                 if [ "$FATAL_RUNTIME_LINE" != "" ]; then
-                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$FATAL_RUNTIME_LINE\",\"Stack Overflow\",\"\",\"\"" >> $OUTPUT_CSV
+                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$FATAL_RUNTIME_LINE\",\"Stack Overflow\",\"\",\"\",\"\"" >> $OUTPUT_CSV
                     continue
                 fi
                 UNHANDLED_TYPE_LINE=$(cat "$LOG" | grep -n '^Unhandled type' | head -n 1)
                 if [ "$UNHANDLED_TYPE_LINE" != "" ]; then
                     UNHANDLED_TYPE_TEXT=$(echo "$UNHANDLED_TYPE_LINE" | cut -d ':' -f 3)
-                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$UNHANDLED_TYPE_LINE\",\"LLI Internal Error\",\"Unhandled type\",\"$UNHANDLED_TYPE_TEXT\"" >> $OUTPUT_CSV
+                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$UNHANDLED_TYPE_LINE\",\"LLI Internal Error\",\"Unhandled type\",\"$UNHANDLED_TYPE_TEXT\",\"\"" >> $OUTPUT_CSV
                     continue
                 fi
                 LLVM_ERROR_LINE=$(cat "$LOG" | grep -n '^LLVM ERROR:' | head -n 1)
                 if [ "$LLVM_ERROR_LINE" != "" ]; then
                     LLVM_ERROR_TEXT=$(echo "$LLVM_ERROR_LINE" | cut -d ':' -f 3)
-                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$LLVM_ERROR_LINE\",\"LLI Internal Error\",\"$LLVM_ERROR_TEXT\",\"\"" >> $OUTPUT_CSV
+                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$LLVM_ERROR_LINE\",\"LLI Internal Error\",\"$LLVM_ERROR_TEXT\",\"\",\"\"" >> $OUTPUT_CSV
                     continue
                 fi
                 # check if there's a line of the form "error: could not compile [...] due to previous error"
@@ -38,13 +39,21 @@ function unpack_errors() {
                 if [ "$PREVIOUS_ERROR_LINE" != "" ]; then
                     ERROR_LINE=$(cat "$LOG" | grep -n '^error:' | head -n 1)
                     ERROR_TEXT=$(echo "$ERROR_LINE" | cut -d ':' -f 3)
-                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$PREVIOUS_ERROR_LINE\",\"Compilation Failed\",\"$ERROR_TEXT\",\"\"" >> $OUTPUT_CSV
+                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$PREVIOUS_ERROR_LINE\",\"Compilation Failed\",\"$ERROR_TEXT\",\"\",\"\"" >> $OUTPUT_CSV
                     continue
                 fi
                 
                 # find the first line that includes error, but doesn't necessarily start with it:
                 # this is the first error that occurred during compilation
                 ERROR_LINE=$(cat "$LOG" | grep -n '^error:' | head -n 1)
+                ERROR_LINE_NUMBER=$(echo "$ERROR_LINE" | cut -d ':' -f 1)
+                NEXT_LINE_NUMBER=$((ERROR_LINE_NUMBER + 1))
+                NEXT_LINE=$(awk -v line=$NEXT_LINE_NUMBER 'NR == line' "$LOG")
+                if [[ $NEXT_LINE == *"-->"* ]]; then
+                    ERROR_LOCATION=${NEXT_LINE#*--> }
+                else
+                    ERROR_LOCATION=""
+                fi
                 if [ "$ERROR_LINE" != "" ]; then
                     ERROR_TYPE=$(echo "$ERROR_LINE" | cut -d ':' -f 3)
                     FULL_ERROR_TYPE=${ERROR_LINE#*error:}
@@ -62,7 +71,7 @@ function unpack_errors() {
                     fi
                     ERROR_TEXT=$(echo "$ERROR_LINE" | cut -d ':' -f 4)
                     ERROR_SUBTEXT=$(echo "$ERROR_LINE" | cut -d ':' -f 5)
-                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$FULL_ERROR_TYPE\",\"$ERROR_TYPE\",\"$ERROR_TEXT\",\"$ERROR_SUBTEXT\"" >> $OUTPUT_CSV
+                    echo "$CRATE_NAME,\"$TEST_NAME\",\"$FULL_ERROR_TYPE\",\"$ERROR_TYPE\",\"$ERROR_TEXT\",\"$ERROR_SUBTEXT\",\"$ERROR_LOCATION\"" >> $OUTPUT_CSV
                 fi
             done
         else
@@ -70,8 +79,8 @@ function unpack_errors() {
         fi
     done
 }
-echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext" >> $ROOT_DIR/errors_stack.csv
-echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext" >> $ROOT_DIR/errors_tree.csv
+echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext,error_location_rust" >> $ROOT_DIR/errors_stack.csv
+echo "crate_name,test_name,full_error_text,error_type,error_text,error_subtext,error_location_rust" >> $ROOT_DIR/errors_tree.csv
 unpack_errors "stack" "$ROOT_DIR/errors_stack.csv" "$ROOT_DIR/engaged_stack.csv"
 unpack_errors "tree" "$ROOT_DIR/errors_tree.csv" "$ROOT_DIR/engaged_tree.csv"
 echo "Finished!"

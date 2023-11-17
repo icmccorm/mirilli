@@ -12,123 +12,148 @@ deduplicate_error_text <- function(df) {
         mutate(error_text = str_replace(error_text, "<[0-9]+>", "<>"))
     return(df)
 }
+valid_error_type <- function(type) {
+    (type != "Unsupported Operation" & type != "LLI Internal Error" & type != "Timeout")
+}
+errored_exit_code <- function(exit_code) {
+    exit_code != 0 & exit_code != 124
+}
+
+prepare_errors <- function(dir, type) {
+    error_path <- file.path(dir, paste0("errors", "_", type, ".csv"))
+    root_path <- file.path(dir, paste0(type, "_error_roots.csv"))
+    meta_path <- file.path(dir, paste0(type, "_metadata.csv"))
+    errors <- read_csv(error_path, show_col_types = FALSE) %>%
+        inner_join(all, by = c("crate_name"))
+    error_roots <- read_csv(root_path, show_col_types = FALSE)
+    error_rust_locations <- errors %>%
+        select(crate_name, test_name, error_location_rust) %>%
+        rename(error_root = error_location_rust) %>%
+        filter(!is.na(error_root))
+    error_roots <- error_roots %>%
+        anti_join(error_rust_locations, by = c("crate_name", "test_name")) %>%
+        bind_rows(error_rust_locations)
+    meta <- read_csv(meta_path, show_col_types = FALSE)
+    errors <- errors %>%
+        full_join(error_roots, by = c("crate_name", "test_name")) %>%
+        full_join(meta, by = c("crate_name", "test_name")) %>%
+        deduplicate_error_text()
+    exit_codes <- read_csv(file.path(dir, paste0("status_", type, ".csv")), col_names = c("exit_code", "crate_name", "test_name"), show_col_types = FALSE)
+    errors <- errors %>%
+        full_join(exit_codes, by = c("crate_name", "test_name")) %>%
+        mutate(error_type = if_else(exit_code == 124, "Timeout", error_type)) %>%
+        mutate(borrow_mode = type)
+    return(errors)
+}
 
 all <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
 
 compile_errors <- function(dir) {
-    # get the last directory in the path
     basename <- basename(dir)
     print(basename)
-
-    stage3_root <- file.path("./data/compiled/stage3/", basename)
-
-    if (!dir.exists(stage3_root)) {
-        dir.create(stage3_root)
-    }
-    source_root <- file.path(dir)
-    stack_errors <- file.path(dir, "errors_stack.csv") %>%
-        read_csv(show_col_types = FALSE) %>%
-        inner_join(all, by = c("crate_name")) %>%
-        mutate(borrow_mode = "stack")
-
-    stack_error_roots <- file.path(dir, "stack_error_roots.csv") %>%
-        read_csv(show_col_types = FALSE)
-
-    stack_meta <- file.path(dir, "stack_metadata.csv") %>%
-        read_csv(show_col_types = FALSE)
-
-    tree_errors <- file.path(dir, "errors_tree.csv") %>%
-        read_csv(show_col_types = FALSE) %>%
-        inner_join(all, by = c("crate_name")) %>%
-        mutate(borrow_mode = "tree")
-
-    tree_error_roots <- file.path(dir, "tree_error_roots.csv") %>%
-        read_csv(show_col_types = FALSE)
-
-    tree_meta <- file.path(dir, "tree_metadata.csv") %>%
-        read_csv(show_col_types = FALSE)
-
-    tree_errors <- tree_errors %>%
-        full_join(tree_error_roots, by = c("crate_name", "test_name")) %>%
-        full_join(tree_meta, by = c("crate_name", "test_name")) %>%
-        deduplicate_error_text()
-
-    stack_errors <- stack_errors %>%
-        full_join(stack_error_roots, by = c("crate_name", "test_name")) %>%
-        full_join(stack_meta, by = c("crate_name", "test_name")) %>%
-        deduplicate_error_text()
-
-    activated_tree <- tree_meta %>%
-        inner_join(all, by = c("crate_name")) %>%
-        filter(llvm_engaged == TRUE) %>%
-        select(crate_name, test_name) %>%
+    stack_errors <- prepare_errors(dir, "stack")
+    tree_errors <- prepare_errors(dir, "tree")
+    status_col_names <- col_names <- c("exit_code", "crate_name", "test_name")
+    native_comp_status <- read_csv(file.path(dir, "status_native_comp.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
+        rename(native_comp_exit_code = exit_code) %>%
         unique()
-    activated_stack <- stack_meta %>%
-        inner_join(all, by = c("crate_name")) %>%
-        filter(llvm_engaged == TRUE) %>%
-        select(crate_name, test_name) %>%
+    native_status <- read_csv(file.path(dir, "status_native.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
+        rename(native_exit_code = exit_code) %>%
         unique()
-    activated <- bind_rows(activated_tree, activated_stack) %>%
+    miri_comp_status <- read_csv(file.path(dir, "status_miri_comp.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
+        rename(miri_comp_exit_code = exit_code) %>%
         unique()
-    activated %>% write_csv(file.path(dir, "activated.csv"))
-    test_failed_natively <- read_csv(file.path(dir, "status_native.csv"), col_names = c("exit_code", "crate_name", "test_name"), show_col_types = FALSE) %>%
-        filter(exit_code != 0) %>%
-        filter(exit_code != 124) %>%
-        select(crate_name, test_name) %>%
-        unique()
-    missing_activation <- bind_rows(stack_errors, tree_errors) %>%
-        anti_join(bind_rows(activated_tree, activated_stack), by = c("crate_name", "test_name")) %>%
-        unique()
-    missing_activation_ub <- missing_activation %>%
-        filter(error_type %in% c("Undefined Behavior", "Stack Overflow"))
-    missing_activation_erroneous_failure <- missing_activation %>%
-        filter(error_type %in% c("Test Failed")) %>%
-        anti_join(test_failed_natively, by = c("crate_name", "test_name"))
-    missing_activation <- bind_rows(missing_activation_ub, missing_activation_erroneous_failure) %>%
-        unique()
-    write_csv(missing_activation, file.path(dir, "missing_activation.csv"))
+    status <- native_comp_status %>%
+        full_join(native_status, by = c("crate_name", "test_name")) %>%
+        full_join(miri_comp_status, by = c("crate_name", "test_name"))
     errors <- bind_rows(stack_errors, tree_errors) %>%
-        filter(error_type != "Unsupported Operation") %>%
-        filter(error_type != "LLI Internal Error") %>%
-        select(crate_name, test_name, borrow_mode, error_type, error_text, error_root)
-    errors_ub <- errors %>% filter(error_type != "Test Failed")
-    errors_erroneous_failure <- errors %>%
-        filter(error_type == "Test Failed") %>%
-        anti_join(test_failed_natively, by = c("crate_name", "test_name"))
-    errors <- bind_rows(errors_ub, errors_erroneous_failure) %>%
-        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, error_root)) %>%
-        group_by(crate_name, error_text_stack, error_text_tree, error_root_stack, error_root_tree) %>%
-        mutate(error_id = cur_group_id()) %>%
-        ungroup()
-    return(errors)
+        select(crate_name, test_name, borrow_mode, error_type, error_text, error_root, exit_code) %>%
+        unique() %>%
+        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, error_root, exit_code))
+    status %>%
+        full_join(errors, by = c("crate_name", "test_name")) %>%
+        select(
+            crate_name,
+            test_name,
+            native_comp_exit_code,
+            native_exit_code,
+            miri_comp_exit_code,
+            exit_code_stack,
+            exit_code_tree,
+            error_type_stack,
+            error_type_tree,
+            error_text_stack,
+            error_text_tree,
+            error_root_stack,
+            error_root_tree
+        )
 }
+
+# errors can only be deduplicated if they have a root under both stack and tree borrows.
+# otherwise, we cannot be sure that any two errors are the same, since a "NA" root could be anywhere
+deduplicate_errors <- function(df) {
+    deduplicable <- df %>%
+        filter(!is.na(error_root_stack) & !is.na(error_root_tree))
+    deduplicated <- deduplicable %>%
+        group_by(across(c(-test_name))) %>%
+        slice(1) %>%
+        ungroup()
+    not_deduplicable <- df %>%
+        anti_join(deduplicable, by = c("crate_name", "test_name"))
+    return(bind_rows(not_deduplicable, deduplicated))
+}
+
+baseline <- compile_errors("./data/results/stage3/baseline")
 zeroed <- compile_errors("./data/results/stage3/zeroed")
-zeroed_deduplicated <- zeroed %>%
-    group_by(error_id) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(-error_id)
 uninit <- compile_errors("./data/results/stage3/uninit")
-uninit_deduplicated <- uninit %>%
-    group_by(error_id) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(-error_id)
-zeroed_labelled <- zeroed %>% mutate(mode = "zeroed")
-uninit_labelled <- uninit %>% mutate(mode = "uninit")
-all_errors <- bind_rows(zeroed_labelled, uninit_labelled) %>%
+all_errors <- bind_rows(baseline, zeroed, uninit) %>%
+    unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
 
-same_for_both <- zeroed_deduplicated %>%
-    inner_join(uninit_deduplicated, by = join_by(crate_name, test_name, error_type_stack, error_type_tree, error_text_stack, error_text_tree, error_root_stack, error_root_tree)) %>%
-    arrange(crate_name, test_name) %>%
-    mutate(unique_error_id = paste0("U", row_number())) %>%
-    inner_join(all, by = c("crate_name")) %>%
-    select(unique_error_id, crate_name, version, test_name, error_type_stack, error_type_tree, error_text_stack, error_text_tree)
-same_for_both %>% write_csv(file.path(stage3_root, "errors_unique.csv"))
-different_for_uninit <- uninit_deduplicated %>%
-    anti_join(same_for_both) %>%
-    write_csv(file.path("./error_in_uninit.csv"))
-different_for_zeroed <- zeroed_deduplicated %>%
-    anti_join(same_for_both) %>%
-    write_csv(file.path("./error_in_zeroed.csv"))
+
+remove_erroneous_failures <- function(df, dir) {
+    to_remove <- df %>%
+        filter(errored_exit_code(native_exit_code) & errored_exit_code(exit_code_stack) & errored_exit_code(exit_code_tree)) %>%
+        filter(str_detect(error_type_stack, "Test Failed")) %>%
+        filter(str_detect(error_type_tree, "Test Failed"))
+    df %>% anti_join(to_remove)
+}
+
+keep_actual_errors <- function(df) {
+    df %>%
+        filter(native_comp_exit_code == 0 & miri_comp_exit_code == 0) %>%
+        select(-miri_comp_exit_code, -native_comp_exit_code) %>%
+        filter(errored_exit_code(exit_code_stack) | errored_exit_code(exit_code_tree)) %>%
+        deduplicate_errors() %>%
+        filter(valid_error_type(error_type_stack) | valid_error_type(error_type_tree)) %>%
+        remove_erroneous_failures()
+}
+shared_errors <- zeroed %>%
+    inner_join(uninit) %>%
+    inner_join(baseline) %>%
+    keep_actual_errors() %>%
+    unique() %>%
+    write_csv(file.path(stage3_root, "errors_unique.csv"))
+
+differed_in_baseline <- baseline %>%
+    anti_join(zeroed) %>%
+    anti_join(uninit) %>%
+    keep_actual_errors() %>%
+    unique() %>%
+    filter(error_text_stack != "using uninitialized data, but this operation requires initialized memory") %>%
+    filter(error_text_tree != "using uninitialized data, but this operation requires initialized memory") %>%
+    write_csv(file.path(stage3_root, "diff_errors_baseline.csv"))
+
+differed_in_zeroed <- zeroed %>%
+    anti_join(uninit) %>%
+    anti_join(baseline) %>%
+    keep_actual_errors() %>%
+    unique() %>%
+    write_csv(file.path(stage3_root, "diff_errors_zeroed.csv"))
+
+differed_in_uninit <- uninit %>%
+    anti_join(zeroed) %>%
+    anti_join(baseline) %>%
+    keep_actual_errors() %>%
+    unique() %>%
+    write_csv(file.path(stage3_root, "diff_errors_uninit.csv"))
