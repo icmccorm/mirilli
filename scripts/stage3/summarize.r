@@ -6,10 +6,15 @@ stage3_root <- file.path("./data/compiled/stage3/")
 if (!dir.exists(stage3_root)) {
     dir.create(stage3_root)
 }
+
+
 deduplicate_error_text <- function(df) {
     df <- df %>%
-        mutate(error_text = str_replace(error_text, "alloc[0-9]+", "alloc")) %>%
-        mutate(error_text = str_replace(error_text, "<[0-9]+>", "<>"))
+        mutate(full_error_text = str_replace(full_error_text, "alloc[0-9]+", "alloc")) %>%
+        mutate(full_error_text = str_replace(full_error_text, "<[0-9]+>", "<>")) %>%
+        mutate(full_error_text = str_replace(full_error_text, "call [0-9]+", "call <>")) %>%
+        mutate(full_error_text = str_replace(full_error_text, paste0("^", error_type, ":"), "")) %>%
+        mutate(full_error_text = trimws(full_error_text))
     return(df)
 }
 valid_error_type <- function(type) {
@@ -67,13 +72,15 @@ compile_errors <- function(dir) {
         full_join(native_status, by = c("crate_name", "test_name")) %>%
         full_join(miri_comp_status, by = c("crate_name", "test_name"))
     errors <- bind_rows(stack_errors, tree_errors) %>%
-        select(crate_name, test_name, borrow_mode, error_type, error_text, error_root, exit_code) %>%
+        select(crate_name, test_name, borrow_mode, error_type, full_error_text, error_root, exit_code) %>%
         unique() %>%
-        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, error_root, exit_code))
+        pivot_wider(names_from = borrow_mode, values_from = c(error_type, full_error_text, error_root, exit_code))
     status %>%
         full_join(errors, by = c("crate_name", "test_name")) %>%
+        inner_join(all, by = c("crate_name")) %>%
         select(
             crate_name,
+            version,
             test_name,
             native_comp_exit_code,
             native_exit_code,
@@ -82,24 +89,27 @@ compile_errors <- function(dir) {
             exit_code_tree,
             error_type_stack,
             error_type_tree,
-            error_text_stack,
-            error_text_tree,
+            full_error_text_stack,
+            full_error_text_tree,
             error_root_stack,
             error_root_tree
         )
 }
 
-# errors can only be deduplicated if they have a root under both stack and tree borrows.
-# otherwise, we cannot be sure that any two errors are the same, since a "NA" root could be anywhere
 deduplicate_errors <- function(df) {
-    deduplicable <- df %>%
-        filter(!is.na(error_root_stack) & !is.na(error_root_tree))
-    deduplicated <- deduplicable %>%
+    can_deduplicate <- df %>%
+        filter(is.na(error_type_stack) | error_type_stack != "Test Failed") %>%
+        filter(is.na(error_type_tree) | error_type_tree != "Test Failed") %>%
+        filter(!(is.na(error_root_stack) & errored_exit_code(exit_code_stack))) %>%
+        filter(!(is.na(error_root_tree) & errored_exit_code(exit_code_tree)))
+    deduplicated <- can_deduplicate %>%
         group_by(across(c(-test_name))) %>%
+        mutate(num_duplicates = n()) %>%
         slice(1) %>%
         ungroup()
     not_deduplicable <- df %>%
-        anti_join(deduplicable, by = c("crate_name", "test_name"))
+        anti_join(can_deduplicate) %>%
+        mutate(num_duplicates = 1)
     return(bind_rows(not_deduplicable, deduplicated))
 }
 
@@ -128,32 +138,46 @@ keep_actual_errors <- function(df) {
         filter(valid_error_type(error_type_stack) | valid_error_type(error_type_tree)) %>%
         remove_erroneous_failures()
 }
+
 shared_errors <- zeroed %>%
     inner_join(uninit) %>%
-    inner_join(baseline) %>%
     keep_actual_errors() %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors_unique.csv"))
 
+# we keep errors in the baseline that are either unique to it, or that differ from the zereod/uninit errors
+# however, we discard differences when the baseline error was due to using uninitialized memory,
+# but there's a different result in either the zeroed or uninit modes.
+tested_in_zereod_or_uninit <- zeroed %>%
+    select(crate_name, test_name) %>%
+    bind_rows(uninit %>% select(crate_name, test_name)) %>%
+    unique()
+baseline_also <- baseline %>%
+    filter(crate_name %in% tested_in_zereod_or_uninit$crate_name & test_name %in% tested_in_zereod_or_uninit$test_name)
+baseline_unique <- baseline %>%
+    anti_join(baseline_also, by = c("crate_name", "test_name")) %>%
+    mutate(shared = FALSE)
+baseline_also <- baseline_also %>%
+    filter(full_error_text_stack != "using uninitialized data, but this operation requires initialized memory") %>%
+    filter(full_error_text_tree != "using uninitialized data, but this operation requires initialized memory") %>%
+    mutate(shared = TRUE)
+baseline <- bind_rows(baseline_also, baseline_unique)
 differed_in_baseline <- baseline %>%
     anti_join(zeroed) %>%
     anti_join(uninit) %>%
     keep_actual_errors() %>%
+    select(-error_root_stack, -error_root_tree) %>%
     unique() %>%
-    filter(error_text_stack != "using uninitialized data, but this operation requires initialized memory") %>%
-    filter(error_text_tree != "using uninitialized data, but this operation requires initialized memory") %>%
     write_csv(file.path(stage3_root, "diff_errors_baseline.csv"))
-
 differed_in_zeroed <- zeroed %>%
     anti_join(uninit) %>%
-    anti_join(baseline) %>%
     keep_actual_errors() %>%
+    select(-error_root_stack, -error_root_tree) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "diff_errors_zeroed.csv"))
-
 differed_in_uninit <- uninit %>%
     anti_join(zeroed) %>%
-    anti_join(baseline) %>%
     keep_actual_errors() %>%
+    select(-error_root_stack, -error_root_tree) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "diff_errors_uninit.csv"))
