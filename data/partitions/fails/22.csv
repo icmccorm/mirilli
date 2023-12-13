@@ -1,0 +1,4 @@
+scalar::tests::mul,p256k1,5.4.1
+scalar::tests::sub,p256k1,5.4.1
+field::tests::pow,p256k1,5.4.1
+scalar::tests::mul_assign,p256k1,5.4.1

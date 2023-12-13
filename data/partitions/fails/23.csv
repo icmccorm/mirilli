@@ -1,0 +1,4 @@
+field::tests::pow,p256k1,5.4.1
+scalar::tests::mul_assign,p256k1,5.4.1
+it_hashes_directory,paq,1.0.1
+it_hashes_directory_absolute_symlink_without_following,paq,1.0.1

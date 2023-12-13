@@ -1,0 +1,4 @@
+util::bip32::tests::test_vector_2,digibyte,0.27.3
+util::bip32::tests::test_vector_1,digibyte,0.27.3
+download_test,download_sdl2,0.0.3
+example,etch,0.4.2

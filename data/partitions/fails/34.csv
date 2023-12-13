@@ -1,0 +1,4 @@
+sphincsharaka128ssimple::test::test_sign,pqcrypto-sphincsplus,0.6.4
+sphincssha256256ssimple::test::test_sign_detached,pqcrypto-sphincsplus,0.6.4
+sphincsharaka192srobust::test::test_sign,pqcrypto-sphincsplus,0.6.4
+ffi::test_sphincsharaka128frobust_clean::test_ffi,pqcrypto-sphincsplus,0.6.4

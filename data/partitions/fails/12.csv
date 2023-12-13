@@ -1,0 +1,4 @@
+h3::get_icosahedron_faces::hexagon_with_edge_vertices,h3o,0.4.0
+h3::grid_disk::exhaustive_res0,h3o,0.4.0
+h3::grid_disk::exhaustive_res1,h3o,0.4.0
+h3::grid_disk::exhaustive_res2,h3o,0.4.0

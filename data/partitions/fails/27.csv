@@ -1,0 +1,4 @@
+bytes::tests::find_utf_emoji_as_bytes,pcre2,0.2.4
+bytes::tests::capture_names,pcre2,0.2.4
+ffi::test_dilithium5_clean::test_ffi,pqcrypto-dilithium,0.4.6
+dilithium5::test::test_sign,pqcrypto-dilithium,0.4.6

@@ -1,0 +1,4 @@
+dilithium2aes::test::test_sign,pqcrypto-dilithium,0.4.6
+ffi::test_dilithium2_clean::test_ffi,pqcrypto-dilithium,0.4.6
+falcon512::test::test_sign,pqcrypto-falcon,0.2.10
+ffi::test_falcon512_clean::test_ffi,pqcrypto-falcon,0.2.10

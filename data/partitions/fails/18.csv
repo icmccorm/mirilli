@@ -1,0 +1,4 @@
+h3::is_valid_vertex::valid,h3o,0.4.0
+h3::local_ij_to_cell::exhaustive_res0,h3o,0.4.0
+h3::get_directed_edge_destination::exhaustive_res2,h3o,0.4.0
+h3::cell_to_child_pos::exhaustive_res0,h3o,0.4.0
