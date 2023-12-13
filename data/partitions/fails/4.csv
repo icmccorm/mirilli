@@ -1,0 +1,4 @@
+h3::are_neighbor_cells::exhaustive_res1,h3o,0.4.0
+h3::are_neighbor_cells::exhaustive_res2,h3o,0.4.0
+h3::cell_to_local_ij::exhaustive_res0,h3o,0.4.0
+h3::cell_to_local_ij::exhaustive_res1,h3o,0.4.0

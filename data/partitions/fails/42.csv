@@ -1,0 +1,4 @@
+sphincsharaka256srobust::test::test_sign,pqcrypto-sphincsplus,0.6.4
+ffi::test_sphincssha256128ssimple_clean::test_ffi,pqcrypto-sphincsplus,0.6.4
+tests::test_instruction_checks,rabbitizer,1.7.9
+tests::test_operands_slice,rabbitizer,1.7.9

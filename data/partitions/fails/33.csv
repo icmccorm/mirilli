@@ -1,0 +1,4 @@
+ffi::test_qteslapiii_clean::test_ffi,pqcrypto-qtesla,0.1.1
+qteslapi::test::test_sign_detached,pqcrypto-qtesla,0.1.1
+sphincsshake256256frobust::test::test_sign,pqcrypto-sphincsplus,0.6.4
+sphincsshake256128frobust::test::test_sign,pqcrypto-sphincsplus,0.6.4

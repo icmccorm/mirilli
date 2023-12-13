@@ -1,0 +1,4 @@
+it_hashes_directory_with_ignored_file,paq,1.0.1
+it_hashes_directory_with_ignored_subdirectory,paq,1.0.1
+it_hashes_single_file,paq,1.0.1
+compression::tests::test_codec_lz4_raw,parquet,46.0.0

@@ -1,0 +1,4 @@
+it_hashes_directory_files_consistently,paq,1.0.1
+it_hashes_directory_from_any_path,paq,1.0.1
+it_hashes_directory_relative_symlink_without_following,paq,1.0.1
+it_hashes_directory_with_file,paq,1.0.1

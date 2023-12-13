@@ -1,0 +1,4 @@
+mqdss48::test::test_sign_detached,pqcrypto-mqdss,0.3.0
+qteslapi::test::test_sign,pqcrypto-qtesla,0.1.1
+qteslapiii::test::test_sign,pqcrypto-qtesla,0.1.1
+ffi::test_qteslapi_clean::test_ffi,pqcrypto-qtesla,0.1.1

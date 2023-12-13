@@ -1,0 +1,4 @@
+f128::tests::f128_signaling,softfloat-wrapper,0.3.4
+f128::tests::f128_compare,softfloat-wrapper-riscv,0.1.0
+simple32_vs_reference_implementation,tab-hash,0.3.0
+twisted64_vs_reference_implementation,tab-hash,0.3.0

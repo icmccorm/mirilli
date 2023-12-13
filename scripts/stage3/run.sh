@@ -16,7 +16,7 @@ touch ./data/results/stage3/status_tree.csv
 touch ./data/results/stage3/status_native.csv
 CURRENT_CRATE=""
 TIMEOUT=5m
-TIMEOUT_MIRI=3m
+TIMEOUT_MIRI=6m
 # if $2 is equal to -v, then set LOGGING_FLAG to -Zmiri-llvm-log-verbose. If not, set it to -Zmiri-llvm-log
 if [ "$2" == "-v" ]; then
     LOGGING_FLAG="-Zmiri-llvm-log-verbose"
