@@ -20,3 +20,4 @@ pulled
 pulled-old
 *.tar
 *.txt
+**/*/__pycache__

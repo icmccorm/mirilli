@@ -45,12 +45,10 @@ extract-stage3:
 	@./scripts/stage3/extract.sh ./pulled ./extracted-stage3
 
 compile-stage3:
-	./scripts/stage3/parse.sh ./data/results/stage3/baseline/
-	./scripts/stage3/parse.sh ./data/results/stage3/zeroed/
-	./scripts/stage3/parse.sh ./data/results/stage3/uninit/
-	python3 ./scripts/stage3/collate.py ./data/results/stage3/baseline/
-	python3 ./scripts/stage3/collate.py ./data/results/stage3/zeroed/
-	python3 ./scripts/stage3/collate.py ./data/results/stage3/uninit/
+	python3 ./scripts/stage3/parse.py ./data/results/stage3/baseline
+	python3 ./scripts/stage3/parse.py ./data/results/stage3/zeroed
+	python3 ./scripts/stage3/parse.py ./data/results/stage3/uninit
 	Rscript ./scripts/stage3/summarize.r
+	
 validate:
 	@Rscript ./scripts/all/validate.r

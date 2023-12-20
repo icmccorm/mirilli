@@ -1,6 +1,10 @@
 import os
 import sys
 import json
+import re
+
+RE_MAYBEUNINIT = re.compile(r"error: .*\n.  --> .*\n(    \|\n)*([0-9]+[ ]+\|.* (((std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\)))")
+RE_MEM_UNINIT = re.compile(r"error: .*\n.  --> .*\n(    \|\n)*([0-9]+[ ]+\|.* (((std::){0,1}mem::){0,1}(uninitialized\(\)))")
 
 def failed():
     print(f"Usage: python3 collate.py [data dir]")
@@ -11,14 +15,14 @@ if(len(sys.argv) != 2):
 
 root_dir = sys.argv[1]
 if not os.path.exists(root_dir):
-    failed()
+    failed()            
 data_dir = os.path.join(root_dir, "crates")
 
 # ensure that the directory stage3/crates exists in walk_dir
 if not os.path.exists(data_dir):
     failed()
 
-def extract_lines(text):
+def extract_error_trace(text):
     lines = []
     in_trace = False
     for line in text.split("\n"):
@@ -32,36 +36,19 @@ def extract_lines(text):
             lines.append(line)
     return lines
 
-flag_headers = None
-def extract_representatives(crate, directory):
-    global flag_headers
-    representatives = {}
-    test_cases = ""
-    files_organized = os.listdir(directory)
-    # alphabetize
-    files_organized.sort()
-    for filename in files_organized:
-        if filename.endswith(".err.log"):
-            with open(os.path.join(directory, filename), "r") as f:
-                text = f.read()
-                test_case = os.path.basename(filename)[:-8]
-                lines = extract_lines(text)
-                if len(lines) > 0:
-                    lines = lines[:-1]
-                    lines = ",".join(lines)
-                    representatives[test_case] = lines
-        if filename.endswith(".json"):
-            with open(os.path.join(directory, filename), "r") as f:
-                text = f.read()
-                test_case = os.path.basename(filename)[:-5]
-                json_obj = json.loads(text)
-                if flag_headers is None:
-                    flag_headers = "crate_name,test_name," + (",".join(json_obj.keys()))
-                test_cases += crate + "," + test_case
-                for field in json_obj.keys():
-                    test_cases += "," + str(json_obj[field])
-                test_cases += "\n"
-    return (representatives, test_cases)
+
+def is_maybeuninit():
+    pass
+def is_mem_uninit(text):
+    # find if there's a match against RE_MAYBEUNINIT
+    # if so, return the line number and the index where the innermost capturing group starts
+    # otherwise, return None
+    match = RE_MEM_UNINIT.search(text)
+    if match is None:
+        return None
+    else:
+        return (match.group(2), match.start(3))
+    
 
 
 stack_errors_path = os.path.join(root_dir, "stack_error_roots.csv")
@@ -92,34 +79,34 @@ first_visited_stack = True
 first_visited_tree = True
 for crate in os.listdir(data_dir):
     stack_dir = os.path.join(data_dir, crate, "stack")
-    if not os.path.exists(stack_dir):
+    if os.path.exists(stack_dir):
+        (reps,status) = extract_representatives(crate, stack_dir)
+        for test in reps:
+            stack_errors_file.write(f"{crate},{test},\"{reps[test]}\"\n")
+            stack_errors_file.flush()
+        if first_visited_stack and flag_headers is not None:
+            stack_meta_file.write(flag_headers + "\n")
+            first_visited_stack = False
+        stack_meta_file.write(status)
+        stack_meta_file.flush()
+    else:
         print(f"No 'stack' directory found for {crate}")
-        continue
-    
-    (reps,status) = extract_representatives(crate, stack_dir)
-    for test in reps:
-        stack_errors_file.write(f"{crate},{test},\"{reps[test]}\"\n")
-        stack_errors_file.flush()
-    if first_visited_stack and flag_headers is not None:
-        stack_meta_file.write(flag_headers + "\n")
-        first_visited_stack = False
-    stack_meta_file.write(status)
-    stack_meta_file.flush()
 
     tree_dir = os.path.join(data_dir, crate, "tree")
+
     if not os.path.exists(tree_dir):
+        first_visited = (flag_headers is None)
+        (reps, status) = extract_representatives(crate, tree_dir)
+        for test in reps:
+            tree_errors_file.write(f"{crate},{test},\"{reps[test]}\"\n")
+            tree_errors_file.flush()
+        if first_visited_tree and flag_headers is not None:
+            tree_meta_file.write(flag_headers + "\n")
+            first_visited_tree = False
+        tree_meta_file.write(status)
+        tree_meta_file.flush()
+    else:
         print(f"No 'tree' directory found for {crate}")
-        continue    
-    first_visited = (flag_headers is None)
-    (reps, status) = extract_representatives(crate, tree_dir)
-    for test in reps:
-        tree_errors_file.write(f"{crate},{test},\"{reps[test]}\"\n")
-        tree_errors_file.flush()
-    if first_visited_tree and flag_headers is not None:
-        tree_meta_file.write(flag_headers + "\n")
-        first_visited_tree = False
-    tree_meta_file.write(status)
-    tree_meta_file.flush()
 
 tree_errors_file.close()
 stack_errors_file.close()
