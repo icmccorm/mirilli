@@ -3,10 +3,10 @@ import sys
 import json
 import re
 import parse_tb
-
+import parse_shared
+import parse_sb
 RE_MAYBEUNINIT = re.compile(r"error: .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\))")
 RE_MEM_UNINIT = re.compile(r"error: .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(uninitialized\(\))")
-
 
 def check_for_uninit(text):
     return RE_MEM_UNINIT.search(text) is not None
@@ -38,25 +38,24 @@ if not os.path.exists(data_dir):
 base = os.path.basename(root_dir)
 print("Parsing errors from directory '%s'..." % base)
 
-def open_csv_for_both(dir, name, headers):
+def open_csv(dir, name, headers):
     global FILES_TO_CLOSE
+    path = os.path.join(dir, name)
+    if os.path.exists(path):
+        os.remove(path)
+    file = open(path, "a")
+    if len(headers) > 0:
+        file.write("%s\n" % ",".join(headers))
+        file.flush()
+    FILES_TO_CLOSE.append(file)
+    return file
+
+def open_csv_for_both(dir, name, headers):
     stack_file_name = "%s_stack.csv" % name
     tree_file_name = "%s_tree.csv" % name
-    stack_path = os.path.join(dir, stack_file_name)
-    tree_path = os.path.join(dir, tree_file_name)
-    if os.path.exists(stack_path):
-        os.remove(stack_path)
-    if os.path.exists(tree_path):
-        os.remove(tree_path)
-    open_files = []
-    for path in [stack_path, tree_path]:
-        file = open(path, "a")
-        if len(headers) > 0:
-            file.write("%s\n" % ",".join(headers))
-            file.flush()
-        open_files.append(file)
-        FILES_TO_CLOSE.append(file)
-    return open_files    
+    stack_file = open_csv(dir, stack_file_name, headers)
+    tree_file = open_csv(dir, tree_file_name, headers)
+    return [stack_file, tree_file]    
 
 def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, info_file):
     global flag_headers
@@ -67,7 +66,14 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
             test_case = os.path.basename(filename)[:-8]
             with open(os.path.join(directory, filename), "r") as f:
                 text = f.read()
-                info = extract_error_info(is_tree_borrows, text)
+                (info, borrow_info) = extract_error_info(is_tree_borrows, text)
+                if borrow_info is not None:
+                    if is_tree_borrows:
+                        tree_summary.write(csv_row([crate_name, test_case] + borrow_info))
+                        tree_summary.flush()
+                    else:
+                        stack_summary.write(csv_row([crate_name, test_case] + borrow_info + ["NA"]))
+                        stack_summary.flush()
                 actual_failure = "NA"
                 output_path = os.path.join(directory, test_case + ".out.log")
                 if os.path.exists(output_path):
@@ -170,18 +176,20 @@ def extract_error_info(is_tree_borrows, text):
             match = signal_regex.search(line)
             if match:
                 exit_signal_number = match.group(1)
-    error_subtype = "NA"
+    error_subtype = None
     if(error_type == "Undefined Behavior"):
-        if is_tree_borrows:
-            parse_tb.tb_error(help_text)
-
+        if not is_tree_borrows:
+            error_subtype = parse_sb.stack_error(help_text)
+        else:
+            error_subtype = parse_tb.tb_error(help_text)
     error_type = error_type_override if error_type_override is not None else error_type
-
-    return [error_type, quote(error_text), quote(error_location), exit_signal_number]
+    return ([error_type, quote(error_text), quote(error_location), exit_signal_number], error_subtype)
 
 (stack_roots, tree_roots) = open_csv_for_both(root_dir, "error_roots", ["crate_name", "test_name", "error_root"])
 (stack_meta, tree_meta) = open_csv_for_both(root_dir, "metadata", [])
 (stack_info, tree_info) = open_csv_for_both(root_dir, "error_info", ["crate_name", "test_name", "error_type", "error_text", "error_location_rust","exit_signal_no","actual_failure"])
+tree_summary = open_csv(root_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
+stack_summary = open_csv(root_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
 
 for crate in os.listdir(data_dir):
     stack_dir = os.path.join(data_dir, crate, "stack")
@@ -195,7 +203,6 @@ for crate in os.listdir(data_dir):
         parse_directory(True, crate_name, tree_dir, tree_roots, tree_meta, tree_info)
     else:
         print(f"No 'tree' directory found for {crate}")
-
 for file in FILES_TO_CLOSE:
     file.flush()
     file.close()

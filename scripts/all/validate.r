@@ -70,6 +70,7 @@ if (erroneous_stage2_count > 1) {
         message(paste0("x - Certain crate(s) didn't compile ", message_fail_counts(status_native_comp_stage2)))
         failed <- TRUE
     }
+    print(status_native_comp_stage2)
 }else{
     message(paste0("✓ - All crates continued to compile in stage2"))
 }

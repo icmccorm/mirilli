@@ -1,6 +1,7 @@
 import re
 import parse_shared;
 from enum import Enum
+TB_COLUMNS = ["action","kind","subkind"]
 
 class TBOperation(Enum):
     read = "read"
@@ -36,7 +37,6 @@ TB_ERROR = re.compile(f"{TB_ACTION} through {parse_shared.TAG} is forbidden")
 RELATION_TREE = re.compile(f"the accessed tag {parse_shared.TAG} is a child of the {TB_REFERRENT} tag {parse_shared.TAG}")
 CREATION_TREE = re.compile(f"\s*the {TB_REFERRENT} tag {parse_shared.TAG} was created here(?:, in the initial state {TB_STATE})*\s*")
 DESTRUCTION_TREE = re.compile(f"\s*the {TB_REFERRENT} tag {parse_shared.TAG} later transitioned to {TB_STATE} due to a (?:{TB_HIERARCHY} {TB_ACTION}|reborrow \(acting as a {TB_HIERARCHY} {TB_ACTION}\)) at offsets {parse_shared.OFFSETS}\s*")
-
 
 class TBAction:
     def __init__(self, action, relation):
@@ -94,7 +94,10 @@ class TBError:
                 elif self.conflicting_tag_transition.start_state == TBState.Frozen:
                     error_type = TBErrorType.FrozenWrite
                     indirection_type = TBErrorIndirectionType.Indirect
-        return (error_type, indirection_type)
+        if self.action_type is None or error_type is None or indirection_type is None:
+            print("Unrecognized Tree Borrows error type")
+            exit(1)
+        return [self.action_type.value, error_type.value, indirection_type.value]
     
 class TBErrorIndirectionType(Enum):
     Direct = "Direct"
@@ -178,18 +181,13 @@ def parse_tb_subtype(action, help_text):
                 conflicting_destruction_type = TBOperation[action_type]
                 conflicting_destruction = TBState[result_state]
             continue
+
     access_action = TBAction(accessed_destruction_type, accessed_destruction_relation)
     conflicting_action = TBAction(conflicting_destruction_type, conflicting_destruction_relation)
     accessed_transition = TBTagTransition(kind = TBRole.accessed, action = access_action, start_state = accessed_creation, end_state = accessed_destruction)
     conflicting_transition = TBTagTransition(kind = conflicting_kind, action = conflicting_action, start_state = conflicting_creation, end_state = conflicting_destruction)
     tb_error = TBError(access_type, accessed_child is not None, accessed_transition, conflicting_transition)
-    (error_type, indirection_type) = tb_error.summarize()
-    if error_type is None or indirection_type is None:
-        print(info_text)
-        print("Unknown Tree Borrows error type:\n %s" % "\n".join(help_text))
-        exit(1)
-    return (error_type, indirection_type)
-
+    return tb_error.summarize()
 def tb_error(help_text):
     error_text = help_text[0] 
     match = TB_ERROR.search(error_text)

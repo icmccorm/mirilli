@@ -49,6 +49,6 @@ compile-stage3:
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/zeroed
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/uninit
 	Rscript ./scripts/stage3/summarize.r
-	
+
 validate:
 	@Rscript ./scripts/all/validate.r
