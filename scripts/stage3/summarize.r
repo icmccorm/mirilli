@@ -34,7 +34,7 @@ deduplicate_error_text <- function(df) {
         mutate(error_text = trimws(error_text))
     return(df)
 }
-valid_error_type <- function(type) {
+valid_error_type <- function(type, trace) {
     !(type %in% c(
         UNSUPP_ERR_TXT,
         LLI_ERR_TXT,
@@ -42,7 +42,8 @@ valid_error_type <- function(type) {
         TIMEOUT_PASS_ERR_TXT,
         UB_MAYBEUNINIT,
         UB_MEM_UNINIT
-    ))
+    )) | (type %in% c(UB_MAYBEUNINIT, UB_MEM_UNINIT) & str_starts(trace, "/root/.cargo/registry/src/index.crates.io"))
+
 }
 passed <- function(exit_code) {
     exit_code == 0
@@ -72,13 +73,13 @@ error_in_dependency <- function(error_root) {
     str_detect(error_root, "/root/.cargo/registry/src/index.crates.io-")
 }
 
-possible_non_failure_bug <- function(error_type) {
-    valid_error_type(error_type) & error_type != TEST_FAILED_TXT & error_type != STACK_OVERFLOW_TXT
+possible_non_failure_bug <- function(error_type, trace) {
+    valid_error_type(error_type, trace) & error_type != TEST_FAILED_TXT & error_type != STACK_OVERFLOW_TXT
 }
 
 keep_only_ub <- function(df) {
     failures <- df %>%
-        filter(!possible_non_failure_bug(error_type_stack) & !possible_non_failure_bug(error_type_tree))
+        filter(!possible_non_failure_bug(error_type_stack, error_root_stack) & !possible_non_failure_bug(error_type_tree, error_root_tree))
     df %>% anti_join(failures)
 }
 
@@ -232,7 +233,7 @@ keep_actual_errors <- function(df) {
         # then, we require that the test errored in either stacked borrows or tree borrows
         filter(errored_exit_code(exit_code_stack) | errored_exit_code(exit_code_tree)) %>%
         # finally, there must be a valid error type in either category
-        filter(valid_error_type(error_type_stack) | valid_error_type(error_type_tree)) %>%
+        filter(valid_error_type(error_type_stack, error_root_stack) | valid_error_type(error_type_tree, error_root_tree)) %>%
         deduplicate_errors() %>%
         remove_erroneous_failures()
 }

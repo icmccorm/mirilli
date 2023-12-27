@@ -5,9 +5,9 @@ import re
 import parse_tb
 import parse_shared
 import parse_sb
-RE_MAYBEUNINIT = re.compile(r"error: .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\))")
-RE_MEM_UNINIT = re.compile(r"error: .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(uninitialized\(\))")
 
+RE_MAYBEUNINIT = re.compile(r"(error|warning): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\))")
+RE_MEM_UNINIT = re.compile(r"(error|warning): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(uninitialized\(\))")
 def check_for_uninit(text):
     return RE_MEM_UNINIT.search(text) is not None
 def check_for_maybeuninit(text):
