@@ -25,7 +25,6 @@ if (dir.exists(logging_dir)) {
 dir.create(logging_dir)
 failed <- FALSE
 
-
 all_crates <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
 exclude_crates <- read_csv(file.path("./data/results/exclude.csv"), show_col_types = FALSE, col_names = c("crate_name"))
 
