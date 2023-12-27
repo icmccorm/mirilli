@@ -1,4 +1,0 @@
-falcon1024::test::test_sign_detached,pqcrypto-falcon-wasi,0.2.14
-falcon512::test::test_sign,pqcrypto-falcon-wasi,0.2.14
-falcon1024::test::test_sign,pqcrypto-falcon-wasi,0.2.14
-ffi::test_falcon1024_clean::test_ffi,pqcrypto-falcon-wasi,0.2.14

@@ -1,4 +1,0 @@
-compression::tests::test_codec_lz4,parquet,46.0.0
-bytes::tests::jit4lyfe,pcre2,0.2.4
-bytes::tests::max_jit_stack_size_does_something,pcre2,0.2.4
-bytes::tests::find_start_end_and_as_bytes,pcre2,0.2.4

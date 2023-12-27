@@ -1,4 +1,0 @@
-field::tests::add_assign,p256k1,5.4.1
-scalar::tests::add_assign,p256k1,5.4.1
-point::tests::test_bip_340,p256k1,5.4.1
-field::tests::add,p256k1,5.4.1

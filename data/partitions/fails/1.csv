@@ -1,4 +1,0 @@
-tests::test_hash_128,clickhouse-driver-cthrs,0.1.1
-test::test_compression,clickhouse-driver-lz4,0.1.0
-physical_plan::filter::tests::test_filter_statistics_multiple_columns,datafusion,31.0.0
-util::bip32::tests::test_vector_3,digibyte,0.27.3

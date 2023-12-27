@@ -1,4 +1,0 @@
-mqdss48::test::test_sign,pqcrypto-mqdss,0.3.0
-mqdss64::test::test_sign_detached,pqcrypto-mqdss,0.3.0
-ffi::test_mqdss64_clean::test_ffi,pqcrypto-mqdss,0.3.0
-ffi::test_mqdss48_clean::test_ffi,pqcrypto-mqdss,0.3.0

@@ -16,8 +16,7 @@ touch ./data/results/stage3/status_tree.csv
 touch ./data/results/stage3/status_native.csv
 CURRENT_CRATE=""
 TIMEOUT=5m
-TIMEOUT_MIRI=6m
-# if $2 is equal to -v, then set LOGGING_FLAG to -Zmiri-llvm-log-verbose. If not, set it to -Zmiri-llvm-log
+TIMEOUT_MIRI=10m
 if [ "$2" == "-v" ]; then
     LOGGING_FLAG="-Zmiri-llvm-log-verbose"
 else
@@ -61,7 +60,7 @@ do
         cd ./extracted || exit
 
         echo "Compiling rustc test binary..."
-        RUSTC_COMP_EXITCODE=0
+        RUSTC_COMP_EXITCODE=1
         OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list 2> err)
         RUSTC_COMP_EXITCODE=$?
         echo "Exit: $RUSTC_COMP_EXITCODE"
@@ -70,7 +69,7 @@ do
         if [ "$RUSTC_COMP_EXITCODE" -eq 0 ]; then
 
             echo "Executing rustc test $test_name..."
-            RUSTC_EXEC_EXITCODE=0
+            RUSTC_EXEC_EXITCODE=1
             OUTPUT=$(timeout $TIMEOUT cargo test -q "$test_name" -- --exact 2> err)
             RUSTC_EXEC_EXITCODE=$?
             echo "Exit: $RUSTC_EXEC_EXITCODE"
@@ -94,15 +93,15 @@ do
             fi
 
             echo "Compiling miri test binary..."
-            MIRI_COMP_EXITCODE=0
+            MIRI_COMP_EXITCODE=1
             OUTPUT=$(timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
             MIRI_COMP_EXITCODE=$?
             echo "Exit: $MIRI_COMP_EXITCODE"
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_miri_comp.csv
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
-                MFLAGS="-Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
+                MFLAGS="-Zmiri-descriptive-ub -Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
-                MIRI_STACK_EXITCODE=0
+                MIRI_STACK_EXITCODE=1
                 OUTPUT=$(MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 echo "Exit: $MIRI_STACK_EXITCODE"
@@ -124,7 +123,7 @@ do
                     cp "$test_name".upcast.csv ../data/results/stage3/crates/"$crate_name"/stack/
                 fi
                 echo "Executing Miri in Tree Borrows mode..."
-                MIRI_TREE_EXITCODE=0
+                MIRI_TREE_EXITCODE=1
                 OUTPUT=$(MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
                 echo "Exit: $MIRI_TREE_EXITCODE"

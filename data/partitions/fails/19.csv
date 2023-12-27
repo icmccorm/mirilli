@@ -1,4 +1,0 @@
-test::solve_real_linear_system,klu-rs,0.4.0
-test::delta,librsync,0.2.3
-test::signature,librsync,0.2.3
-lz4f::dictionary::tests::create_dictionary,lzzzz,1.0.4

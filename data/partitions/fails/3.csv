@@ -1,4 +1,0 @@
-ips::tests::check_create_and_apply,flips-sys,0.2.1
-h3::child_pos_to_cell::exhaustive_res0,h3o,0.4.0
-h3::cell_to_child_pos::exhaustive_res2,h3o,0.4.0
-h3::are_neighbor_cells::exhaustive_res0,h3o,0.4.0

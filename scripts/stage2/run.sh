@@ -53,7 +53,7 @@ do
                     do
                         rm -f err
                         touch err
-                        EXITCODE=0
+                        EXITCODE=1
                         HAD_FFI=0
                         OUTPUT=""
                         if [[ $test_name =~ ^[0-9]*\ test[s]*,\ [0-9]*\ benchmark[s]*$ ]]; then

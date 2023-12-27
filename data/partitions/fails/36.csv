@@ -1,4 +1,0 @@
-sphincsshake256192frobust::test::test_sign,pqcrypto-sphincsplus,0.6.4
-sphincsharaka256ssimple::test::test_sign_detached,pqcrypto-sphincsplus,0.6.4
-sphincsshake256128ssimple::test::test_sign_detached,pqcrypto-sphincsplus,0.6.4
-sphincssha256192fsimple::test::test_sign,pqcrypto-sphincsplus,0.6.4

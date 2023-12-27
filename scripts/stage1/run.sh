@@ -20,12 +20,12 @@ touch ./data/results/status_comp.csv
 touch ./data/results/status_lint.csv
 touch ./data/results/failed_download.csv
 touch ./data/results/has_bytecode.csv
-
 rustup override set "$NIGHTLY"
 TRIES_REMAINING=3
 while IFS=, read -r name version; 
 do
     while [ "$TRIES_REMAINING" -gt "0" ]; do
+        EXITCODE=1
         (./scripts/misc/cargo-download.sh "$name" "$version")
         EXITCODE=$?
         TRIES_REMAINING=$(( TRIES_REMAINING - 1 ))
@@ -34,15 +34,14 @@ do
             TRIES_REMAINING=0
             OUTPUT=""
             cd extracted || exit
+            COMP_EXIT_CODE=1
             OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list)
             COMP_EXIT_CODE=$?
             cd ..
             echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_comp.csv"
-            
             if [ -n "$OUTPUT" ]; then
                 echo "$OUTPUT" > data/results/tests/"$name".txt
             fi
-
             OUTPUT=""
             OUTPUT=$(find ./extracted -type f -name '*.bc' -print -quit)
             if [ -n "$OUTPUT" ]; then
@@ -51,6 +50,7 @@ do
                 echo "$OUTPUT" > data/results/bytecode/"$name".csv
             fi
 
+            COMP_EXIT_CODE=1
             cd extracted || exit
             (timeout $TIMEOUT cargo dylint --all 1> /dev/null)
             COMP_EXIT_CODE=$?

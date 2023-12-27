@@ -1,4 +1,0 @@
-h3::cells_to_directed_edge::pentagon,h3o,0.4.0
-h3::directed_edge_to_cells::hexagon,h3o,0.4.0
-h3::edge_length_rads::pentagon_res0,h3o,0.4.0
-h3::edge_length_rads::pentagon_res1,h3o,0.4.0
