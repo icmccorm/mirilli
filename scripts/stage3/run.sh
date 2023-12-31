@@ -101,15 +101,23 @@ do
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
                 MFLAGS="-Zmiri-descriptive-ub -Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
+                grep -i kill /var/log/syslog > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1
                 OUTPUT=$(MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
+                grep -i kill /var/log/syslog > ./after_log.txt
+
                 echo "Exit: $MIRI_STACK_EXITCODE"
                 echo "$MIRI_STACK_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_stack.csv
                 mkdir -p "../data/results/stage3/crates/$crate_name/stack"
                 cp err "../data/results/stage3/crates/$crate_name/stack/$test_name.err.log"
+                comm -1 -3 ./prev_log.txt ./after_log.txt > "../data/results/stage3/crates/$crate_name/stack/$test_name.sys.log"
                 echo "$OUTPUT" > "../data/results/stage3/crates/$crate_name/stack/$test_name.out.log"
+                
                 rm err
+                rm ./prev_log.txt
+                rm ./after_log.txt
+
                 if [ -f "./flags.json" ]; then
                     mv ./flags.json "$test_name".json
                     cp "$test_name".json ../data/results/stage3/crates/"$crate_name"/stack/
@@ -123,15 +131,23 @@ do
                     cp "$test_name".upcast.csv ../data/results/stage3/crates/"$crate_name"/stack/
                 fi
                 echo "Executing Miri in Tree Borrows mode..."
+                grep -i kill /var/log/syslog > ./prev_log.txt
                 MIRI_TREE_EXITCODE=1
                 OUTPUT=$(MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
+                grep -i kill /var/log/syslog > ./after_log.txt
+
                 echo "Exit: $MIRI_TREE_EXITCODE"
                 echo "$MIRI_TREE_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_tree.csv
                 mkdir -p "../data/results/stage3/crates/$crate_name/tree"
                 cp err "../data/results/stage3/crates/$crate_name/tree/$test_name.err.log"
                 echo "$OUTPUT" > "../data/results/stage3/crates/$crate_name/tree/$test_name.out.log"
+                comm -1 -3 ./prev_log.txt ./after_log.txt > "../data/results/stage3/crates/$crate_name/tree/$test_name.sys.log"
+
                 rm err
+                rm ./prev_log.txt
+                rm ./after_log.txt
+
                 if [ -f "./flags.json" ]; then
                     mv ./flags.json "$test_name".json
                     cp "$test_name".json ../data/results/stage3/crates/"$crate_name"/tree/
