@@ -118,17 +118,13 @@ do
                 rm ./prev_log.txt
                 rm ./after_log.txt
 
-                if [ -f "./flags.json" ]; then
-                    mv ./flags.json "$test_name".json
-                    cp "$test_name".json ../data/results/stage3/crates/"$crate_name"/stack/
+                if [ -f "./llvm_flags.csv" ]; then
+                    mv ./llvm_flags.csv "$test_name".flags.csv
+                    cp "$test_name".flags.csv ../data/results/stage3/crates/"$crate_name"/stack/
                 fi
                 if [ -f "./llvm_conversions.csv" ]; then
                     mv ./llvm_conversions.csv "$test_name".convert.csv
                     cp "$test_name".convert.csv ../data/results/stage3/crates/"$crate_name"/stack/
-                fi
-                if [ -f "./llvm_upcasts.csv" ]; then
-                    mv ./llvm_upcasts.csv "$test_name".upcast.csv
-                    cp "$test_name".upcast.csv ../data/results/stage3/crates/"$crate_name"/stack/
                 fi
                 echo "Executing Miri in Tree Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
@@ -148,17 +144,13 @@ do
                 rm ./prev_log.txt
                 rm ./after_log.txt
 
-                if [ -f "./flags.json" ]; then
-                    mv ./flags.json "$test_name".json
-                    cp "$test_name".json ../data/results/stage3/crates/"$crate_name"/tree/
+                if [ -f "./llvm_flags.csv" ]; then
+                    mv "./llvm_flags.csv" "$test_name".flags.csv
+                    cp "$test_name".flags.csv ../data/results/stage3/crates/"$crate_name"/tree/
                 fi
                 if [ -f "./llvm_conversions.csv" ]; then
                     mv ./llvm_conversions.csv "$test_name".convert.csv
                     cp "$test_name".convert.csv ../data/results/stage3/crates/"$crate_name"/tree/
-                fi
-                if [ -f "./llvm_upcasts.csv" ]; then
-                    mv ./llvm_upcasts.csv "$test_name".upcast.csv
-                    cp "$test_name".upcast.csv ../data/results/stage3/crates/"$crate_name"/tree/
                 fi
             fi
         fi
