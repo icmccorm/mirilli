@@ -1,4 +1,3 @@
-test_name,crate_name,version
 settings::test::settings_ref,fluidlite,0.2.1
 test::basic_api,libcmark-sys,0.1.0
 tests::dummy,trussed,0.1.0
