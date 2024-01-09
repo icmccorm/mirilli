@@ -22,4 +22,4 @@ rerun_tree <- errors_tree %>%
     inner_join(all, by=c("crate_name")) %>%
     select(test_name, crate_name, version)
 
-rerun_uninit_all <- bind_rows(rerun_stack, rerun_tree) %>% unique() %>% write_csv("./data/compiled/stage3/uninit.csv", col_names = FALSE)
+rerun_uninit_all <- bind_rows(rerun_stack, rerun_tree) %>% unique() %>% write_csv("./build/stage3/uninit.csv", col_names = FALSE)

@@ -1,6 +1,11 @@
 library(dplyr)
 library(readr)
 
+stage2_root <- file.path("./build/stage2")
+if (!dir.exists(stage2_root)) {
+    dir.create(stage2_root)
+}
+
 # if ./data/results/tests is not empty, then we can use this to filter
 if (file.exists("./data/results/stage2/tests.csv")) {
     tests <- read_csv(
@@ -18,5 +23,5 @@ if (file.exists("./data/results/stage2/tests.csv")) {
         select(test_name, crate_name) %>%
         inner_join(population, by = c("crate_name"))
     failed_miri_ffi %>% select(crate_name) %>% unique() %>% nrow()
-    failed_miri_ffi %>% write_csv(file.path("./data/compiled/stage2/stage3.csv"), col_names = FALSE)
+    failed_miri_ffi %>% write_csv(file.path(stage2_root, "/stage3.csv"), col_names = FALSE)
 }

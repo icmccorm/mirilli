@@ -1,9 +1,10 @@
 library(dplyr)
 library(readr)
-
 stage1_input_dir <- file.path("./data/results/stage1")
-stage1_output_dir <- file.path("./data/compiled/stage1")
-
+stage1_output_dir <- file.path("./build/stage1")
+if (!dir.exists(stage1_output_dir)) {
+    dir.create(stage1_output_dir)
+}
 
 comp_status <- read_csv(file.path(stage1_input_dir, "status_comp.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
 lint_status <- read_csv(file.path(stage1_input_dir, "status_lint.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)

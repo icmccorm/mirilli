@@ -2,7 +2,7 @@ library(dplyr)
 library(readr)
 library(stringr)
 library(tidyr)
-stage3_root <- file.path("./data/compiled/stage3/")
+stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
     dir.create(stage3_root)
 }
