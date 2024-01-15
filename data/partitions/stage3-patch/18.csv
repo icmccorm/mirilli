@@ -1,3 +1,0 @@
-avx_tests::test_max_m256,safe_arch,0.7.1
-avx_tests::test_shuffle_av_f64_all_m128d,safe_arch,0.7.1
-bmi2_tests::test_population_extract_u64,safe_arch,0.7.1

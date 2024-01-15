@@ -1,5 +1,0 @@
-kats_picnic_l3_full,libpicnic-sys,0.1.0+3.0.18
-download_test,download_sdl2,0.0.3
-test_crash_after_metadata_commit,grebedb,1.0.0
-test::test_compression,clickhouse-driver-lz4,0.1.0
-test_cursor_range_memory_small_options,grebedb,1.0.0

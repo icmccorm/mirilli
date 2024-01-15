@@ -1,5 +1,0 @@
-kats_picnic_l5_full,libpicnic-sys,0.1.0+3.0.18
-tests::parse,satisfactory-save-file,0.2.0
-test::test_cifar_10_loader_rs,cifar_10_loader,0.2.0
-it_hashes_directory_with_ignored_file,paq,1.0.1
-field::tests::mul,p256k1,5.4.1

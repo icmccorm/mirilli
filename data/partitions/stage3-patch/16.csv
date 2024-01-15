@@ -1,3 +1,0 @@
-avx_tests::test_sqrt_m256,safe_arch,0.7.1
-avx_tests::test_store_masked_m128d,safe_arch,0.7.1
-run_cargo_deb_command_on_example_dir_with_variant,cargo-deb,2.0.0-rc.1

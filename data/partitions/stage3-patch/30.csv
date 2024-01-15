@@ -1,2 +1,0 @@
-avx_tests::test_add_horizontal_m256d,safe_arch,0.7.1
-bmi1_tests::test_bit_extract2_u64,safe_arch,0.7.1

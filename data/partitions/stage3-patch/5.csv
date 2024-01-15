@@ -1,3 +1,0 @@
-avx_tests::test_load_masked_m128,safe_arch,0.7.1
-avx_tests::test_dot_product_m256,safe_arch,0.7.1
-ssse3_tests::test_sub_horizontal_saturating_i16_m128i,safe_arch,0.7.1

@@ -1,3 +1,0 @@
-build_with_command_line_compress,cargo-deb,2.0.0-rc.1
-bmi2_tests::test_population_deposit_u32,safe_arch,0.7.1
-manifest::tests::add_systemd_assets_with_config_adds_unit_assets,cargo-deb,2.0.0-rc.1

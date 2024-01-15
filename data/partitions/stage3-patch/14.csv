@@ -1,3 +1,0 @@
-avx_tests::test_addsub_m256d,safe_arch,0.7.1
-ssse3_tests::test_add_horizontal_saturating_i16_m128i,safe_arch,0.7.1
-ssse3_tests::test_mul_i16_scale_round_m128i,safe_arch,0.7.1

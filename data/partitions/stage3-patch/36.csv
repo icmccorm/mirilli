@@ -1,3 +1,0 @@
-ssse3_tests::test_sub_horizontal_i16_m128i,safe_arch,0.7.1
-avx_tests::test_convert_to_m128_from_m256d,safe_arch,0.7.1
-run_cargo_deb_command_on_example_dir,cargo-deb,2.0.0-rc.1

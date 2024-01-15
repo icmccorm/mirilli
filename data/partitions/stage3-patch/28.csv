@@ -1,2 +1,0 @@
-dependencies::resolve_test,cargo-deb,2.0.0-rc.1
-sse4_2_tests::test_crc32_u32,safe_arch,0.7.1

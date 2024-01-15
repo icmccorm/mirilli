@@ -1,3 +1,0 @@
-sse4_2_tests::test_search_implicit_str_for_index,safe_arch,0.7.1
-ssse3_tests::test_mul_u8i8_add_horizontal_saturating_m128i,safe_arch,0.7.1
-ssse3_tests::test_sub_horizontal_i32_m128i,safe_arch,0.7.1

@@ -1,3 +1,0 @@
-control::tests::generate_scripts_archives_user_supplied_maintainer_scripts_in_workspace_package,cargo-deb,2.0.0-rc.1
-sse3_tests::test_sub_horizontal_m128d,safe_arch,0.7.1
-bmi2_tests::test_bit_zero_high_index_u32,safe_arch,0.7.1

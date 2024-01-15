@@ -1,3 +1,0 @@
-bmi2_tests::test_bit_zero_high_index_u64,safe_arch,0.7.1
-avx_tests::test_convert_to_i32_m256i_from_m256,safe_arch,0.7.1
-rdseed_tests::test_rdseed_u16,safe_arch,0.7.1

@@ -1,3 +1,0 @@
-ssse3_tests::atoi_test,safe_arch,0.7.1
-avx_tests::test_sub_horizontal_m256,safe_arch,0.7.1
-avx_tests::test_cmp_op_mask_m256d,safe_arch,0.7.1

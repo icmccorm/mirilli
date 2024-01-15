@@ -1,3 +1,0 @@
-avx_tests::test_move_mask_m256d,safe_arch,0.7.1
-sse4_2_tests::test_crc32_u64,safe_arch,0.7.1
-ssse3_tests::test_abs_i32_m128i,safe_arch,0.7.1

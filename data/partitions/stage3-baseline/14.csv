@@ -1,5 +1,0 @@
-scalar::tests::add,p256k1,5.4.1
-core::prefixer::test::python_interop,cesride,0.6.1
-test_cursor_iter_manual_memory_default,grebedb,1.0.0
-test_cursor_removed_items_memory_default,grebedb,1.0.0
-field::tests::sub,p256k1,5.4.1

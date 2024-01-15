@@ -1,3 +1,0 @@
-rdrand_tests::test_rdrand_u32,safe_arch,0.7.1
-avx_tests::test_load_m128d_splat_m256d,safe_arch,0.7.1
-avx_tests::test_permute2z_m256,safe_arch,0.7.1

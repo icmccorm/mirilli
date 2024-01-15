@@ -1,5 +1,0 @@
-template::test_template::can_render,upversion,0.1.0
-tests::aead,trussed,0.1.0
-test_cursor_iter_manual_memory_small_options,grebedb,1.0.0
-tests::serializer::logical_properties_basepart_size,rbx_binary,0.7.1
-test_sequential_numbers_memory_small_options,grebedb,1.0.0

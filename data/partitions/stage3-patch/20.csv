@@ -1,3 +1,0 @@
-manifest::tests::add_systemd_assets_with_no_config_does_nothing,cargo-deb,2.0.0-rc.1
-avx_tests::test_load_masked_m256,safe_arch,0.7.1
-avx_tests::test_shuffle_av_f32_half_m256,safe_arch,0.7.1

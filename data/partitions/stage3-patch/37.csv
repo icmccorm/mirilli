@@ -1,2 +1,0 @@
-ssse3_tests::test_sign_apply_i8_m128i,safe_arch,0.7.1
-sse3_tests::test_addsub_m128d,safe_arch,0.7.1

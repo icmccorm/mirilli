@@ -1,3 +1,0 @@
-ssse3_tests::test_abs_i16_m128i,safe_arch,0.7.1
-sse4_2_tests::test_search_implicit_str_for_mask,safe_arch,0.7.1
-ssse3_tests::test_abs_i8_m128i,safe_arch,0.7.1

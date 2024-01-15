@@ -12541,7 +12541,6 @@ autd3-protobuf,false,false
 epee-encoding,false,false
 debug_types,false,false
 telegrust-histo,false,false
-dyn,false,false
 fltk-fluid,false,false
 rebootinto-cli,false,false
 json-compare,false,false
@@ -43044,7 +43043,6 @@ serde-lsp,false,false
 autovcpkg,false,false
 audis,false,false
 arenatree,false,false
-cargo-change,false,false
 zbx_sender,false,false
 fragment,false,false
 three-des-rs,false,false
@@ -44465,7 +44463,6 @@ secret-keeper-test_util,false,false
 move-source-compiler,false,false
 tokio_env,false,false
 change-journal,false,false
-ast_node,false,false
 fervid_core,false,false
 sudoku-generator,false,false
 exotic_macro,false,false
@@ -46789,6 +46786,7 @@ awsm_web,true,true
 mdlp-rs,false,false
 diff-report-rs,false,false
 futures-borrow,false,false
+spl-discriminator-syn,false,false
 bevy_utils_proc_macros,false,false
 somedoc,false,false
 vscode,false,false
@@ -78892,7 +78890,6 @@ sitemap-iter,false,false
 chinese-variant,false,false
 synnax,false,false
 opgm,false,false
-nat,false,false
 fid,false,false
 rvp,false,false
 dune-crypto,false,false
@@ -87789,6 +87786,7 @@ thermal_printer,false,false
 nft-smart-contract,false,false
 vm-superio-ser,false,false
 polkadot-staking-miner,false,false
+llvm-plugin-inkwell,false,false
 ing2ynab,false,false
 serde-env,false,false
 md_puppy,false,false

@@ -1,5 +1,0 @@
-pe::test_coverage_pe_libyara_tiny,boreal,0.3.0
-scalar::tests::add_assign,p256k1,5.4.1
-page::tests::test_page_table_many_pages,grebedb,1.0.0
-page::tests::test_page_table_remove,grebedb,1.0.0
-core::serder::test::python_interop,cesride,0.6.1

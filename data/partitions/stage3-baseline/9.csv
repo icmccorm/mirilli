@@ -1,5 +1,0 @@
-scalar::tests::sub,p256k1,5.4.1
-test_put_one_memory_default,grebedb,1.0.0
-kats_picnic_l3_fs,libpicnic-sys,0.1.0+3.0.18
-core::sadder::test::populate_from_kind_and_self,cesride,0.6.1
-tests::serializer::just_folder,rbx_binary,0.7.1

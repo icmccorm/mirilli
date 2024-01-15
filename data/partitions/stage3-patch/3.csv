@@ -1,3 +1,0 @@
-bmi1_tests::test_bit_extract_u64,safe_arch,0.7.1
-rdseed_tests::test_rdseed_u32,safe_arch,0.7.1
-bmi2_tests::test_population_deposit_u64,safe_arch,0.7.1

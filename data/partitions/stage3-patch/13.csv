@@ -1,3 +1,0 @@
-control::tests::generate_scripts_augments_maintainer_scripts_for_unit_in_root_package,cargo-deb,2.0.0-rc.1
-run_cargo_deb_command_on_example_dir_with_version,cargo-deb,2.0.0-rc.1
-rdrand_tests::test_rdrand_u16,safe_arch,0.7.1

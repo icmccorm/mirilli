@@ -1,3 +1,0 @@
-avx_tests::test_round_m256,safe_arch,0.7.1
-control::tests::generate_scripts_generates_missing_maintainer_scripts_for_unit_in_root_package,cargo-deb,2.0.0-rc.1
-ssse3_tests::test_sign_apply_i16_m128i,safe_arch,0.7.1

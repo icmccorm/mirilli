@@ -1,2 +1,0 @@
-avx_tests::test_store_masked_m256,safe_arch,0.7.1
-sse3_tests::test_sub_horizontal_m128,safe_arch,0.7.1

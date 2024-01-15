@@ -1,3 +1,0 @@
-avx_tests::test_sub_horizontal_m256d,safe_arch,0.7.1
-control::tests::generate_scripts_generates_missing_maintainer_scripts_for_unit_in_workspace_package,cargo-deb,2.0.0-rc.1
-ssse3_tests::test_add_horizontal_i32_m128i,safe_arch,0.7.1

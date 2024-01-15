@@ -1,3 +1,0 @@
-control::tests::generate_scripts_augments_maintainer_scripts_for_unit_in_workspace_package,cargo-deb,2.0.0-rc.1
-sse4_2_tests::test_crc32_u8,safe_arch,0.7.1
-bmi2_tests::test_population_extract_u32,safe_arch,0.7.1

@@ -1,3 +1,0 @@
-avx_tests::test_min_m256d,safe_arch,0.7.1
-avx_tests::test_shuffle_av_f64_half_m256d,safe_arch,0.7.1
-control::tests::generate_scripts_archives_user_supplied_maintainer_scripts_in_root_package,cargo-deb,2.0.0-rc.1

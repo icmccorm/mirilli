@@ -1,3 +1,0 @@
-pclmulqdq_tests::test_mul_i64_carryless_m128i,safe_arch,0.7.1
-avx_tests::test_cmp_op_mask_m256,safe_arch,0.7.1
-avx_tests::test_load_masked_m128d,safe_arch,0.7.1

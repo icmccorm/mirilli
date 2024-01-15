@@ -1,3 +1,0 @@
-sse3_tests::test_add_horizontal_m128,safe_arch,0.7.1
-avx_tests::test_store_masked_m256d,safe_arch,0.7.1
-rdseed_tests::test_rdseed_u64,safe_arch,0.7.1

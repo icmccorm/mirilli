@@ -1,3 +1,0 @@
-build_workspaces,cargo-deb,2.0.0-rc.1
-avx_tests::test_max_m256d,safe_arch,0.7.1
-control::tests::generate_scripts_does_nothing_if_maintainer_scripts_is_not_set,cargo-deb,2.0.0-rc.1

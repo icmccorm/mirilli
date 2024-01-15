@@ -1,3 +1,0 @@
-avx_tests::test_load_masked_m256d,safe_arch,0.7.1
-avx_tests::test_reciprocal_m256,safe_arch,0.7.1
-adx_tests::test_add_carry_u64,safe_arch,0.7.1

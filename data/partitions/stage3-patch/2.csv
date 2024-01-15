@@ -1,3 +1,0 @@
-sse3_tests::test_add_horizontal_m128d,safe_arch,0.7.1
-ssse3_tests::test_add_horizontal_i16_m128i,safe_arch,0.7.1
-avx_tests::test_load_m128_splat_m256,safe_arch,0.7.1

@@ -1,3 +1,0 @@
-build_with_explicit_compress_type,cargo-deb,2.0.0-rc.1
-avx_tests::test_min_m256,safe_arch,0.7.1
-avx_tests::test_convert_to_m256_from_i32_m256i,safe_arch,0.7.1

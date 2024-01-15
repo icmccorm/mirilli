@@ -1,3 +1,0 @@
-rdrand_tests::test_rdrand_u64,safe_arch,0.7.1
-bmi1_tests::test_bit_extract_u32,safe_arch,0.7.1
-bmi1_tests::test_bit_extract2_u32,safe_arch,0.7.1
