@@ -103,7 +103,7 @@ do
                 echo "Executing Miri in Stacked Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1
-                OUTPUT=$(MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 dmesg -T | egrep -i 'killed process' > ./after_log.txt
 
@@ -129,7 +129,7 @@ do
                 echo "Executing Miri in Tree Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_TREE_EXITCODE=1
-                OUTPUT=$(MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows -Zmiri-unique-is-unique" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
                 dmesg -T | egrep -i 'killed process' > ./after_log.txt
 
