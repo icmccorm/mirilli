@@ -15,8 +15,8 @@ touch ./data/results/stage3/status_stack.csv
 touch ./data/results/stage3/status_tree.csv
 touch ./data/results/stage3/status_native.csv
 CURRENT_CRATE=""
-TIMEOUT=5m
-TIMEOUT_MIRI=10m
+TIMEOUT=10m
+TIMEOUT_MIRI=5m
 if [ "$2" == "-v" ]; then
     LOGGING_FLAG="-Zmiri-llvm-log-verbose"
 else
