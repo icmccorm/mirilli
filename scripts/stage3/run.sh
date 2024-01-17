@@ -99,7 +99,7 @@ do
             echo "Exit: $MIRI_COMP_EXITCODE"
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_miri_comp.csv
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
-                MFLAGS="-Zmiri-descriptive-ub -Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
+                MFLAGS="-Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1
