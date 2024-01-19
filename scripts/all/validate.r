@@ -48,7 +48,7 @@ if (missed_stage1_count > 1) {
 
 # STAGE 2
 print_stage(2)
-all_crates_stage2 <- read_csv(file.path("./data/compiled/stage1/stage2.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
+all_crates_stage2 <- read_csv(file.path("./build/stage1/stage2.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
 stage2_failed_download <- read_csv(file.path("./data/results/stage2/failed_download.csv"), col_names = c("crate_name", "version"), show_col_types = FALSE)
 stage2_visited <- read_csv(file.path("./data/results/stage2/visited.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
 missed_stage2 <- all_crates_stage2 %>%
@@ -79,7 +79,7 @@ if (erroneous_stage2_count > 1) {
 }
 # STAGE 3
 print_stage(3)
-intended_tests_stage3 <- read_csv(file.path("./data/compiled/stage2/stage3.csv"), show_col_types = FALSE, col_names = c("test_name", "crate_name", "version")) %>% select(crate_name, test_name) %>% unique()
+intended_tests_stage3 <- read_csv(file.path("./build/stage2/stage3.csv"), show_col_types = FALSE, col_names = c("test_name", "crate_name", "version")) %>% select(crate_name, test_name) %>% unique()
 get_visited_tests <- function(dir) {
     read_csv(file.path(dir, "status_native_comp.csv"), show_col_types = FALSE, col_names=c("exit_code", "crate_name", "test_name")) %>% select(crate_name, test_name) %>% unique()
 }
