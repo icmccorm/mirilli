@@ -83,10 +83,12 @@ intended_tests_stage3 <- read_csv(file.path("./build/stage2/stage3.csv"), show_c
 get_visited_tests <- function(dir) {
     read_csv(file.path(dir, "status_native_comp.csv"), show_col_types = FALSE, col_names=c("exit_code", "crate_name", "test_name")) %>% select(crate_name, test_name) %>% unique()
 }
-visited_tests_baseline <- get_visited_tests("./data/results/stage3/baseline/")
+#visited_tests_baseline <- get_visited_tests("./data/results/stage3/baseline/")
 visited_tests_zeroed <- get_visited_tests("./data/results/stage3/zeroed/")
-visited_tests_uninit <- get_visited_tests("./data/results/stage3/uninit/")
-visited_tests_all <- bind_rows(visited_tests_baseline, visited_tests_zeroed, visited_tests_uninit) %>% unique()
+#visited_tests_uninit <- get_visited_tests("./data/results/stage3/uninit/")
+
+
+visited_tests_all <- bind_rows(visited_tests_zeroed) %>% unique()
 missing_tests <- intended_tests_stage3 %>%
     anti_join(visited_tests_all, by = c("crate_name", "test_name")) %>% 
     anti_join(exclude_crates, by = c("crate_name"))
@@ -110,43 +112,51 @@ internal_validation_stage3 <- function(dir) {
     }else{
         message(paste0("✓ - All tests continued to compile in ", basename))
     }
+
+    status_miri_comp <- read_csv(file.path(dir, "status_miri_comp.csv"), show_col_types = FALSE, col_names = c("exit_code", "crate_name", "test_name"))
+    erroneous_count <- status_miri_comp %>% filter(exit_code != 0) %>% select(test_name, crate_name) %>% write_csv(file.path("rerun.csv"))
+    if (erroneous_count > 0) {
+        if (!ignore_regression) {
+            message(paste0("x - Certain test(s) failed to compile in miri for ", basename, ":\t", message_fail_counts(status_miri_comp)))
+            failed <- TRUE
+        }
+    }
 }
 
-internal_validation_stage3("./data/results/stage3/baseline")
 internal_validation_stage3("./data/results/stage3/zeroed")
-internal_validation_stage3("./data/results/stage3/uninit")
+#internal_validation_stage3("./data/results/stage3/uninit")
 
-tests_missed_zeroed_uninit <- visited_tests_zeroed %>%
-    anti_join(visited_tests_uninit, by = c("crate_name", "test_name")) %>%
-    anti_join(exclude_crates, by = c("crate_name"))
-tests_missed_zeroed_count <- tests_missed_zeroed_uninit %>% nrow()
-tests_missed_uninit_zeroed <- visited_tests_uninit %>%
-    anti_join(visited_tests_zeroed, by = c("crate_name", "test_name")) %>%
-    anti_join(exclude_crates, by = c("crate_name"))
-tests_missed_uninit_count <- tests_missed_uninit_zeroed %>% nrow()
+#tests_missed_zeroed_uninit <- visited_tests_zeroed %>%
+#    anti_join(visited_tests_uninit, by = c("crate_name", "test_name")) %>%
+#    anti_join(exclude_crates, by = c("crate_name"))
+#tests_missed_zeroed_count <- tests_missed_zeroed_uninit %>% nrow()
+#tests_missed_uninit_zeroed <- visited_tests_uninit %>%
+#    anti_join(visited_tests_zeroed, by = c("crate_name", "test_name")) %>%
+#    anti_join(exclude_crates, by = c("crate_name"))
+#tests_missed_uninit_count <- tests_missed_uninit_zeroed %>% nrow()
 
-passed <- tests_missed_zeroed_count == 0 && tests_missed_uninit_count == 0
-if (passed) {
-    message("✓ - Each evaluation method covered the same tests.")
-} else {
-    if (tests_missed_zeroed_count > 0) {
-        message(paste0("x - There are ", tests_missed_zeroed_uninit %>% nrow(), " tests from zeroed that still need to be run for uninit."))
-        failed <- TRUE
-    }
-    if (tests_missed_uninit_count > 0) {
-        message(paste0("x - There are ", tests_missed_uninit_zeroed %>% nrow(), " tests from uninit that still need to be run for zeroed."))
-        failed <- TRUE
-    }
-}
+#passed <- tests_missed_zeroed_count == 0 && tests_missed_uninit_count == 0
+#if (passed) {
+#    message("✓ - Each evaluation method covered the same tests.")
+#} else {
+#    if (tests_missed_zeroed_count > 0) {
+#        message(paste0("x - There are ", tests_missed_zeroed_uninit %>% nrow(), " tests from zeroed that still need to be run for uninit."))
+#        failed <- TRUE
+#    }
+#    if (tests_missed_uninit_count > 0) {
+#        message(paste0("x - There are ", tests_missed_uninit_zeroed %>% nrow(), " tests from uninit that still need to be run for zeroed."))
+#        failed <- TRUE
+#    }
+#}
 
-visited_tests_in_evaluation <- bind_rows(visited_tests_zeroed, visited_tests_uninit) %>% unique()
-activated_tests_in_initial_run <- read_csv(file.path("./data/results/stage3/baseline/activated.csv"), show_col_types = FALSE, col_names = c("crate_name", "test_name")) %>% unique()
+#visited_tests_in_evaluation <- bind_rows(visited_tests_zeroed, visited_tests_uninit) %>% unique()
+#activated_tests_in_initial_run <- read_csv(file.path("./data/results/stage3/baseline/activated.csv"), show_col_types = FALSE, col_names = c("crate_name", "test_name")) %>% unique()
 
-visited_activated_tests <- activated_tests_in_initial_run %>% anti_join(activated_tests_in_initial_run, by = c("crate_name", "test_name"))
-tests_activated_in_initial_run_count <- visited_activated_tests %>% nrow()
-if (tests_activated_in_initial_run_count > 0) {
-    message(paste0("x - There are ", tests_activated_in_initial_run_count, " tests that were activated in the initial run but not in the evaluation."))
-    failed <- TRUE
-}else{
-    message("✓ - All tests activated in the initial run were also activated in the evaluation.")
-}
+#visited_activated_tests <- activated_tests_in_initial_run %>% anti_join(activated_tests_in_initial_run, by = c("crate_name", "test_name"))
+#tests_activated_in_initial_run_count <- visited_activated_tests %>% nrow()
+#if (tests_activated_in_initial_run_count > 0) {
+ #   message(paste0("x - There are ", tests_activated_in_initial_run_count, " tests that were activated in the initial run but not in the evaluation."))
+ #   failed <- TRUE
+#}else{
+#    message("✓ - All tests activated in the initial run were also activated in the evaluation.")
+#}

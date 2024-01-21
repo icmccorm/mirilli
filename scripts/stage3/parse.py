@@ -6,8 +6,17 @@ import parse_tb
 import parse_shared
 import parse_sb
 
-RE_MAYBEUNINIT = re.compile(r"(error|warning): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\))")
-RE_MEM_UNINIT = re.compile(r"(error|warning): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(uninitialized\(\))")
+def read_flags(FLAGS_CSV_PATH):
+    with open(FLAGS_CSV_PATH, "r") as f:
+        flags = list(map(lambda x: x.strip(), f.readlines()))
+        flags.sort()
+        return flags
+
+FLAGS_CSV_PATH = "./data/flags.csv"
+FLAGS = read_flags(FLAGS_CSV_PATH)
+
+RE_MAYBEUNINIT = re.compile(r"(error): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\))")
+RE_MEM_UNINIT = re.compile(r"(error): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(uninitialized\(\))")
 def check_for_uninit(text):
     return RE_MEM_UNINIT.search(text) is not None
 def check_for_maybeuninit(text):
@@ -85,11 +94,17 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
                 root = quote(",".join(extract_error_trace(text)))
                 roots.write(csv_row([crate_name, test_case, root]))
                 roots.flush()
-        if filename.endswith(".json"):
-            with open(os.path.join(directory, filename), "r") as f:
-                text = f.read()
-                test_case = os.path.basename(filename)[:-5]
-                metadata.write(csv_row([crate_name, test_case] + [str(v) for v in json.loads(text).values()]))
+        if filename.endswith(".flags.csv"):
+            curr_flags = set(read_flags(os.path.join(directory, filename)))
+            test_case = os.path.basename(filename)[:-5]
+            # iterate over FLAGS and write 1 if the flag is present, 0 otherwise
+            flags = []
+            for flag in FLAGS:
+                if flag in curr_flags:
+                    flags.append("1")
+                else:
+                    flags.append("0")
+            metadata.write(csv_row([crate_name, test_case] + flags))
                          
 def extract_error_trace(text):
     lines = []

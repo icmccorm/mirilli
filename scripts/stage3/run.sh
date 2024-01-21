@@ -94,10 +94,13 @@ do
 
             echo "Compiling miri test binary..."
             MIRI_COMP_EXITCODE=1
-            OUTPUT=$(timeout $TIMEOUT MIRIFLAGS="-Zmiri-disable-bc" cargo miri test --tests -- --list 2> err)
+            OUTPUT=$(MIRIFLAGS="-Zmiri-disable-bc" timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
             MIRI_COMP_EXITCODE=$?
             echo "Exit: $MIRI_COMP_EXITCODE"
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_miri_comp.csv
+            if [ ! -f "../data/results/stage3/crates/$crate_name/miri.comp.log" ]; then
+                cp err ../data/results/stage3/crates/$crate_name/miri.comp.log
+            fi
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
                 MFLAGS="-Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
