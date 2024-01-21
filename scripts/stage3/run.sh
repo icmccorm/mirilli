@@ -94,7 +94,7 @@ do
 
             echo "Compiling miri test binary..."
             MIRI_COMP_EXITCODE=1
-            OUTPUT=$(timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
+            OUTPUT=$(timeout $TIMEOUT MIRIFLAGS="-Zmiri-disable-bc" cargo miri test --tests -- --list 2> err)
             MIRI_COMP_EXITCODE=$?
             echo "Exit: $MIRI_COMP_EXITCODE"
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_miri_comp.csv
