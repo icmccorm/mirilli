@@ -44,6 +44,13 @@ data_dir = os.path.join(root_dir, "crates")
 if not os.path.exists(data_dir):
     failed()
 
+build_dir = "build"
+if not os.path.exists(build_dir):
+    os.mkdir(build_dir)
+build_output_dir = os.path.join(build_dir, "stage3")
+if not os.path.exists(build_output_dir):
+    os.mkdir(build_output_dir)
+
 base = os.path.basename(root_dir)
 print("Parsing errors from directory '%s'..." % base)
 
@@ -96,7 +103,7 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
                 roots.flush()
         if filename.endswith(".flags.csv"):
             curr_flags = set(read_flags(os.path.join(directory, filename)))
-            test_case = os.path.basename(filename)[:-5]
+            test_case = os.path.basename(filename)[:-10]
             # iterate over FLAGS and write 1 if the flag is present, 0 otherwise
             flags = []
             for flag in FLAGS:
@@ -200,11 +207,11 @@ def extract_error_info(is_tree_borrows, text):
     error_type = error_type_override if error_type_override is not None else error_type
     return ([error_type, quote(error_text), quote(error_location), exit_signal_number], error_subtype)
 
-(stack_roots, tree_roots) = open_csv_for_both(root_dir, "error_roots", ["crate_name", "test_name", "error_root"])
-(stack_meta, tree_meta) = open_csv_for_both(root_dir, "metadata", [])
-(stack_info, tree_info) = open_csv_for_both(root_dir, "error_info", ["crate_name", "test_name", "error_type", "error_text", "error_location_rust","exit_signal_no","actual_failure"])
-tree_summary = open_csv(root_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
-stack_summary = open_csv(root_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
+(stack_roots, tree_roots) = open_csv_for_both(build_output_dir, "error_roots", ["crate_name", "test_name", "error_root"])
+(stack_meta, tree_meta) = open_csv_for_both(build_output_dir, "metadata", ["crate_name", "test_name"] + FLAGS)
+(stack_info, tree_info) = open_csv_for_both(build_output_dir, "error_info", ["crate_name", "test_name", "error_type", "error_text", "error_location_rust","exit_signal_no","actual_failure"])
+tree_summary = open_csv(build_output_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
+stack_summary = open_csv(build_output_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
 
 for crate in os.listdir(data_dir):
     stack_dir = os.path.join(data_dir, crate, "stack")

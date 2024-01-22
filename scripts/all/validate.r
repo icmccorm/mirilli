@@ -103,8 +103,7 @@ if (missing_tests_count > 0) {
 internal_validation_stage3 <- function(dir) {
     basename <- basename(dir)
     status_native_comp <- read_csv(file.path(dir, "status_native_comp.csv"), show_col_types = FALSE, col_names = c("exit_code", "crate_name", "test_name"))
-    erroneous_count <- status_native_comp %>% filter(exit_code != 0) %>% nrow()
-    if (erroneous_count > 0) {
+    if ((status_native_comp %>% filter(exit_code != 0) %>% nrow()) > 0) {
         if (!ignore_regression) {
             message(paste0("x - Certain test(s) failed to compile for ", basename, ":\t", message_fail_counts(status_native_comp)))
             failed <- TRUE
@@ -114,13 +113,15 @@ internal_validation_stage3 <- function(dir) {
     }
 
     status_miri_comp <- read_csv(file.path(dir, "status_miri_comp.csv"), show_col_types = FALSE, col_names = c("exit_code", "crate_name", "test_name"))
-    erroneous_count <- status_miri_comp %>% filter(exit_code != 0) %>% select(test_name, crate_name) %>% write_csv(file.path("rerun.csv"))
+    
+    erroneous_count <- status_miri_comp %>% filter(exit_code != 0) %>% select(test_name, crate_name) %>% write_csv(file.path("rerun.csv")) %>% nrow()
     if (erroneous_count > 0) {
         if (!ignore_regression) {
             message(paste0("x - Certain test(s) failed to compile in miri for ", basename, ":\t", message_fail_counts(status_miri_comp)))
             failed <- TRUE
         }
     }
+    
 }
 
 internal_validation_stage3("./data/results/stage3/zeroed")

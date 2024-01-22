@@ -42,7 +42,7 @@ compile-stage2:
 	@Rscript ./scripts/stage2/summarize.r
 
 extract-stage3:
-	@./scripts/stage3/extract.sh ./pulled ./extracted-stage3
+	@./scripts/stage3/extract.sh ./pulled ./data/results/stage3/zeroed
 
 compile-stage3:
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/baseline

@@ -1,5 +1,5 @@
 #!/bin/bash
-INDEX=1
+INDEX=2
 rm -rf ./pulled
 mkdir ./pulled
 touch ./pulled/status.csv
