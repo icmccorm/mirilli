@@ -1,11 +1,15 @@
-library(dplyr)
-library(readr)
-library(stringr)
-library(tidyr)
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(readr)
+    library(stringr)
+    library(tidyr)
+})
+
 stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
     dir.create(stage3_root)
 }
+
 STACK_OVERFLOW_TXT <- "Stack Overflow"
 UNSUPP_ERR_TXT <- "Unsupported Operation"
 LLI_ERR_TXT <- "LLI Internal Error"
@@ -19,7 +23,6 @@ INTEROP_ERR_TXT <- "LLI Interoperation Error"
 UB_MAYBEUNINIT <- "Invalid MaybeUninit<T>"
 UB_MEM_UNINIT <- "Invalid mem::uninitialized()"
 PASS_ERR_TEXT <- "Passed"
-
 
 can_deduplicate_without_error_root <- function(error_type) {
     return(error_type %in% c(LLI_ERR_TXT, UNSUPP_ERR_TXT, TIMEOUT_ERR_TXT, TIMEOUT_PASS_ERR_TXT, TERMINATED_EARLY_ERR_TXT))
@@ -43,7 +46,6 @@ valid_error_type <- function(type, trace) {
         UB_MAYBEUNINIT,
         UB_MEM_UNINIT
     )) | (type %in% c(UB_MAYBEUNINIT, UB_MEM_UNINIT) & str_starts(trace, "/root/.cargo/registry/src/index.crates.io"))
-
 }
 passed <- function(exit_code) {
     exit_code == 0
@@ -238,17 +240,29 @@ keep_actual_errors <- function(df) {
         remove_erroneous_failures()
 }
 
-baseline_raw <- compile_errors("./data/results/stage3/baseline")
+compile_metadata <- function(dir) {
+    mode <- basename(dir)
+    stack_meta <- read_csv(file.path(dir, "metadata_stack.csv"), show_col_types = FALSE) %>% mutate(borrow_mode = "stack")
+    tree_meta <- read_csv(file.path(dir, "metadata_tree.csv"), show_col_types = FALSE) %>% mutate(borrow_mode = "tree")
+    return(bind_rows(stack_meta, tree_meta) %>%
+        mutate(memory_mode == mode))
+}
+
+
+zeroed_meta <- compile_metadata("./data/results/stage3/zeroed")
+uninit_meta <- compile_metadata("./data/results/stage3/uninit")
+zeroed_meta %>% bind_rows(uninit_meta) %>%
+    write_csv(file.path(stage3_root, "metadata.csv"))
+
 zeroed_raw <- compile_errors("./data/results/stage3/zeroed")
 uninit_raw <- compile_errors("./data/results/stage3/uninit")
 
-all_errors <- bind_rows(baseline_raw, zeroed_raw, uninit_raw) %>%
+all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
 
 uninit <- uninit_raw %>% merge_passes_and_timeouts()
 zeroed <- zeroed_raw %>% merge_passes_and_timeouts()
-baseline <- baseline_raw %>% merge_passes_and_timeouts()
 
 shared_errors <- zeroed %>%
     inner_join(uninit) %>%
@@ -276,36 +290,6 @@ tested_in_zereod_or_uninit <- zeroed %>%
     select(crate_name, test_name) %>%
     bind_rows(uninit %>% select(crate_name, test_name)) %>%
     unique()
-baseline_also <- baseline %>%
-    filter(crate_name %in% tested_in_zereod_or_uninit$crate_name & test_name %in% tested_in_zereod_or_uninit$test_name)
-baseline_unique <- baseline %>%
-    anti_join(baseline_also, by = c("crate_name", "test_name"))
-
-baseline_also <- baseline_also %>%
-    filter(error_text_stack != USING_UNINIT_FULL_ERR_TXT) %>%
-    filter(error_text_tree != USING_UNINIT_FULL_ERR_TXT)
-
-baseline_selected <- bind_rows(baseline_also, baseline_unique)
-
-differed_in_baseline <- baseline_selected %>%
-    anti_join(zeroed) %>%
-    anti_join(uninit) %>%
-    keep_actual_errors() %>%
-    unique()
-
-baseline_failures <- differed_in_baseline %>%
-    failed_in_either_mode() %>%
-    unique() %>%
-    mutate(mode = "Baseline")
-
-baseline_overflows <- differed_in_baseline %>%
-    overflowed_in_either_mode() %>%
-    unique() %>%
-    mutate(mode = "Baseline")
-
-baseline_non_failures <- differed_in_baseline %>%
-    keep_only_ub() %>%
-    write_csv(file.path(stage3_root, "diff_errors_baseline.csv"))
 
 differed_in_zeroed <- zeroed %>%
     anti_join(uninit, na_matches = c("na")) %>%
@@ -392,14 +376,12 @@ deduplicate_label_write <- function(df, path) {
 
 all_failures_to_investigate <- bind_rows(
     shared_failures,
-    baseline_failures,
     zeroed_failures,
     uninit_failures
 ) %>% deduplicate_label_write(file.path(stage3_root, "failures.csv"))
 
 all_overflows_to_investigate <- bind_rows(
     shared_overflows,
-    baseline_overflows,
     zeroed_overflows,
     uninit_overflows
 ) %>% deduplicate_label_write(file.path(stage3_root, "overflows.csv"))

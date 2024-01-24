@@ -30,10 +30,13 @@ extract-stage1:
 	@./scripts/stage1/extract_tests.sh
 
 compile-stage1:
-	@rm -rf ./data/compiled/stage1/*
-	@mkdir -p ./data/compiled/stage1/lints
-	@(python3 ./scripts/stage1/compile.py ./data/results/stage1 ./data/compiled/stage1/lints)
+	@rm -rf ./build/stage1
+	@mkdir -p ./build/stage1
+	@(python3 ./scripts/stage1/compile.py ./data/results/stage1 ./build/stage1/lints)
 	@Rscript ./scripts/stage1/summarize.r
+
+summarize:
+	@Rscript ./scripts/summarize.r
 
 extract-stage2:
 	@./scripts/stage2/extract.sh ./pulled
@@ -42,13 +45,12 @@ compile-stage2:
 	@Rscript ./scripts/stage2/summarize.r
 
 extract-stage3:
-	@./scripts/stage3/extract.sh ./pulled ./data/results/stage3/zeroed
+	@./scripts/stage3/extract.sh ./pulled ./data/results/stage3/uninit
 
 compile-stage3:
-	python3 ./scripts/stage3/parse.py ./data/results/stage3/baseline
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/zeroed
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/uninit
 	Rscript ./scripts/stage3/summarize.r
 
 validate:
-	@Rscript ./scripts/all/validate.r
+	@Rscript ./scripts/validate.r
