@@ -8,9 +8,12 @@ if (len(sys.argv) == 1):
 walk_dir = sys.argv[1]
 
 if (len(sys.argv) < 3):
-    out_dir = "./data/compiled/stage1/lints"
+    out_dir = "./build/stage1/lints"
 else:
     out_dir = sys.argv[2]
+
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
 
 early_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
 late_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"

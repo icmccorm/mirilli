@@ -15,12 +15,12 @@ touch ./data/results/stage3/status_stack.csv
 touch ./data/results/stage3/status_tree.csv
 touch ./data/results/stage3/status_native.csv
 CURRENT_CRATE=""
-TIMEOUT=5m
-TIMEOUT_MIRI=10m
-if [ "$2" == "-v" ]; then
-    LOGGING_FLAG="-Zmiri-llvm-log-verbose"
+TIMEOUT=10m
+TIMEOUT_MIRI=5m
+if [ "$2" == "-z" ]; then
+    MEMORY_MODE_FLAG="-Zmiri-llvm-zero-all"
 else
-    LOGGING_FLAG="-Zmiri-llvm-log"
+    MEMORY_MODE_FLAG="-Zmiri-llvm-read-uninit"
 fi
 
 while IFS=, read -r test_name crate_name version <&3;
@@ -81,6 +81,7 @@ do
 
             if [ ! -f "./$crate_name.sum.bc" ]; then
                 echo "Assembling bytecode files..."
+                cp /usr/src/ffickle/libcxx.bc ./libcxx.bc
                 rllvm-as "./$crate_name.sum.bc"
                 RLLVM_AS_EXITCODE=$?
                 echo "Exit: $RLLVM_AS_EXITCODE"    
@@ -94,16 +95,19 @@ do
 
             echo "Compiling miri test binary..."
             MIRI_COMP_EXITCODE=1
-            OUTPUT=$(timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
+            OUTPUT=$(MIRIFLAGS="-Zmiri-disable-bc" timeout $TIMEOUT cargo miri test --tests -- --list 2> err)
             MIRI_COMP_EXITCODE=$?
             echo "Exit: $MIRI_COMP_EXITCODE"
             echo "$MIRI_COMP_EXITCODE,$crate_name,\"$test_name\"" >> ../data/results/stage3/status_miri_comp.csv
+            if [ ! -f "../data/results/stage3/crates/$crate_name/miri.comp.log" ]; then
+                cp err ../data/results/stage3/crates/$crate_name/miri.comp.log
+            fi
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
-                MFLAGS="-Zmiri-descriptive-ub -Zmiri-llvm-zero-all -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation $LOGGING_FLAG -Zmiri-extern-bc-file=./$crate_name.sum.bc"
+                MFLAGS="-Zmiri-descriptive-ub -Zmiri-backtrace=full $MEMORY_MODE_FLAG -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1
-                OUTPUT=$(MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
                 dmesg -T | egrep -i 'killed process' > ./after_log.txt
 
@@ -129,7 +133,7 @@ do
                 echo "Executing Miri in Tree Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_TREE_EXITCODE=1
-                OUTPUT=$(MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
+                OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows -Zmiri-unique-is-unique" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
                 dmesg -T | egrep -i 'killed process' > ./after_log.txt
 
