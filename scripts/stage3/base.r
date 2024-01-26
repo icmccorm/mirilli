@@ -54,7 +54,7 @@ deduplicate_error_text <- function(df) {
 }
 
 correct_error_type <- function(df) {
-    df <- df %>% 
+    df <- df %>%
         mutate(error_type = if_else(str_detect(error_text, UNWIND_ERR_TEXT), UNWIND_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, CROSS_LANGUAGE_ERR_TEXT), CROSS_LANGUAGE_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, USING_UNINIT_FULL_ERR_TXT), UB_MEM_UNINIT, error_type)) %>%
@@ -198,7 +198,8 @@ compile_errors <- function(dir) {
             actual_failure_tree,
             exit_signal_no_stack,
             exit_signal_no_tree
-        )
+        ) %>%
+        mutate(memory_mode = basename)
 }
 
 merge_passes_and_timeouts <- function(df) {

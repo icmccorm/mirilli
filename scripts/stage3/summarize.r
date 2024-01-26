@@ -97,6 +97,7 @@ num_failed_engaged_constructor <- zeroed_failed %>%
 
 uninit_raw <- compile_errors("./data/results/stage3/uninit")
 uninit_raw %>% select(error_type_stack) %>% unique()
+
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
