@@ -90,7 +90,7 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
                 info_file.flush()
 
                 root = quote(",".join(extract_error_trace(text)))
-                roots.write(csv_row([crate_name, test_case, root]))
+                roots.write(csv_row([crate_name, test_case, "1", root]))
                 roots.flush()
         if filename.endswith(".flags.csv"):
             curr_flags = set(read_flags(os.path.join(directory, filename)))

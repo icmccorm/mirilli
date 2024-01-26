@@ -56,11 +56,11 @@ if (file.exists("./data/results/stage2/tests.csv")) {
         unique() %>%
         nrow()
 
-
     failed_miri_ffi <- tests %>%
         filter(had_ffi == 0, exit_code == 1) %>%
         select(test_name, crate_name) %>%
         inner_join(population, by = c("crate_name"))
+        
     failed_miri_ffi_count <- failed_miri_ffi %>%
         unique() %>%
         nrow()

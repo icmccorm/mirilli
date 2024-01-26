@@ -21,13 +21,7 @@ message_fail_counts <- function(df) {
     return(paste0("(Timed out: ", num_timed_out, ", Failed: ", num_failed, ")"))
 }
 
-logging_dir <- file.path("./build/validation/")
-# if the directory 'build' exists, remove it
-if (dir.exists(logging_dir)) {
-    unlink(logging_dir, recursive = TRUE)
-}
-# create the directory 'build'
-dir.create(logging_dir)
+
 failed <- FALSE
 
 all_crates <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
@@ -44,8 +38,6 @@ missed_stage1_count <- missed_stage1 %>% nrow()
 
 if (missed_stage1_count > 1) {
     message(paste0("x - There were ", missed_stage1_count, " missed crates in stage1."))
-    missed_stage1 %>%
-        write_csv(file.path(logging_dir, "missed_stage1.csv"))
     failed <- TRUE
 } else {
     message("✓ - All crates were visited in stage1")
@@ -61,8 +53,6 @@ missed_stage2 <- all_crates_stage2 %>%
     anti_join(stage2_failed_download, by = c("crate_name", "version"))
 missed_stage2_count <- missed_stage2 %>% nrow()
 if (missed_stage2_count > 1) {
-    missed_stage2 %>%
-        write_csv(file.path(logging_dir, "missed_stage2.csv"))
     message(paste0("x - There were ", missed_stage2_count, "missed crates in stage2."))
     failed <- TRUE
 } else {
@@ -165,7 +155,6 @@ read_activated <- function(path) {
         unique()
     return(bind_rows(activated_tree, activated_stack) %>% unique())
 }
-
 
 activated_zeroed <- read_activated("./data/results/stage3/zeroed")
 activated_uninit <- read_activated("./data/results/stage3/uninit")

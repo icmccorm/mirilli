@@ -15,7 +15,13 @@ RUN rustup component add miri
 RUN rustup install nightly
 RUN git submodule update --init ./rust
 
-FROM setup as rust-compile
+FROM setup as libcpp-compile
+WORKDIR /usr/src/ffickle/rust/src/llvm-project/
+RUN mkdir build-libcpp
+RUN cmake -G Ninja -S runtimes -B build-libcpp -DLLVM_ENABLE_RUNTIMES="libcxx" 
+RUN ninja -C build cxx
+
+FROM libcpp-compile as rust-compile
 WORKDIR /usr/src/ffickle/rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell

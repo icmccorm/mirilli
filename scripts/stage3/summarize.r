@@ -1,262 +1,102 @@
-suppressPackageStartupMessages({
-    library(dplyr)
-    library(readr)
-    library(stringr)
-    library(tidyr)
-})
-
+source("./scripts/stage3/base.r")
 stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
     dir.create(stage3_root)
 }
-
-STACK_OVERFLOW_TXT <- "Stack Overflow"
-UNSUPP_ERR_TXT <- "Unsupported Operation"
-LLI_ERR_TXT <- "LLI Internal Error"
-TIMEOUT_ERR_TXT <- "Timeout"
-TIMEOUT_PASS_ERR_TXT <- "Passed/Timeout"
-TEST_FAILED_TXT <- "Test Failed"
-TERMINATED_EARLY_ERR_TXT <- "Main Terminated Early"
-USING_UNINIT_FULL_ERR_TXT <- "using uninitialized data, but this operation requires initialized memory"
-UB_ERR_TXT <- "Undefined Behavior"
-INTEROP_ERR_TXT <- "LLI Interoperation Error"
-UB_MAYBEUNINIT <- "Invalid MaybeUninit<T>"
-UB_MEM_UNINIT <- "Invalid mem::uninitialized()"
-PASS_ERR_TEXT <- "Passed"
-
-can_deduplicate_without_error_root <- function(error_type) {
-    return(error_type %in% c(LLI_ERR_TXT, UNSUPP_ERR_TXT, TIMEOUT_ERR_TXT, TIMEOUT_PASS_ERR_TXT, TERMINATED_EARLY_ERR_TXT))
-}
-
-deduplicate_error_text <- function(df) {
-    df <- df %>%
-        mutate(error_text = str_replace(error_text, "alloc[0-9]+", "alloc")) %>%
-        mutate(error_text = str_replace(error_text, "<[0-9]+>", "<>")) %>%
-        mutate(error_text = str_replace(error_text, "call [0-9]+", "call <>")) %>%
-        mutate(error_text = str_replace(error_text, paste0("^", error_type, ":"), "")) %>%
-        mutate(error_text = trimws(error_text))
-    return(df)
-}
-valid_error_type <- function(type, trace) {
-    !(type %in% c(
-        UNSUPP_ERR_TXT,
-        LLI_ERR_TXT,
-        TIMEOUT_ERR_TXT,
-        TIMEOUT_PASS_ERR_TXT,
-        UB_MAYBEUNINIT,
-        UB_MEM_UNINIT
-    )) | (type %in% c(UB_MAYBEUNINIT, UB_MEM_UNINIT) & str_starts(trace, "/root/.cargo/registry/src/index.crates.io"))
-}
-passed <- function(exit_code) {
-    exit_code == 0
-}
-timed_out <- function(exit_code) {
-    exit_code == 124
-}
-errored_exit_code <- function(exit_code) {
-    !passed(exit_code) & !timed_out(exit_code)
-}
-
-failed_in_either_mode <- function(df) {
-    df %>% filter(
-        error_type_stack == TEST_FAILED_TXT |
-            error_type_tree == TEST_FAILED_TXT
-    )
-}
-
-overflowed_in_either_mode <- function(df) {
-    df %>% filter(
-        error_type_stack == STACK_OVERFLOW_TXT |
-            error_type_tree == STACK_OVERFLOW_TXT
-    )
-}
-
-error_in_dependency <- function(error_root) {
-    str_detect(error_root, "/root/.cargo/registry/src/index.crates.io-")
-}
-
-possible_non_failure_bug <- function(error_type, trace) {
-    valid_error_type(error_type, trace) & error_type != TEST_FAILED_TXT & error_type != STACK_OVERFLOW_TXT
-}
-
-keep_only_ub <- function(df) {
-    failures <- df %>%
-        filter(!possible_non_failure_bug(error_type_stack, error_root_stack) & !possible_non_failure_bug(error_type_tree, error_root_tree))
-    df %>% anti_join(failures)
-}
-
-prepare_errors <- function(dir, type) {
-    error_path <- file.path(dir, paste0("error_info_", type, ".csv"))
-    root_path <- file.path(dir, paste0("error_roots_", type, ".csv"))
-
-    errors <- read_csv(error_path, show_col_types = FALSE) %>%
-        inner_join(all, by = c("crate_name"))
-
-    error_roots <- read_csv(root_path, show_col_types = FALSE)
-
-    error_rust_locations <- errors %>%
-        select(crate_name, test_name, error_location_rust)
-
-    error_roots <- error_roots %>%
-        full_join(error_rust_locations, by = c("crate_name", "test_name")) %>%
-        mutate(error_root = if_else(is.na(error_root), error_location_rust, error_root)) %>%
-        select(-error_location_rust)
-
-    errors <- errors %>%
-        full_join(error_roots, by = c("crate_name", "test_name")) %>%
-        deduplicate_error_text()
-
-    exit_codes <- read_csv(file.path(dir, paste0("status_", type, ".csv")), col_names = c("exit_code", "crate_name", "test_name"), show_col_types = FALSE)
-
-    errors <- errors %>%
-        full_join(exit_codes, by = c("crate_name", "test_name")) %>%
-        mutate(error_type = if_else(timed_out(exit_code), TIMEOUT_ERR_TXT, error_type)) %>%
-        mutate(borrow_mode = type)
-    borrow_summary <- read_csv(file.path(dir, paste0(type, "_summary.csv")), show_col_types = FALSE)
-    errors <- errors %>% full_join(borrow_summary, by = c("crate_name", "test_name"))
-    return(errors)
-}
-
-all <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
-
-compile_errors <- function(dir) {
-    basename <- basename(dir)
-    print(basename)
-
-    stack_errors <- prepare_errors(dir, "stack")
-    tree_errors <- prepare_errors(dir, "tree")
-    status_col_names <- col_names <- c("exit_code", "crate_name", "test_name")
-    native_comp_status <- read_csv(file.path(dir, "status_native_comp.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
-        rename(native_comp_exit_code = exit_code) %>%
-        unique()
-    native_status <- read_csv(file.path(dir, "status_native.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
-        rename(native_exit_code = exit_code) %>%
-        unique()
-    miri_comp_status <- read_csv(file.path(dir, "status_miri_comp.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
-        rename(miri_comp_exit_code = exit_code) %>%
-        unique()
-    status <- native_comp_status %>%
-        full_join(native_status, by = c("crate_name", "test_name")) %>%
-        full_join(miri_comp_status, by = c("crate_name", "test_name"))
-    errors <- bind_rows(stack_errors, tree_errors)
-    errors <- errors %>%
-        select(crate_name, test_name, borrow_mode, error_type, error_text, error_root, exit_code, actual_failure, exit_signal_no, action, kind, subkind) %>%
-        unique() %>%
-        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, error_root, exit_code, actual_failure, exit_signal_no, action, kind, subkind))
-    status %>%
-        full_join(errors, by = c("crate_name", "test_name")) %>%
-        inner_join(all, by = c("crate_name")) %>%
-        select(
-            crate_name,
-            version,
-            test_name,
-            native_comp_exit_code,
-            native_exit_code,
-            miri_comp_exit_code,
-            exit_code_stack,
-            exit_code_tree,
-            error_type_stack,
-            error_type_tree,
-            error_text_stack,
-            error_text_tree,
-            error_root_stack,
-            error_root_tree,
-            action_stack,
-            action_tree,
-            kind_stack,
-            kind_tree,
-            subkind_stack,
-            subkind_tree,
-            actual_failure_stack,
-            actual_failure_tree,
-            exit_signal_no_stack,
-            exit_signal_no_tree
-        )
-}
-
-merge_passes_and_timeouts <- function(df) {
-    df <- mutate(
-        df,
-        exit_code_stack = if_else(timed_out(exit_code_stack) & error_type_stack == TIMEOUT_ERR_TXT, 0, exit_code_stack),
-        exit_code_tree = if_else(timed_out(exit_code_tree) & error_type_tree == TIMEOUT_ERR_TXT, 0, exit_code_tree),
-        error_type_stack = if_else(passed(exit_code_stack), TIMEOUT_PASS_ERR_TXT, error_type_stack),
-        error_type_tree = if_else(passed(exit_code_tree), TIMEOUT_PASS_ERR_TXT, error_type_tree)
-    )
-}
-
-deduplicate_errors <- function(df) {
-    # we can only deduplicate errors that are not test failures, and that have a non-NA error root
-    can_deduplicate <- df %>%
-        filter(is.na(error_type_stack) | error_type_stack != TEST_FAILED_TXT) %>%
-        filter(is.na(error_type_tree) | error_type_tree != TEST_FAILED_TXT) %>%
-        filter(ifelse(errored_exit_code(exit_code_stack), !is.na(error_root_stack) | can_deduplicate_without_error_root(error_type_stack), TRUE)) %>%
-        filter(ifelse(errored_exit_code(exit_code_tree), !is.na(error_root_tree) | can_deduplicate_without_error_root(error_type_tree), TRUE))
-    # we want to deduplicate across everything except the name of a test.
-    deduplicated <- can_deduplicate %>%
-        group_by(across(c(-test_name))) %>%
-        mutate(num_duplicates = n()) %>%
-        slice(1) %>%
-        ungroup()
-
-    error_in_deps <- deduplicated %>%
-        filter((error_in_dependency(error_root_stack) & error_in_dependency(error_root_tree)) |
-            (is.na(error_root_stack) & error_in_dependency(error_root_tree)) |
-            (is.na(error_root_tree) & error_in_dependency(error_root_stack)))
-
-    deduplicated <- deduplicated %>%
-        anti_join(error_in_deps)
-
-    error_in_deps <- error_in_deps %>%
-        group_by(across(c(-test_name, -crate_name, -version))) %>%
-        mutate(num_duplicates = n()) %>%
-        slice(1) %>%
-        ungroup()
-
-    not_deduplicable <- df %>%
-        anti_join(can_deduplicate) %>%
-        mutate(num_duplicates = 1)
-
-    return(bind_rows(not_deduplicable, deduplicated, error_in_deps))
-}
-
-remove_erroneous_failures <- function(df, dir) {
-    to_remove <- df %>%
-        filter(errored_exit_code(native_exit_code) & errored_exit_code(exit_code_stack) & errored_exit_code(exit_code_tree)) %>%
-        filter(str_detect(error_type_stack, TEST_FAILED_TXT)) %>%
-        filter(str_detect(error_type_tree, TEST_FAILED_TXT))
-    df %>% anti_join(to_remove)
-}
-
-keep_actual_errors <- function(df) {
-    df %>%
-        # we only want to include cases where a test passed both native compilation and miri
-        filter(passed(native_comp_exit_code) & passed(miri_comp_exit_code)) %>%
-        select(-miri_comp_exit_code, -native_comp_exit_code) %>%
-        # then, we require that the test errored in either stacked borrows or tree borrows
-        filter(errored_exit_code(exit_code_stack) | errored_exit_code(exit_code_tree)) %>%
-        # finally, there must be a valid error type in either category
-        filter(valid_error_type(error_type_stack, error_root_stack) | valid_error_type(error_type_tree, error_root_tree)) %>%
-        deduplicate_errors() %>%
-        remove_erroneous_failures()
-}
-
-compile_metadata <- function(dir) {
-    mode <- basename(dir)
-    stack_meta <- read_csv(file.path(dir, "metadata_stack.csv"), show_col_types = FALSE) %>% mutate(borrow_mode = "stack")
-    tree_meta <- read_csv(file.path(dir, "metadata_tree.csv"), show_col_types = FALSE) %>% mutate(borrow_mode = "tree")
-    return(bind_rows(stack_meta, tree_meta) %>%
-        mutate(memory_mode == mode))
-}
-
+stats_file <- file.path(stage3_root, "./stats.csv")
+stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 zeroed_meta <- compile_metadata("./data/results/stage3/zeroed")
 uninit_meta <- compile_metadata("./data/results/stage3/uninit")
-zeroed_meta %>% bind_rows(uninit_meta) %>%
+
+num_tests_engaged <- zeroed_meta %>%
+    filter(LLVMEngaged == 1) %>%
+    select(test_name, crate_name) %>%
+    unique() %>%
+    nrow()
+stats <- stats %>% add_row(key = "num_tests_engaged", value = num_tests_engaged)
+num_crates_engaged <- zeroed_meta %>%
+    filter(LLVMEngaged == 1) %>%
+    select(crate_name) %>%
+    unique() %>%
+    nrow()
+stats <- stats %>% add_row(key = "num_crates_engaged", value = num_crates_engaged)
+
+
+did_not_engage_zeroed <- zeroed_meta %>%
+    filter(LLVMEngaged == 0) %>%
+    select(crate_name, test_name, borrow_mode) %>%
+    group_by(crate_name, test_name) %>%
+    summarize(num_modes = n()) %>%
+    filter(num_modes == 2) %>%
+    unique()
+
+stats <- stats %>% add_row(key = "num_tests_not_engaged_both", value = did_not_engage_zeroed %>% nrow())
+
+engaged_in_only_one_mode <- zeroed_meta %>%
+    filter(LLVMEngaged == 0) %>%
+    select(crate_name, test_name, borrow_mode) %>%
+    group_by(crate_name, test_name) %>%
+    summarize(num_modes = n()) %>%
+    filter(num_modes == 1) %>%
+    unique()
+stats <- stats %>% add_row(key = "num_tests_not_engaged_one", value = engaged_in_only_one_mode %>% nrow())
+
+engaged_constructor_zeroed <- zeroed_meta %>%
+    filter(LLVMInvokedConstructor == 1) %>%
+    select(crate_name, test_name) %>%
+    unique()
+
+zeroed_meta_summary <- summarize_metadata(zeroed_meta)
+uninit_meta_summary <- summarize_metadata(uninit_meta)
+zeroed_meta_summary %>%
+    bind_rows(uninit_meta_summary) %>%
     write_csv(file.path(stage3_root, "metadata.csv"))
 
 zeroed_raw <- compile_errors("./data/results/stage3/zeroed")
-uninit_raw <- compile_errors("./data/results/stage3/uninit")
+zeroed_failed <- zeroed_raw %>% right_join(did_not_engage_zeroed, by = c("crate_name", "test_name"))
+zeroed_failed_fn <- zeroed_failed %>%
+    filter(grepl("can't call foreign function `", error_text_stack)) %>%
+    filter(grepl("can't call foreign function `", error_text_tree)) %>%
+    mutate(
+        error_text_stack = str_extract(error_text_stack, "`(.*)` on OS", group = 1),
+        error_text_tree = str_extract(error_text_tree, "`(.*)` on OS", group = 1)
+    ) %>%
+    select(crate_name, test_name, error_text_stack, error_text_tree) %>%
+    unique()
+failed_function_names <- (zeroed_failed_fn %>% select(crate_name, test_name, error_text_stack) %>% rename(error_text = error_text_stack)) %>%
+    bind_rows(zeroed_failed_fn %>% select(crate_name, test_name, error_text_tree) %>% rename(error_text = error_text_tree)) %>%
+    unique()
+stopifnot(failed_function_names %>% nrow() == zeroed_failed_fn %>% nrow())
 
+function_count <- failed_function_names %>%
+    group_by(error_text) %>%
+    summarize(n = n()) %>%
+    arrange(desc(n))
+
+
+count_pipe <- function_count %>% filter(error_text == "pipe2") %>% select(n) %>% pull()
+stats <- stats %>% add_row(key = "num_not_engaged_pipe", value = count_pipe)
+
+count_socket <- function_count %>% filter(error_text == "socket") %>% select(n) %>% pull()
+stats <- stats %>% add_row(key = "num_not_engaged_socket", value = count_socket)
+
+count_each_blake <- function_count %>% filter(grepl("blake3", error_text))
+count_blake <- sum(count_each_blake$n)
+stats <- stats %>% add_row(key = "num_not_engaged_blake", value = count_blake)
+
+count_each_std <- function_count %>% filter(str_detect(error_text, "^_ZNS"))
+count_std <- sum(count_each_std$n)
+stats <- stats %>% add_row(key = "num_not_engaged_std", value = count_std)
+
+num_failed_engaged_constructor <- zeroed_failed %>%
+    inner_join(engaged_constructor_zeroed, by = c("crate_name", "test_name")) %>%
+    select(crate_name, test_name) %>%
+    unique() %>%
+    nrow()
+
+uninit_raw <- compile_errors("./data/results/stage3/uninit")
+uninit_raw %>% select(error_type_stack) %>% unique()
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
@@ -329,51 +169,6 @@ uninit_non_failures <- differed_in_uninit %>%
     keep_only_ub() %>%
     write_csv(file.path(stage3_root, "diff_errors_uninit.csv"))
 
-deduplicate_label_write <- function(df, path) {
-    df %>%
-        unique() %>%
-        select(
-            mode,
-            crate_name,
-            version,
-            test_name,
-            error_type_stack,
-            error_type_tree,
-            exit_code_stack,
-            exit_code_tree,
-            actual_failure_stack,
-            actual_failure_tree,
-            exit_signal_no_stack,
-            exit_signal_no_tree,
-        ) %>%
-        mutate(
-            errored_in = ifelse(errored_exit_code(exit_code_tree),
-                ifelse(errored_exit_code(exit_code_stack), "Both", "Tree"),
-                ifelse(errored_exit_code(exit_code_stack), "Stack", NA)
-            ),
-            actual_failure = ifelse(errored_in == "Tree",
-                actual_failure_tree,
-                actual_failure_stack
-            ),
-            exit_signal_no = ifelse(errored_in == "Tree",
-                exit_signal_no_tree,
-                exit_signal_no_stack
-            )
-        ) %>%
-        select(
-            mode,
-            crate_name,
-            version,
-            test_name,
-            errored_in,
-            error_type_stack,
-            error_type_tree,
-            actual_failure,
-            exit_signal_no
-        ) %>%
-        write_csv(path)
-}
-
 all_failures_to_investigate <- bind_rows(
     shared_failures,
     zeroed_failures,
@@ -385,3 +180,7 @@ all_overflows_to_investigate <- bind_rows(
     zeroed_overflows,
     uninit_overflows
 ) %>% deduplicate_label_write(file.path(stage3_root, "overflows.csv"))
+
+stats <- stats %>% write.csv(stats_file, row.names = FALSE, quote = FALSE)
+
+

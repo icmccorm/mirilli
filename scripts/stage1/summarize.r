@@ -2,6 +2,7 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(readr)
 })
+options(dplyr.summarise.inform = FALSE)
 
 stage1_input_dir <- file.path("./data/results/stage1")
 stage1_output_dir <- file.path("./build/stage1")
