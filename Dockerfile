@@ -43,7 +43,7 @@ RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
 ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
-RUN cd rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx.bc
+RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx.bc
 
 FROM rllvm-as-compile as ffickle-compile
 WORKDIR /usr/src/ffickle/
