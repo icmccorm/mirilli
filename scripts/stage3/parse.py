@@ -43,8 +43,6 @@ data_dir = os.path.join(root_dir, "crates")
 if not os.path.exists(data_dir):
     failed()
 
-print("Parsing errors from directory '%s'..." % base)
-
 def open_csv(dir, name, headers):
     global FILES_TO_CLOSE
     path = os.path.join(dir, name)

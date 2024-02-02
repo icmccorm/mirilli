@@ -104,7 +104,6 @@ if (os.path.isdir(walk_dir)):
         if dir == "early":
             early = os.path.join(walk_dir, dir)
             for early_result in os.listdir(early):
-                print(f"{early_result}-late")
                 path_to_early_result = os.path.join(early, early_result)
                 name, early_result_json = read_json(
                     path_to_early_result, early_result)
@@ -119,7 +118,6 @@ if (os.path.isdir(walk_dir)):
             late = os.path.join(walk_dir, dir)
             for late_result in os.listdir(late):
                 path_to_late_result = os.path.join(late, late_result)
-                print(f"{late_result}-late")
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
                 finished_late += f"{name}\n"
