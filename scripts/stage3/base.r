@@ -87,8 +87,8 @@ errored_exit_code <- function(exit_code) {
 
 failed_in_either_mode <- function(df) {
     df %>% filter(
-        error_type_stack == TEST_FAILED_TXT |
-            error_type_tree == TEST_FAILED_TXT
+        error_type_stack == TEST_FAILED_TXT & is.na(exit_signal_no_stack) |
+            error_type_tree == TEST_FAILED_TXT & is.na(exit_signal_no_stack)
     )
 }
 

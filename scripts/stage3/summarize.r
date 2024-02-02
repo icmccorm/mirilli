@@ -185,7 +185,8 @@ all_failures_to_investigate <- bind_rows(
     shared_failures,
     zeroed_failures,
     uninit_failures
-) %>% deduplicate_label_write(file.path(stage3_root, "failures.csv"))
+) %>%
+    deduplicate_label_write(file.path(stage3_root, "failures.csv"))
 
 all_overflows_to_investigate <- bind_rows(
     shared_overflows,

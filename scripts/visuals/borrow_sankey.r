@@ -33,7 +33,6 @@ borrowing_errors_final <- errors %>%
         error_root_stack,
         error_root_tree
     )) %>%
-    filter(tb_error_location == "Same") %>%
     rename(`SB Error Type` = kind_stack, `TB Error Location` = tb_error_location, `TB Error Type` = kind_tree, `TB Error Subtype` = subkind_tree) %>%
     make_long(`SB Error Type`, `TB Error Type`, `TB Error Subtype`) %>%
     filter(!is.na(node))
