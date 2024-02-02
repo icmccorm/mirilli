@@ -68,7 +68,6 @@ if (erroneous_stage2_count > 1) {
         message(paste0("x - Certain crate(s) didn't compile ", message_fail_counts(status_native_comp_stage2)))
         failed <- TRUE
     }
-    print(status_native_comp_stage2)
 } else {
     message(paste0("✓ - All crates continued to compile in stage2"))
 }
@@ -80,7 +79,6 @@ tests <- read_csv(file.path("./data/results/stage2/tests.csv"), col_names = c("e
     filter(!is.na(test_name)) %>%
     select(crate_name)
 
-print(status_miri_comp %>% anti_join(tests) %>% nrow())
 
 # STAGE 3
 print_stage(3)

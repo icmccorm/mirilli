@@ -126,8 +126,8 @@ class SBError:
         return [self.action.value, error_type.value]
 class SBErrorType(Enum):
     Insufficient = "Insufficient"
-    OutOfBounds = "OutOfBounds"
-    InvalidatedByUniqueRetag = "InvalidatedByUniqueRetag"
-    InvalidatedByRead = "InvalidatedByRead"
-    InvalidatedByWrite = "InvalidatedByWrite"
+    OutOfBounds = "Out of Bounds"
+    InvalidatedByUniqueRetag = "Invalidated-Unique Retag"
+    InvalidatedByRead = "Invalidated-Read"
+    InvalidatedByWrite = "Invalidated-Write"
     Protected = "Protected"

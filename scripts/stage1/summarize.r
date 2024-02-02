@@ -13,6 +13,7 @@ stats_file <- file.path(stage1_output_dir, "./stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 comp_status <- read_csv(file.path(stage1_input_dir, "status_comp.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
+
 lint_status <- read_csv(file.path(stage1_input_dir, "status_lint.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
 
 num_comp_all <- comp_status %>% nrow()

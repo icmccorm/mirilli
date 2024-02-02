@@ -1,20 +1,23 @@
-library(dplyr)
-library(readr)
-library(tidyr)
-library(stringr)
+suppressPackageStartupMessages({
+    library(dplyr)
+    library(readr)
+    library(tidyr)
+    library(stringr)
+})
+
 
 build_dir <- file.path("./build")
 if (!dir.exists(build_dir)) {
     dir.create(build_dir)
 }
-
 source("./scripts/stage1/summarize.r")
 source("./scripts/stage2/summarize.r")
 source("./scripts/stage3/summarize.r")
-
 stats_file <- file.path(build_dir, "./stats.csv")
 if (file.exists(stats_file)) {
-    file.remove(stats_file)
+    if (!file.remove(stats_file)) {
+        stop("Failed to remove existing stats file")
+    }
 }
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 for (file in list.files(file.path(build_dir), full.names = TRUE, recursive = TRUE)) {

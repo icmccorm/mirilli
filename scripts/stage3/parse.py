@@ -79,7 +79,7 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
                         tree_summary.write(csv_row([crate_name, test_case] + borrow_info))
                         tree_summary.flush()
                     else:
-                        stack_summary.write(csv_row([crate_name, test_case] + borrow_info + ["NA"]))
+                        stack_summary.write(csv_row([crate_name, test_case] + borrow_info))
                         stack_summary.flush()
                 actual_failure = "NA"
                 output_path = os.path.join(directory, test_case + ".out.log")
@@ -89,7 +89,7 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
                 info_file.write(csv_row([crate_name, test_case] + info + [actual_failure]))
                 info_file.flush()
 
-                root = quote(",".join(extract_error_trace(text)))
+                root = quote(";".join(extract_error_trace(text)))
                 roots.write(csv_row([crate_name, test_case, "1", root]))
                 roots.flush()
         if filename.endswith(".flags.csv"):
@@ -189,7 +189,7 @@ def extract_error_info(is_tree_borrows, text):
             if match:
                 exit_signal_number = match.group(1)
     error_subtype = None
-    if(error_type == "Undefined Behavior"):
+    if(error_type == "Borrowing Violation"):
         if not is_tree_borrows:
             error_subtype = parse_sb.stack_error(help_text)
         else:
@@ -197,7 +197,7 @@ def extract_error_info(is_tree_borrows, text):
     error_type = error_type_override if error_type_override is not None else error_type
     return ([error_type, quote(error_text), quote(error_location), exit_signal_number], error_subtype)
 
-(stack_roots, tree_roots) = open_csv_for_both(root_dir, "error_roots", ["crate_name", "test_name", "error_root"])
+(stack_roots, tree_roots) = open_csv_for_both(root_dir, "error_roots", ["crate_name", "test_name", "is_foreign", "error_root"])
 (stack_meta, tree_meta) = open_csv_for_both(root_dir, "metadata", ["crate_name", "test_name"] + FLAGS)
 (stack_info, tree_info) = open_csv_for_both(root_dir, "error_info", ["crate_name", "test_name", "error_type", "error_text", "error_location_rust","exit_signal_no","actual_failure"])
 tree_summary = open_csv(root_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)

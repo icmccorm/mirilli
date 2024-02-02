@@ -18,6 +18,7 @@ if (file.exists("./data/results/stage2/tests.csv")) {
         col_names = c("exit_code", "had_ffi", "test_name", "crate_name")
     ) %>%
         filter(test_name != "")
+
     population <- read_csv(
         file.path("./data/all.csv"),
         show_col_types = FALSE,

@@ -41,7 +41,7 @@ summarize:
 extract-stage2:
 	@./scripts/stage2/extract.sh ./pulled
 
-compile-stage2:
+summarize-stage2:
 	@Rscript ./scripts/stage2/summarize.r
 
 extract-stage3:
@@ -50,7 +50,12 @@ extract-stage3:
 compile-stage3:
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/zeroed
 	python3 ./scripts/stage3/parse.py ./data/results/stage3/uninit
+
+summarize-stage3:
 	Rscript ./scripts/stage3/summarize.r
 
 validate:
 	@Rscript ./scripts/validate.r
+
+visualize: summarize
+	@Rscript ./scripts/visualize.r

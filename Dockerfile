@@ -18,7 +18,7 @@ RUN git submodule update --init ./rust
 FROM setup as libcpp-compile
 WORKDIR /usr/src/ffickle/rust/src/llvm-project/
 RUN mkdir build-libcpp
-RUN cmake -G Ninja -S runtimes -B build-libcpp -DLLVM_ENABLE_RUNTIMES="libcxx" 
+RUN cmake -G Ninja -S runtimes -B build-libcpp -DLLVM_ENABLE_RUNTIMES="libcxx" -DLIBCXX_ENABLE_THREADS="" 
 RUN ninja -C build cxx
 
 FROM libcpp-compile as rust-compile
