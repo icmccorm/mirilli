@@ -12,7 +12,7 @@ def read_flags(FLAGS_CSV_PATH):
         flags.sort()
         return flags
 
-FLAGS_CSV_PATH = "./data/flags.csv"
+FLAGS_CSV_PATH = "./results/stage3/flags.csv"
 FLAGS = read_flags(FLAGS_CSV_PATH)
 
 def check_for_uninit(text):

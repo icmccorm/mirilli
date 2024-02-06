@@ -1,8 +1,8 @@
 #!/bin/bash
 echo "Preparing directories..."
-rm -rf ./data/results/stage1
+rm -rf ./results/stage1
 rm -rf ./temp
-RESULT_DIR="./data/results/stage1"
+RESULT_DIR="./results/stage1"
 mkdir "$RESULT_DIR"
 mkdir "$RESULT_DIR/early/"
 mkdir "$RESULT_DIR/late/"

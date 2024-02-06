@@ -143,7 +143,7 @@ prepare_errors <- function(dir, type) {
     return(errors)
 }
 
-all <- read_csv(file.path("./data/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
+all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
 
 compile_errors <- function(dir) {
     basename <- basename(dir)

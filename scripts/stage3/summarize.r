@@ -8,8 +8,8 @@ if (!dir.exists(stage3_root)) {
 stats_file <- file.path(stage3_root, "./stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
-zeroed_meta <- compile_metadata("./data/results/stage3/zeroed")
-uninit_meta <- compile_metadata("./data/results/stage3/uninit")
+zeroed_meta <- compile_metadata("./results/stage3/zeroed")
+uninit_meta <- compile_metadata("./results/stage3/uninit")
 
 num_tests_engaged <- zeroed_meta %>%
     filter(LLVMEngaged == 1) %>%
@@ -55,7 +55,7 @@ zeroed_meta_summary %>%
     bind_rows(uninit_meta_summary) %>%
     write_csv(file.path(stage3_root, "metadata.csv"))
 
-zeroed_raw <- compile_errors("./data/results/stage3/zeroed")
+zeroed_raw <- compile_errors("./results/stage3/zeroed")
 
 zeroed_failed <- zeroed_raw %>% right_join(did_not_engage_zeroed, by = c("crate_name", "test_name"))
 zeroed_failed_fn <- zeroed_failed %>%
@@ -103,7 +103,7 @@ num_failed_engaged_constructor <- zeroed_failed %>%
     unique() %>%
     nrow()
 
-uninit_raw <- compile_errors("./data/results/stage3/uninit")
+uninit_raw <- compile_errors("./results/stage3/uninit")
 
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%

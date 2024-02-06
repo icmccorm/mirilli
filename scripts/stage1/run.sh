@@ -12,14 +12,14 @@ cargo --version
 make clean && make all
 rm -rf ./data/results
 mkdir -p ./data/results
-mkdir -p ./data/results/early
-mkdir -p ./data/results/late
-mkdir -p ./data/results/tests
-mkdir -p ./data/results/bytecode
-touch ./data/results/status_comp.csv
-touch ./data/results/status_lint.csv
-touch ./data/results/failed_download.csv
-touch ./data/results/has_bytecode.csv
+mkdir -p ./results/early
+mkdir -p ./results/late
+mkdir -p ./results/tests
+mkdir -p ./results/bytecode
+touch ./results/status_comp.csv
+touch ./results/status_lint.csv
+touch ./results/failed_download.csv
+touch ./results/has_bytecode.csv
 rustup override set "$NIGHTLY"
 TRIES_REMAINING=3
 while IFS=, read -r name version; 

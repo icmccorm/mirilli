@@ -11,14 +11,14 @@ stats_file <- file.path(stage2_root, "./stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 tests <- read_csv(
-    file.path("./data/results/stage2/tests_cleaned.csv"),
+    file.path("./results/stage2/tests_cleaned.csv"),
     show_col_types = FALSE,
     col_names = c("exit_code", "had_ffi", "test_name", "crate_name")
 ) %>%
     filter(test_name != "")
 
 population <- read_csv(
-    file.path("./data/all.csv"),
+    file.path("./results/all.csv"),
     show_col_types = FALSE,
     col_names = c("crate_name", "version")
 )
