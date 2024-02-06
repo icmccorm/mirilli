@@ -1,9 +1,0 @@
-crate_name,version
-cw-optimizoor,0.10.0
-debridge-solana-sdk,1.0.1
-ever,0.2.0
-solana-nft-programs-paid-claim-approver,4.6.0
-solana-nft-programs-time-invalidator,1.0.0
-solana-nft-programs-token-manager,1.0.0
-solana-nft-programs-transfer-authority,1.0.0
-solana-nft-programs-use-invalidator,1.0.0
