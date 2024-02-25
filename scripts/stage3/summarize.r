@@ -109,6 +109,7 @@ all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
 
+
 uninit <- uninit_raw %>%
     merge_passes_and_timeouts() %>%
     select(-memory_mode)
@@ -195,3 +196,26 @@ all_overflows_to_investigate <- bind_rows(
 ) %>% deduplicate_label_write(file.path(stage3_root, "overflows.csv"))
 
 stats <- stats %>% write.csv(stats_file, row.names = FALSE, quote = FALSE)
+
+bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
+    select(crate_name, version, root_crate_name, root_crate_version, test_name, issue, pull_request, commit, bug_type_override, memory_mode) %>%
+    left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
+    mutate(id = row_number()) %>%
+    mutate(
+        error_type_tree = ifelse(!is.na(bug_type_override), bug_type_override, error_type_tree)
+    ) %>%
+    mutate(error_type = ifelse(str_equal(error_type_tree, "Borrowing Violation"), "Tree Borrows Violation", error_type_tree)) %>%
+    filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue)) %>%
+    select(
+        id,
+        crate_name,
+        version,
+        root_crate_name,
+        root_crate_version,
+        test_name,
+        error_type,
+        issue,
+        pull_request,
+        commit
+    ) %>%
+    write_csv(file.path(stage3_root, "bugs.csv"))

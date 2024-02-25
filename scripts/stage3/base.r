@@ -20,7 +20,7 @@ TEST_FAILED_TXT <- "Test Failed"
 TERMINATED_EARLY_ERR_TXT <- "Main Terminated Early"
 USING_UNINIT_FULL_ERR_TXT <- "using uninitialized data, but this operation requires initialized memory"
 INTEROP_ERR_TXT <- "LLI Interoperation Error"
-UB_MAYBEUNINIT <- "Invalid MaybeUninit<T>"
+UB_MAYBEUNINIT <- "Using Uninitialized Memory"
 UB_MEM_UNINIT <- "Invalid mem::uninitialized()"
 PASS_ERR_TEXT <- "Passed"
 
@@ -30,7 +30,7 @@ UNWIND_ERR_TYPE <- "Unwinding Past Topmost Frame"
 CROSS_LANGUAGE_ERR_TEXT <- "which is [C|Rust] heap memory, using [C|Rust] heap deallocation operation"
 CROSS_LANGUAGE_ERR_TYPE <- "Cross Language Deallocation"
 
-INVALID_VALUE_UNINIT_ERR_TYPE <- "Invalid Uninitialized Value"
+INVALID_VALUE_UNINIT_ERR_TYPE <- "Using Uninitialized Memory"
 INVALID_VALUE_UNINIT_ERR_TEXT <- "encountered uninitialized memory, but expected"
 
 INVALID_VALUE_UNALIGNED_ERR_TYPE <- "Unaligned Reference"
@@ -143,7 +143,8 @@ prepare_errors <- function(dir, type) {
     return(errors)
 }
 
-all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
+all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
+select(crate_name, version)
 
 compile_errors <- function(dir) {
     basename <- basename(dir)

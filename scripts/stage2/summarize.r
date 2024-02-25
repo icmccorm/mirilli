@@ -17,11 +17,9 @@ tests <- read_csv(
 ) %>%
     filter(test_name != "")
 
-population <- read_csv(
-    file.path("./results/all.csv"),
-    show_col_types = FALSE,
-    col_names = c("crate_name", "version")
-)
+population <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
+select(crate_name, version)
+
 test_count_overall <- tests %>%
     select(test_name, crate_name) %>%
     unique() %>%

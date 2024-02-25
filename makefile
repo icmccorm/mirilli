@@ -27,13 +27,14 @@ extract-stage3:
 	@./scripts/stage3/extract.sh ./pulled ./results/stage3/uninit
 
 summarize: ./build
-	Rscript ./scripts/summarize.r
+	@Rscript ./scripts/summarize.r
 
 validate: ./build
 	@Rscript ./scripts/validate.r
 
-visualize: summarize
+visualize:
 	@Rscript ./scripts/visualize.r
+
 
 ./build: ./build/stage1 ./build/stage2 ./build/stage3
 	@echo "\033[92m✓\033[39m Complete"

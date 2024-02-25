@@ -2,14 +2,17 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(readr)
     library(ggplot2)
+    library(extrafont)
+    library(extrafontdb)
 })
+loadfonts(quiet = TRUE)
+
 if (dir.exists("./build/visuals")) {
     unlink("./build/visuals", recursive = TRUE)
 }
 dir.create("./build/visuals")
 
-source("./scripts/visuals/borrow_sankey.r")
-
+source("./scripts/visuals/bugs.r")
 
 # a sankey diagram of test cases passing through stages 2 and 3
 # this should segment errors into results, e.g. different flows

@@ -26,5 +26,24 @@ for (file in list.files(file.path(build_dir), full.names = TRUE, recursive = TRU
     }
 }
 stats <- stats %>% add_row(key = "num_crates_unfiltered", value = 125804)
-stats %>% pivot_wider(names_from = key, values_from = value) %>% 
+
+bugs <- read_csv(file.path("./build/stage3/bugs.csv"), show_col_types = FALSE) %>%
+    select(crate_name, version, test_name, error_type, issue, pull_request, commit) %>%
+    filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue))
+
+bug_stats <- bugs %>%
+    group_by(error_type) %>%
+    summarize(n = n()) %>%
+    mutate(error_type = str_to_lower(error_type)) %>%
+    mutate(error_type = str_replace_all(error_type, " ", "_")) %>%
+    mutate(error_type = str_replace_all(error_type, "<T>::", "_")) %>%
+    mutate(error_type = str_replace_all(error_type, "()", "")) %>%
+    mutate(error_type = paste0("error_count_", error_type)) %>%
+    rename(key = error_type, value = n)
+
+stats <- stats %>% bind_rows(bug_stats)
+stats <- stats %>% add_row(key = "num_bugs", value = nrow(bugs))
+
+stats %>%
+    pivot_wider(names_from = key, values_from = value) %>%
     write.table(file = stats_file, sep = ",", row.names = FALSE, quote = TRUE)

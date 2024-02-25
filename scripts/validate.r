@@ -24,7 +24,9 @@ message_fail_counts <- function(df) {
 
 failed <- FALSE
 
-all_crates <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version"))
+all_crates <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
+select(crate_name, version)
+
 exclude_crates <- read_csv(file.path("./results/exclude.csv"), show_col_types = FALSE, col_names = c("crate_name"))
 
 # STAGE 1

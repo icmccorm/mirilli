@@ -1,6 +1,7 @@
 library(dplyr)
 library(readr)
-all <- read_csv("./results/all.csv", col_names = c("crate_name", "version"))
+all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
+select(crate_name, version)
 
 errors_stack <- read_csv("./results/stage3/errors_stack.csv")
 roots_stack <- read_csv("./results/stage3/stack_error_roots.csv")

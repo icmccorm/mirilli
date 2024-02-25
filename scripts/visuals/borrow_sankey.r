@@ -5,11 +5,8 @@ suppressPackageStartupMessages({
     library(ggsankey)
     library(ggplot2)
     library(tidyr)
-    library(extrafont)
-    library(extrafontdb)
     library(cowplot)
 })
-loadfonts(quiet = TRUE)
 
 UNSUPPORTED_OP_EQUIVALENT <- c("Unsupported Operation", "LLI Internal Error")
 
