@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
 })
 options(dplyr.summarise.inform = FALSE)
 
-stage1_input_dir <- file.path("./data/results/stage1")
+stage1_input_dir <- file.path("./results/stage1")
 stage1_output_dir <- file.path("./build/stage1")
 if (!dir.exists(stage1_output_dir)) {
     dir.create(stage1_output_dir)
@@ -13,6 +13,7 @@ stats_file <- file.path(stage1_output_dir, "./stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 comp_status <- read_csv(file.path(stage1_input_dir, "status_comp.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
+
 lint_status <- read_csv(file.path(stage1_input_dir, "status_lint.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
 
 num_comp_all <- comp_status %>% nrow()
@@ -27,16 +28,6 @@ num_lint_all <- lint_status %>% nrow()
 num_lint_passed <- lint_status %>%
     filter(exit_code == 0) %>%
     nrow()
-comp_status %>%
-    filter(exit_code == 124) %>%
-    nrow()
-comp_status %>%
-    filter(exit_code == 101) %>%
-    nrow()
-
-comp_status %>%
-    group_by(exit_code) %>%
-    summarize(n = n())
 
 test_counts <- read_csv(file.path(stage1_input_dir, "has_tests.csv"), col_names = c("crate_name", "test_count"), show_col_types = FALSE)
 num_had_tests <- test_counts %>%

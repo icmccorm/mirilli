@@ -3,15 +3,15 @@ export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
 export CC="clang-16 $DEFAULT_FLAGS"
 export CXX="clang++-16 $DEFAULT_FLAGS"
 export PATH="$HOME/.cargo/bin:$PATH"
-rm -rf ./data/results/stage2
+rm -rf ./results/stage2
 rm -rf ./extracted
-STATUS_RUSTC_CSV="./data/results/stage2/status_rustc_comp.csv"
-STATUS_MIRI_CSV="./data/results/stage2/status_miri_comp.csv"
-FAILED_DOWNLOAD_CSV="./data/results/stage2/failed_download.csv"
-VISITED_CSV="./data/results/stage2/visited.csv"
-mkdir -p ./data/results/stage2
-mkdir -p ./data/results/stage2/info/
-mkdir -p ./data/results/stage2/logs/
+STATUS_RUSTC_CSV="./results/stage2/status_rustc_comp.csv"
+STATUS_MIRI_CSV="./results/stage2/status_miri_comp.csv"
+FAILED_DOWNLOAD_CSV="./results/stage2/failed_download.csv"
+VISITED_CSV="./results/stage2/visited.csv"
+mkdir -p ./results/stage2
+mkdir -p ./results/stage2/info/
+mkdir -p ./results/stage2/logs/
 touch $FAILED_DOWNLOAD_CSV
 touch $STATUS_MIRI_CSV
 touch $STATUS_RUSTC_CSV
@@ -37,15 +37,15 @@ do
             RUSTC_TEST_OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list 2> err)
             RUSTC_EXIT_CODE=$?
             echo "$RUSTC_TEST_OUTPUT" | sed 's/: test$//' | sed 's/^\(.*\) -.*(line \([0-9]*\))/\1 \2/' > rustc_list.txt
-            echo "$crate_name,$version,$RUSTC_EXIT_CODE" >> "../data/results/stage2/status_rustc_comp.csv"
+            echo "$crate_name,$version,$RUSTC_EXIT_CODE" >> "../results/stage2/status_rustc_comp.csv"
             if [ "$RUSTC_EXIT_CODE" -eq "0" ] && [ "$(wc -l < ./rustc_list.txt)" -ne 0 ]; then
 		        echo "Precompiling miri"
                 (timeout $TIMEOUT cargo miri test --tests -q -- --list > /dev/null)
                 MIRI_EXIT_CODE=$?
-                echo "$crate_name,$version,$RUSTC_FAILED" >> "../data/results/stage2/status_miri_comp.csv"
+                echo "$crate_name,$version,$RUSTC_FAILED" >> "../results/stage2/status_miri_comp.csv"
                 if [ "$MIRI_EXIT_CODE" -eq "0" ]; then
-                    OUTPUT_FILE="../data/results/stage2/info/$crate_name.csv"
-                    OUTPUT_DIR="../data/results/stage2/logs/$crate_name/"
+                    OUTPUT_FILE="../results/stage2/info/$crate_name.csv"
+                    OUTPUT_DIR="../results/stage2/logs/$crate_name/"
                     echo "Logging tests to $OUTPUT_FILE"
                     mkdir -p "$OUTPUT_DIR"
                     cp ./rustc_list.txt "$OUTPUT_DIR/all.csv"
@@ -97,7 +97,7 @@ do
         else
             echo "FAILED (exit $EXITCODE)"
             if [ "$TRIES_REMAINING" -eq "0" ]; then
-                echo "$crate_name,$version,$EXITCODE" >> "./data/results/stage2/failed_download.csv"
+                echo "$crate_name,$version,$EXITCODE" >> "./results/stage2/failed_download.csv"
             else
                 echo "PAUSE..."
                 sleep 10

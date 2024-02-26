@@ -1,7 +1,7 @@
 import re
 import parse_shared;
 from enum import Enum
-TB_COLUMNS = ["action","kind","subkind"]
+TB_COLUMNS = ["action","kind"]
 
 class TBOperation(Enum):
     read = "read"
@@ -72,43 +72,47 @@ class TBError:
         self.is_child = is_child    
     def summarize(self):
         error_type = None
-        indirection_type = None
+        indirection_type = TBErrorIndirectionType.Direct if self.is_child else TBErrorIndirectionType.Indirect
         if self.accessed_tag_transition.exists():
             if disabled_by(foreign_write, self.accessed_tag_transition):
-                error_type = TBErrorType.DisabledByForeignWrite
-                indirection_type = TBErrorIndirectionType.Direct
+                # TBErrorType.DisabledByForeignWrite
+                error_type = TBErrorInsufficientType(TBState.Disabled,  indirection_type).to_string()
         elif self.conflicting_tag_transition.exists():
                 if disabled_by(foreign_write, self.conflicting_tag_transition):
-                    error_type = TBErrorType.DisabledByForeignWrite
+                    # TBErrorType.DisabledByForeignWrite
+                    error_type = TBErrorInsufficientType(TBState.Disabled,  indirection_type).to_string()
                 if frozen_by(foreign_read, self.conflicting_tag_transition):
-                    error_type = TBErrorType.FrozenByForeignRead
-                indirection_type = TBErrorIndirectionType.Direct if self.is_child else TBErrorIndirectionType.Indirect
+                    # TBErrorType.FrozenByForeignRead
+                    error_type = TBErrorInsufficientType(TBState.Frozen,  indirection_type).to_string()
         else:
             if self.conflicting_tag_transition.kind == TBRole.protected or self.conflicting_tag_transition.kind == TBRole.strongly_protected:
-                error_type = TBErrorType.BlockedByProtector
-                indirection_type = TBErrorIndirectionType.Direct if self.is_child else TBErrorIndirectionType.Indirect
+                error_type = TBErrorType.BlockedByProtector.value
             if self.action_type == TBOperation.write or self.action_type == TBOperation.deallocation:
                 if self.accessed_tag_transition.start_state == TBState.Frozen:
-                    error_type = TBErrorType.FrozenWrite
-                    indirection_type = TBErrorIndirectionType.Direct
+                    error_type = TBErrorInsufficientType(TBState.Frozen,  indirection_type).to_string()
                 elif self.conflicting_tag_transition.start_state == TBState.Frozen:
-                    error_type = TBErrorType.FrozenWrite
-                    indirection_type = TBErrorIndirectionType.Indirect
+                    error_type = TBErrorInsufficientType(TBState.Frozen,  indirection_type).to_string()
         if self.action_type is None or error_type is None or indirection_type is None:
             print("Unrecognized Tree Borrows error type")
             exit(1)
-        return [self.action_type.value, error_type.value, indirection_type.value]
+        return [self.action_type.value, error_type]
+
+class TBErrorInsufficientType:
+    def __init__(self, permission, indirection):
+        self.permission = permission
+        self.indirection = indirection
+    def to_string(self):
+        indirection = self.indirection.value if self.indirection is not None else "NA"
+        permission = self.permission.value if self.permission is not None else "NA"
+        return f"{indirection}-{permission}"
     
 class TBErrorIndirectionType(Enum):
-    Direct = "Direct"
     Indirect = "Indirect"
+    Direct = "Direct"
 
 class TBErrorType(Enum):
-    FrozenWrite = "FrozenWrite"
-    FrozenDealloc= "FrozenDealloc"
-    DisabledByForeignWrite = "DisabledByForeignWrite"
-    FrozenByForeignRead = "FrozenByForeignRead"
-    BlockedByProtector = "BlockedByProtector"
+    Insufficient = "Insufficient"
+    BlockedByProtector = "Protected"
 
 def foreign_write(tb_action):
     return tb_action.action == TBOperation.write and tb_action.relation == TBHierarchy.foreign
