@@ -29,7 +29,7 @@ num_lint_passed <- lint_status %>%
     filter(exit_code == 0) %>%
     nrow()
 
-test_counts <- read_csv(file.path(stage1_input_dir, "has_tests.csv"), col_names = c("crate_name", "test_count"), show_col_types = FALSE)
+test_counts <- read_csv(file.path(stage1_output_dir, "has_tests.csv"), show_col_types = FALSE)
 num_had_tests <- test_counts %>%
     filter(test_count > 0) %>%
     select(crate_name) %>%

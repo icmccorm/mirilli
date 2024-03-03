@@ -5,6 +5,7 @@ import re
 import parse_tb
 import parse_shared
 import parse_sb
+from tqdm import tqdm
 
 def read_flags(FLAGS_CSV_PATH):
     with open(FLAGS_CSV_PATH, "r") as f:
@@ -201,7 +202,8 @@ def extract_error_info(is_tree_borrows, text):
 tree_summary = open_csv(root_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
 stack_summary = open_csv(root_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
 
-for crate in os.listdir(data_dir):
+print(f"Processing errors from '{os.path.basename(base)}' mode...")
+for crate in tqdm(os.listdir(data_dir)):
     stack_dir = os.path.join(data_dir, crate, "stack")
     tree_dir = os.path.join(data_dir, crate, "tree")
     crate_name = os.path.basename(crate)

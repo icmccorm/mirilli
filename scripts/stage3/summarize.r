@@ -4,18 +4,19 @@ stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
     dir.create(stage3_root)
 }
-
 stats_file <- file.path(stage3_root, "./stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 zeroed_meta <- compile_metadata("./results/stage3/zeroed")
 uninit_meta <- compile_metadata("./results/stage3/uninit")
 
-num_tests_engaged <- zeroed_meta %>%
+tests_engaged <- zeroed_meta %>%
     filter(LLVMEngaged == 1) %>%
-    select(test_name, crate_name) %>%
-    unique() %>%
-    nrow()
+    select(crate_name, test_name) %>%
+    unique()
+
+num_tests_engaged <- tests_engaged %>% nrow()
+
 stats <- stats %>% add_row(key = "num_tests_engaged", value = num_tests_engaged)
 num_crates_engaged <- zeroed_meta %>%
     filter(LLVMEngaged == 1) %>%
@@ -55,7 +56,8 @@ zeroed_meta_summary %>%
     bind_rows(uninit_meta_summary) %>%
     write_csv(file.path(stage3_root, "metadata.csv"))
 
-zeroed_raw <- compile_errors("./results/stage3/zeroed")
+zeroed_raw <- compile_errors("./results/stage3/zeroed") %>%
+    inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
 zeroed_failed <- zeroed_raw %>% right_join(did_not_engage_zeroed, by = c("crate_name", "test_name"))
 zeroed_failed_fn <- zeroed_failed %>%
@@ -77,42 +79,45 @@ function_count <- failed_function_names %>%
     summarize(n = n()) %>%
     arrange(desc(n))
 
-count_pipe <- function_count %>%
-    filter(error_text == "pipe2") %>%
-    select(n) %>%
-    pull()
-stats <- stats %>% add_row(key = "num_not_engaged_pipe", value = count_pipe)
 
-count_socket <- function_count %>%
-    filter(error_text == "socket") %>%
-    select(n) %>%
-    pull()
-stats <- stats %>% add_row(key = "num_not_engaged_socket", value = count_socket)
 
-count_each_blake <- function_count %>% filter(grepl("blake3", error_text))
-count_blake <- sum(count_each_blake$n)
-stats <- stats %>% add_row(key = "num_not_engaged_blake", value = count_blake)
+#count_pipe <- function_count %>%
+#    filter(error_text == "pipe2") %>%
+#    select(n) %>%
+#    pull()
+#stats <- stats %>% add_row(key = "num_not_engaged_pipe", value = count_pipe)
 
-count_each_std <- function_count %>% filter(str_detect(error_text, "^_ZNS"))
-count_std <- sum(count_each_std$n)
-stats <- stats %>% add_row(key = "num_not_engaged_std", value = count_std)
+#count_socket <- function_count %>%
+#    filter(error_text == "socket") %>%
+#    select(n) %>%
+#    pull()
+#stats <- stats %>% add_row(key = "num_not_engaged_socket", value = count_socket)
 
-num_failed_engaged_constructor <- zeroed_failed %>%
-    inner_join(engaged_constructor_zeroed, by = c("crate_name", "test_name")) %>%
-    select(crate_name, test_name) %>%
-    unique() %>%
-    nrow()
+#count_each_blake <- function_count %>% filter(grepl("blake3", error_text))
+#count_blake <- sum(count_each_blake$n)
+#stats <- stats %>% add_row(key = "num_not_engaged_blake", value = count_blake)
 
-uninit_raw <- compile_errors("./results/stage3/uninit")
+#count_each_std <- function_count %>% filter(str_detect(error_text, "^_ZNS"))
+#count_std <- sum(count_each_std$n)
+#stats <- stats %>% add_row(key = "num_not_engaged_std", value = count_std)
+
+#num_failed_engaged_constructor <- zeroed_failed %>%
+#    inner_join(engaged_constructor_zeroed, by = c("crate_name", "test_name")) %>%
+#    select(crate_name, test_name) %>%
+#    unique() %>%
+#    nrow()
+
+uninit_raw <- compile_errors("./results/stage3/uninit") %>%
+    inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
 
-
 uninit <- uninit_raw %>%
     merge_passes_and_timeouts() %>%
     select(-memory_mode)
+
 zeroed <- zeroed_raw %>%
     merge_passes_and_timeouts() %>%
     select(-memory_mode)
@@ -121,6 +126,9 @@ shared_errors <- zeroed %>%
     inner_join(uninit, by = names(zeroed)[names(zeroed) %in% names(uninit)]) %>%
     keep_actual_errors() %>%
     unique()
+
+num_unique_shared_errors <- shared_errors %>% nrow()
+stats <- stats %>% add_row(key = "num_shared", value = num_unique_shared_errors)
 
 shared_errors %>%
     keep_only_ub() %>%
@@ -149,6 +157,9 @@ differed_in_zeroed <- zeroed %>%
     keep_actual_errors() %>%
     unique()
 
+num_zeroed_unique <- differed_in_zeroed %>% nrow()
+stats <- stats %>% add_row(key = "num_zeroed_unique", value = num_zeroed_unique)
+
 zeroed_failures <- differed_in_zeroed %>%
     failed_in_either_mode() %>%
     unique() %>%
@@ -167,6 +178,9 @@ differed_in_uninit <- uninit %>%
     anti_join(zeroed, na_matches = c("na"), by = names(zeroed)[names(zeroed) %in% names(uninit)]) %>%
     keep_actual_errors() %>%
     unique()
+
+num_uninit_unique <- differed_in_uninit %>% nrow()
+stats <- stats %>% add_row(key = "num_uninit_unique", value = num_uninit_unique)
 
 uninit_failures <- differed_in_uninit %>%
     failed_in_either_mode() %>%
@@ -188,6 +202,10 @@ all_failures_to_investigate <- bind_rows(
     uninit_failures
 ) %>%
     deduplicate_label_write(file.path(stage3_root, "failures.csv"))
+
+num_legitimate_failures <- all_failures_to_investigate %>%
+    nrow()
+stats <- stats %>% add_row(key = "num_legitimate_failures", value = num_legitimate_failures)
 
 all_overflows_to_investigate <- bind_rows(
     shared_overflows,

@@ -26,3 +26,4 @@ pulled-old
 build
 **/*.zip
 archives
+*.csv

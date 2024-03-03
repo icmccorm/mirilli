@@ -23,12 +23,13 @@ INTEROP_ERR_TXT <- "LLI Interoperation Error"
 UB_MAYBEUNINIT <- "Using Uninitialized Memory"
 UB_MEM_UNINIT <- "Invalid mem::uninitialized()"
 PASS_ERR_TEXT <- "Passed"
+SCALAR_MISMATCH_TEXT <- "Scalar Size Mismatch"
 
 UNWIND_ERR_TEXT <- "unwinding past the topmost frame of the stack"
 UNWIND_ERR_TYPE <- "Unwinding Past Topmost Frame"
 
-CROSS_LANGUAGE_ERR_TEXT <- "which is [C|Rust] heap memory, using [C|Rust] heap deallocation operation"
-CROSS_LANGUAGE_ERR_TYPE <- "Cross Language Deallocation"
+CROSS_LANGUAGE_ERR_TEXT <- "deallocating alloc"
+CROSS_LANGUAGE_ERR_TYPE <- "Cross-Language Deallocation"
 
 INVALID_VALUE_UNINIT_ERR_TYPE <- "Using Uninitialized Memory"
 INVALID_VALUE_UNINIT_ERR_TEXT <- "encountered uninitialized memory, but expected"
@@ -57,11 +58,13 @@ deduplicate_error_text <- function(df) {
 correct_error_type <- function(df) {
     df <- df %>%
         mutate(error_type = if_else(str_detect(error_text, UNWIND_ERR_TEXT), UNWIND_ERR_TYPE, error_type)) %>%
+        mutate(error_type = if_else(str_detect(error_text, "deallocating alloc"), CROSS_LANGUAGE_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, CROSS_LANGUAGE_ERR_TEXT), CROSS_LANGUAGE_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, INVALID_VALUE_UNALIGNED_ERR_TEXT), INVALID_VALUE_UNALIGNED_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, INVALID_ENUM_TAG_ERR_TEXT), INVALID_VALUE_ENUM_TAG_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, INVALID_VALUE_UNINIT_ERR_TEXT), INVALID_VALUE_UNINIT_ERR_TYPE, error_type)) %>%
-        mutate(error_type = if_else(str_detect(error_type, "deadlock"), "Deadlock", error_type))
+        mutate(error_type = if_else(str_detect(error_type, "deadlock"), "Deadlock", error_type)) %>%
+        mutate(error_type = if_else(str_detect(error_text, "is not supported for use in shims."), UNSUPP_ERR_TXT, error_type))
 }
 
 
@@ -69,6 +72,7 @@ valid_error_type <- function(type, trace) {
     !(type %in% c(
         UNSUPP_ERR_TXT,
         LLI_ERR_TXT,
+        SCALAR_MISMATCH_TEXT,
         TIMEOUT_ERR_TXT,
         TIMEOUT_PASS_ERR_TXT,
         UB_MAYBEUNINIT,

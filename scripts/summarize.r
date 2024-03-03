@@ -41,6 +41,19 @@ bug_stats <- bugs %>%
     mutate(error_type = paste0("error_count_", error_type)) %>%
     rename(key = error_type, value = n)
 
+
+errors <- read_csv(file.path("./build/stage3/errors.csv")) %>%
+    filter(memory_mode == "zeroed") %>%
+    mutate(error_type_stack == ifelse(grepl(error_text_stack, ) == "deallocating alloc, which is", "Cross-Language Deallocation", error_type_stack)) %>%
+    group_by(error_type_stack) %>%
+    summarize(n = n()) %>%
+    arrange(desc(n)) %>%
+    mutate(error_type_stack = ifelse(error_type_stack == "LLI Internal Error", "Unsupported Operation in LLI", error_type_stack)) %>%
+    mutate(error_type_stack = ifelse(error_type_stack == "Unsupported Operation", "Unsupported Operation in Miri", error_type_stack)) %>%
+    mutate(error_type_stack = ifelse(is.na(error_type_stack), "Passed", error_type_stack)) 
+
+
+
 stats <- stats %>% bind_rows(bug_stats)
 stats <- stats %>% add_row(key = "num_bugs", value = nrow(bugs))
 

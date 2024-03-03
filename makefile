@@ -37,28 +37,27 @@ visualize:
 
 
 ./build: ./build/stage1 ./build/stage2 ./build/stage3
-	@echo "\033[92m✓\033[39m Complete"
 
 ./build/stage1:
-	@echo "\033[94m*\033[39m Starting Stage 1..."
+	@echo "Starting Stage 1..."
 	@rm -rf ./build/stage1
 	@mkdir -p ./build/stage1
-	@(python3 ./scripts/stage1/compile.py ./results/stage1 ./build/stage1/lints)
+	@(python3 ./scripts/stage1/compile.py ./results/stage1 ./build/stage1)
 	@Rscript ./scripts/stage1/summarize.r
-	@echo "\033[92m✓\033[39m Stage 1"
+	@echo "Finished Stage 1"
 
 ./build/stage2:
-	@echo "\033[94m*\033[39m Starting Stage 2..."
+	@echo "Starting Stage 2..."
 	@Rscript ./scripts/stage2/summarize.r
-	@echo "\033[92m✓\033[39m Stage 2"
+	@echo "Finished Stage 2"
 
 
 ./build/stage3:
-	@echo "\033[94m*\033[39m Starting Stage 3..."
+	@echo "Starting Stage 3..."
 	@python3 ./scripts/stage3/parse.py ./results/stage3/zeroed
 	@python3 ./scripts/stage3/parse.py ./results/stage3/uninit
 	@Rscript ./scripts/stage3/summarize.r
-	@echo "\033[92m✓\033[39m Stage 3"
+	@echo "Finished Stage 3"
 
 clean:
 	@rm -rf ./build

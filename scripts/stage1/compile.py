@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from tqdm import tqdm
 
 if (len(sys.argv) == 1):
     print(f"Usage: python3 compile.py [raw data] [destination dir]")
@@ -8,23 +9,36 @@ if (len(sys.argv) == 1):
 walk_dir = sys.argv[1]
 
 if (len(sys.argv) < 3):
-    out_dir = "./build/stage1/lints"
+    out_dir = "./build/stage1"
 else:
     out_dir = sys.argv[2]
 
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
-early_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
-late_abis = "crate_name,category,abi,file,start_line,start_col,end_line,end_col\n"
-defn_types = ""
-decl_types = ""
-finished_early = "crate_name\n"
-finished_late = "crate_name\n"
-error_category_counts = "crate_name,category,item_index,err_id,count,ignored\n"
-err_info = "crate_name,abi,discriminant,reason,err_id,err_text\n"
-err_locations = "crate_name,err_id,category,ignored,file,start_line,start_col,end_line,end_col\n"
-lint_status_info = "crate_name,defn_disabled,decl_disabled\n"
+FILES_TO_CLOSE = []
+
+def open_csv(dir, name, headers):
+    global FILES_TO_CLOSE
+    path = os.path.join(dir, name)
+    if os.path.exists(path):
+        os.remove(path)
+    file = open(path, "a")
+    if len(headers) > 0:
+        file.write("%s\n" % ",".join(headers))
+        file.flush()
+    FILES_TO_CLOSE.append(file)
+    return file
+
+early_abis = open_csv(out_dir, "early_abis.csv", ["crate_name", "category", "abi", "file", "start_line", "start_col", "end_line", "end_col"])
+late_abis = open_csv(out_dir, "late_abis.csv", ["crate_name", "category", "abi", "file", "start_line", "start_col", "end_line", "end_col"])
+finished_early = open_csv(out_dir, "finished_early.csv", ["crate_name"])
+finished_late = open_csv(out_dir, "finished_late.csv", ["crate_name"])
+error_category_counts = open_csv(out_dir, "category_error_counts.csv", ["crate_name", "category", "item_index", "err_id", "count", "ignored"])
+err_info = open_csv(out_dir, "error_info.csv", ["crate_name", "abi", "discriminant", "reason", "err_id", "err_text"])
+err_locations = open_csv(out_dir, "error_locations.csv", ["crate_name", "err_id", "category", "ignored", "file", "start_line", "start_col", "end_line", "end_col"])
+lint_status_info = open_csv(out_dir, "lint_info.csv", ["crate_name", "defn_disabled", "decl_disabled"])
+has_tests = open_csv(out_dir, "has_tests.csv", ["crate_name", "test_count"])
 
 CAT_FOREIGN_FN = "foreign_functions"
 CAT_STATIC_ITEM = "static_items"
@@ -38,11 +52,6 @@ def read_json(path, name):
     fd.close()
     name = os.path.splitext(name)[0]
     return name, json_obj
-
-def dump(contents, path):
-    fd = open(path, "w")
-    fd.writelines(contents)
-    fd.close()
 
 def location_to_csv(loc):
     items = list(map(str.strip, loc.split(':')))
@@ -103,44 +112,54 @@ if (os.path.isdir(walk_dir)):
     for dir in os.listdir(walk_dir):
         if dir == "early":
             early = os.path.join(walk_dir, dir)
-            for early_result in os.listdir(early):
+            print("Processing early lint results...")
+            for early_result in tqdm(os.listdir(early)):
                 path_to_early_result = os.path.join(early, early_result)
                 name, early_result_json = read_json(
                     path_to_early_result, early_result)
-                finished_early += f"{name}\n"
-                early_abis += process_abis(name, CAT_FOREIGN_FN,
-                                           early_result_json["foreign_function_abis"])
-                early_abis += process_abis(name, CAT_RUST_FN,
-                                           early_result_json["rust_function_abis"])
-                early_abis += process_abis(name, CAT_STATIC_ITEM,
-                                           early_result_json["static_item_abis"])
+                finished_early.write(f"{name}\n")
+                early_abis.write(process_abis(name, CAT_FOREIGN_FN,
+                                           early_result_json["foreign_function_abis"]))
+                early_abis.write(process_abis(name, CAT_RUST_FN,
+                                           early_result_json["rust_function_abis"]))
+                early_abis.write(process_abis(name, CAT_STATIC_ITEM,
+                                           early_result_json["static_item_abis"]))
         if dir == "late":
             late = os.path.join(walk_dir, dir)
-            for late_result in os.listdir(late):
+            print("Processing late lint results...")
+            for late_result in tqdm(os.listdir(late)):
                 path_to_late_result = os.path.join(late, late_result)
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
-                finished_late += f"{name}\n"
+                finished_late.write(f"{name}\n")
                 defn_lint_disabled = late_result_json["defn_lint_disabled_for_crate"]
                 decl_lint_disabled = late_result_json["decl_lint_disabled_for_crate"]
-                lint_status_info += f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n'
-                err_info += process_error_info(name, late_result_json)
+                lint_status_info.write(f'{name},{str(defn_lint_disabled).lower()},{str(decl_lint_disabled).lower()}\n')
+                err_info.write(process_error_info(name, late_result_json))
                 for category in [CAT_FOREIGN_FN, CAT_RUST_FN, CAT_STATIC_ITEM, CAT_ALIAS_TYS]:
                     data = process_error_category(
                         name, category, decl_lint_disabled, late_result_json
                     )
-                    error_category_counts += data["category"]
-                    err_locations += data["locations"]
-                    late_abis += data["abis"]
+                    error_category_counts.write(data["category"])
+                    err_locations.write(data["locations"])
+                    late_abis.write(data["abis"])
 
-    dump(finished_early, os.path.join(out_dir, "finished_early.csv"))
-    dump(finished_late, os.path.join(out_dir, "finished_late.csv"))
-    dump(late_abis, os.path.join(out_dir, "late_abis.csv"))
-    dump(error_category_counts, os.path.join(
-        out_dir, "category_error_counts.csv"))
-    dump(early_abis, os.path.join(out_dir, "early_abis.csv"))
-    dump(err_locations, os.path.join(out_dir, "error_locations.csv"))
-    dump(err_info, os.path.join(out_dir, "error_info.csv"))
-    dump(lint_status_info, os.path.join(out_dir, "lint_info.csv"))
+        if dir == "tests":
+            tests = os.path.join(walk_dir, dir)
+            print("Processing test results...")
+            for test_result in tqdm(os.listdir(tests)):
+                path_to_test_result = os.path.join(tests, test_result)
+                # read the contents of the file
+                with open(path_to_test_result, "r") as test_result_txt:
+                    crate_name = os.path.basename(path_to_test_result)
+                    test_result_content = test_result_txt.readlines()
+                    test_count = len(
+                        [line for line in test_result_content if line.endswith(": test\n")])
+                    has_tests.write(f"{crate_name},{test_count}\n")
+                    
 else:
     print("Invalid input directory.")
+
+for file in FILES_TO_CLOSE:
+    file.flush()
+    file.close()
