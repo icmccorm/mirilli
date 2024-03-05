@@ -9,6 +9,9 @@ suppressPackageStartupMessages({
 })
 options(dplyr.summarise.inform = FALSE)
 
+stats_file <- file.path("./build/visuals/bugs.stats.csv")
+stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
+
 as_link <- function(link_text, url) {
     return(paste0("\\href{", url, "}{", link_text, "}"))
 }
@@ -46,7 +49,7 @@ bugs <- read_csv(file.path("./build/stage3/bugs.csv"), show_col_types = FALSE)
 
 formatted_bugs <- bugs %>%
     select(-root_crate_name, -root_crate_version) %>%
-    mutate(id = paste0("\\#", row_number())) %>%
+    rename(id = bug_id) %>%
     mutate(
         issue = parse_links(issue, "issues", gh_id_parse_fn),
         pull_request = parse_links(pull_request, "pull", gh_id_parse_fn),
@@ -76,25 +79,21 @@ bug_counts <- bugs %>%
     summarize(n = n()) %>%
     arrange(desc(n))
 
-
-bug_counts_plot <- ggplot(data=bug_counts, aes(x=0.5, y=n)) +
-  coord_polar("y", start = 0) +
-  theme_void(base_size = 10) +
-  xlim(c(-1, 1)) +
-  geom_bar(aes(fill = reorder(error_type, n)), stat="identity") +
-  theme(legend.position = "right", text = element_text(family = "Linux Libertine Display", color = "black"), title = element_blank()) +
-  geom_label(data=subset(bug_counts, n>1), aes(x=0.5, label = n, family = "Linux Libertine Display", group = reorder(error_type, n)),colour = "black", position= position_stack(vjust=0.5)) 
+bug_counts_plot <- ggplot(data = bug_counts, aes(x = 0.5, y = n)) +
+    coord_polar("y", start = 0) +
+    theme_void(base_size = 10) +
+    xlim(c(-1, 1)) +
+    geom_bar(aes(fill = reorder(error_type, n)), stat = "identity") +
+    theme(legend.position = "right", text = element_text(family = "Linux Libertine Display", color = "black"), title = element_blank()) +
+    geom_label(data = subset(bug_counts, n > 1), aes(x = 0.5, label = n, family = "Linux Libertine Display", group = reorder(error_type, n)), colour = "black", position = position_stack(vjust = 0.5))
 
 ggsave(file.path("./build/visuals/bugs.pdf"), plot = bug_counts_plot, width = 4, height = 1.8, dpi = 300)
 
-
-all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
-select(crate_name, version)
-
+all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download"))
 popularity <- bugs %>%
     mutate(crate_name = ifelse(!is.na(root_crate_name), root_crate_name, crate_name)) %>%
     mutate(version = ifelse(!is.na(root_crate_version), root_crate_version, version)) %>%
-    select(crate_name, version, id) %>%
+    select(crate_name, version, bug_id) %>%
     inner_join(all, by = c("crate_name", "version")) %>%
     mutate(days_since_last_update = as.numeric(difftime(as.Date("2023-09-20"), as.Date(last_updated), units = "weeks"))) %>%
     select(
@@ -103,20 +102,19 @@ popularity <- bugs %>%
         avg_daily_downloads,
         downloads,
         last_updated,
-        id
+        bug_id
     ) %>%
     mutate(avg_daily_downloads = as.integer(round(avg_daily_downloads, 0))) %>%
     mutate(last_updated = as.character(last_updated)) %>%
     arrange(desc(avg_daily_downloads))
 
-
 popularity_formatted <- popularity %>%
     mutate(daily = format(avg_daily_downloads, big.mark = ",", scientific = FALSE)) %>%
     mutate(all_time = format(downloads, big.mark = ",", scientific = FALSE)) %>%
-    select(crate_name, version, daily, all_time, last_updated, id) %>%
+    select(crate_name, version, daily, all_time, last_updated, bug_id) %>%
     group_by(crate_name, version, daily, all_time, last_updated) %>%
-    mutate(id = paste0("\\#", id)) %>%
-    summarize(bug_ids = paste0(id, collapse = ", ")) %>%
+    mutate(bug_id = bug_id) %>%
+    summarize(bug_ids = paste0(bug_id, collapse = ", ")) %>%
     ungroup()
 
 colnames(popularity_formatted) <- c("Crate", "Version", "Mean {\\scriptsize\\faFileDownload}\\ /\\ Day", "{\\scriptsize\\faFileDownload} All-Time", "Last Updated", "Bug IDs")
@@ -130,3 +128,22 @@ print(
     floating = FALSE,
     comment = FALSE
 )
+
+bugs <- read_csv(file.path("./build/stage3/bugs.csv"), show_col_types = FALSE) %>%
+    select(crate_name, version, test_name, error_type, issue, pull_request, commit) %>%
+    filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue))
+
+bug_stats <- bugs %>%
+    group_by(error_type) %>%
+    summarize(n = n()) %>%
+    mutate(error_type = str_to_lower(error_type)) %>%
+    mutate(error_type = str_replace_all(error_type, " ", "_")) %>%
+    mutate(error_type = str_replace_all(error_type, "<T>::", "_")) %>%
+    mutate(error_type = str_replace_all(error_type, "()", "")) %>%
+    mutate(error_type = paste0("error_count_", error_type)) %>%
+    rename(key = error_type, value = n)
+
+stats <- stats %>% bind_rows(bug_stats)
+stats <- stats %>% add_row(key = "num_bugs", value = nrow(bugs))
+
+stats %>% write_csv(stats_file)

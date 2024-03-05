@@ -104,7 +104,7 @@ class TBErrorTypeWithIndirection:
     def to_string(self):
         error_type = self.error_type.value
         indirection = self.indirection.value if self.indirection is not None else "NA"
-        return f"{error_type}-{indirection}-"
+        return f"{error_type}-{indirection}"
     
 class TBErrorIndirectionType(Enum):
     Indirect = "Indirect"
@@ -113,7 +113,7 @@ class TBErrorIndirectionType(Enum):
 class TBErrorType(Enum):
     Expired = "Expired"
     Insufficient = "Insufficient"
-    BlockedByProtector = "Protected"
+    BlockedByProtector = "Invalid Framing"
 
 def foreign_write(tb_action):
     return tb_action.action == TBOperation.write and tb_action.relation == TBHierarchy.foreign

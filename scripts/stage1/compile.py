@@ -149,9 +149,8 @@ if (os.path.isdir(walk_dir)):
             print("Processing test results...")
             for test_result in tqdm(os.listdir(tests)):
                 path_to_test_result = os.path.join(tests, test_result)
-                # read the contents of the file
                 with open(path_to_test_result, "r") as test_result_txt:
-                    crate_name = os.path.basename(path_to_test_result)
+                    crate_name = os.path.splitext(os.path.basename(path_to_test_result))[0]
                     test_result_content = test_result_txt.readlines()
                     test_count = len(
                         [line for line in test_result_content if line.endswith(": test\n")])

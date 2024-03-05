@@ -80,16 +80,15 @@ def parse_directory(is_tree_borrows, crate_name, directory, roots, metadata, inf
                     else:
                         stack_summary.write(csv_row([crate_name, test_case] + borrow_info))
                         stack_summary.flush()
-                actual_failure = "NA"
+                assertion_failure = "NA"
                 output_path = os.path.join(directory, test_case + ".out.log")
                 if os.path.exists(output_path):
                     with open(output_path, "r") as out:
-                        actual_failure = extract_failure_status(out.read())
-                info_file.write(csv_row([crate_name, test_case] + info + [actual_failure]))
+                        assertion_failure = extract_failure_status(out.read())
+                info_file.write(csv_row([crate_name, test_case] + info + [assertion_failure]))
                 info_file.flush()
-
                 root = quote(";".join(extract_error_trace(text)))
-                roots.write(csv_row([crate_name, test_case, "1", root]))
+                roots.write(csv_row([crate_name, test_case, root]))
                 roots.flush()
         if filename.endswith(".flags.csv"):
             curr_flags = set(read_flags(os.path.join(directory, filename)))
@@ -117,12 +116,12 @@ def extract_error_trace(text):
     return lines
 
 def extract_failure_status(text):
-    actual_failure = "FALSE"
+    assertion_failure = "FALSE"
     lines = text.split("\n")
     for line in lines:
         if 'test result: FAILED' in line:
-            actual_failure = "TRUE"
-    return actual_failure
+            assertion_failure = "TRUE"
+    return assertion_failure
 
 def extract_error_info(is_tree_borrows, text):
     error_type = "Unknown"
@@ -196,9 +195,9 @@ def extract_error_info(is_tree_borrows, text):
     error_type = error_type_override if error_type_override is not None else error_type
     return ([error_type, quote(error_text), quote(error_location), exit_signal_number], error_subtype)
 
-(stack_roots, tree_roots) = open_csv_for_both(root_dir, "error_roots", ["crate_name", "test_name", "is_foreign", "error_root"])
+(stack_roots, tree_roots) = open_csv_for_both(root_dir, "error_roots", ["crate_name", "test_name", "error_root"])
 (stack_meta, tree_meta) = open_csv_for_both(root_dir, "metadata", ["crate_name", "test_name"] + FLAGS)
-(stack_info, tree_info) = open_csv_for_both(root_dir, "error_info", ["crate_name", "test_name", "error_type", "error_text", "error_location_rust","exit_signal_no","actual_failure"])
+(stack_info, tree_info) = open_csv_for_both(root_dir, "error_info", ["crate_name", "test_name", "error_type", "error_text", "error_location_rust","exit_signal_no","assertion_failure"])
 tree_summary = open_csv(root_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
 stack_summary = open_csv(root_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS)
 

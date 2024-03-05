@@ -26,17 +26,13 @@ extract-stage2:
 extract-stage3:
 	@./scripts/stage3/extract.sh ./pulled ./results/stage3/uninit
 
-summarize: ./build
+summarize:
 	@Rscript ./scripts/summarize.r
 
 validate: ./build
 	@Rscript ./scripts/validate.r
 
-visualize:
-	@Rscript ./scripts/visualize.r
-
-
-./build: ./build/stage1 ./build/stage2 ./build/stage3
+build: ./build/stage1 ./build/stage2 ./build/stage3 summarize
 
 ./build/stage1:
 	@echo "Starting Stage 1..."
@@ -50,7 +46,6 @@ visualize:
 	@echo "Starting Stage 2..."
 	@Rscript ./scripts/stage2/summarize.r
 	@echo "Finished Stage 2"
-
 
 ./build/stage3:
 	@echo "Starting Stage 3..."
