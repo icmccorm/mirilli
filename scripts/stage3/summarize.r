@@ -8,8 +8,20 @@ stats_file <- file.path(stage3_root, "./stage3.stats.csv")
 
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
+deduplication <- data.frame(state = character(), count = numeric(), type = character(), stringsAsFactors = FALSE)
+
 zeroed_meta <- compile_metadata("./results/stage3/zeroed")
 uninit_meta <- compile_metadata("./results/stage3/uninit")
+num_tests_uninit <- uninit_meta %>%
+    filter(LLVMEngaged == 1) %>%
+    nrow()
+uninit_meta %>%
+    select(-crate_name, -test_name, -borrow_mode, -memory_mode) %>%
+    filter(LLVMEngaged == 1) %>%
+    pivot_longer(everything()) %>%
+    filter(value == 1) %>%
+    group_by(name) %>%
+    summarize(n = n())
 
 tests_engaged <- zeroed_meta %>%
     filter(LLVMEngaged == 1) %>%
@@ -55,7 +67,6 @@ summarize_metadata(zeroed_meta) %>%
     bind_rows(summarize_metadata(uninit_meta)) %>%
     write_csv(file.path(stage3_root, "metadata.csv"))
 
-
 zeroed_raw <- compile_errors("./results/stage3/zeroed") %>%
     inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
@@ -66,12 +77,12 @@ all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
     unique() %>%
     write_csv(file.path(stage3_root, "errors.csv"))
 
-
 failures_raw <- all_errors %>%
     filter(error_type_stack == "Test Failed" | error_type_tree == "Test Failed") %>%
     select(crate_name, test_name) %>%
-    unique() %>%
-    nrow()
+    unique()
+
+deduplication <- add_row(deduplication, state = "Before", count = failures_raw %>% nrow(), type = "Failures")
 stats <- stats %>% add_row(key = "num_failures_raw", value = failures_raw %>% nrow())
 
 error_to_examine <- function(error_type, signal_no, assertion_failure) {
@@ -88,6 +99,7 @@ failures <- all_errors %>%
     summarize(zeroed = paste(zeroed, collapse = ", "), uninit = paste(uninit, collapse = ", ")) %>%
     write_csv(file.path(stage3_root, "failures.csv"))
 
+deduplication <- add_row(deduplication, state = "After", count = failures %>% nrow(), type = "Failures")
 stats <- stats %>% add_row(key = "num_failures", value = failures %>% nrow())
 
 uninit <- uninit_raw %>%
@@ -101,11 +113,15 @@ deduplicate_with_logging <- function(df, mode) {
     raw_errors <- df %>%
         keep_only_valid_errors() %>%
         unique()
+
+    deduplication <<- add_row(deduplication, state = "Before", count = raw_errors %>% nrow(), type = mode)
     stats <<- stats %>% add_row(key = paste0("num_errors_", mode, "_raw"), value = raw_errors %>% nrow())
     errors <- raw_errors %>%
         deduplicate() %>%
         unique()
     stats <<- stats %>% add_row(key = paste0("num_errors_", mode), value = errors %>% nrow())
+    deduplication <<- add_row(deduplication, state = "After", count = errors %>% nrow(), type = mode)
+    errors
 }
 
 ## Errors that occurred in both modes
@@ -113,7 +129,6 @@ shared <- zeroed %>%
     inner_join(uninit, by = names(zeroed)[names(zeroed) %in% names(uninit)]) %>%
     deduplicate_with_logging("shared") %>%
     write_csv(file.path(stage3_root, "errors_unique.csv"))
-
 
 ## Errors that occurred in the 'Zeroed' evaluation mode
 differed_in_zeroed <- zeroed %>%
@@ -127,27 +142,6 @@ differed_in_uninit <- uninit %>%
     deduplicate_with_logging("uninit") %>%
     write_csv(file.path(stage3_root, "diff_errors_uninit.csv"))
 
-
-stats <- stats %>% write.csv(stats_file, row.names = FALSE, quote = FALSE)
-
-bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
-    select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, issue, pull_request, commit, bug_type_override, memory_mode) %>%
-    left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
-    mutate(
-        error_type_tree = ifelse(!is.na(bug_type_override), bug_type_override, error_type_tree)
-    ) %>%
-    mutate(error_type = ifelse(str_equal(error_type_tree, "Borrowing Violation"), "Tree Borrows Violation", error_type_tree)) %>%
-    filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue)) %>%
-    select(
-        bug_id,
-        crate_name,
-        version,
-        root_crate_name,
-        root_crate_version,
-        test_name,
-        error_type,
-        issue,
-        pull_request,
-        commit
-    ) %>%
-    write_csv(file.path(stage3_root, "bugs.csv"))
+deduplication <- deduplication %>% pivot_wider(names_from = type, values_from = count)
+deduplication$total <- rowSums(deduplication[, -1], na.rm = TRUE)
+deduplication %>% write_csv(file.path(stage3_root, "deduplication.csv"))

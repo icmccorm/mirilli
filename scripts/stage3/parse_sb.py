@@ -118,20 +118,19 @@ class SBError:
             else:
                 if self.invalidation.action == SBOperation.retag:
                     if self.invalidation.permission == SBState.Unique:
-                        error_type = SBErrorType.Expired #InvalidatedByUniqueRetag  
+                        error_type = SBErrorType.ExpiredByUniqueRetag  
                 elif self.invalidation.action == SBOperation.write:
-                    error_type = SBErrorType.Expired #InvalidatedByWrite
+                    error_type = SBErrorType.ExpiredByWrite
                 if self.invalidation.action == SBOperation.read:
-                    error_type = SBErrorType.Expired #InvalidatedByRead
-        if self.action is None and error_type is None:
+                    error_type = SBErrorType.ExpiredByRead
+        if error_type is None:
             print("Unrecognized Stacked Borrows error type: ", self.to_string())
             exit(1)
         return [self.action.value, error_type.value]
 class SBErrorType(Enum):
     Insufficient = "Insufficient"
     OutOfBounds = "Out of bounds"
-    Expired = "Expired"
-    #InvalidatedByUniqueRetag = "Expired-Unique Retag"
-    #InvalidatedByRead = "Expired-Read"
-    #InvalidatedByWrite = "Expired-Write"
+    ExpiredByUniqueRetag = "Expired-UniqueRetag"
+    ExpiredByRead = "Expired-Read"
+    ExpiredByWrite = "Expired-Write"
     Framing = "Invalid Framing"

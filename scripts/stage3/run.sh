@@ -17,11 +17,6 @@ touch ./results/stage3/status_native.csv
 CURRENT_CRATE=""
 TIMEOUT=10m
 TIMEOUT_MIRI=5m
-if [ "$2" == "-z" ]; then
-    MEMORY_MODE_FLAG="-Zmiri-llvm-zero-all"
-else
-    MEMORY_MODE_FLAG="-Zmiri-llvm-read-uninit"
-fi
 
 while IFS=, read -r test_name crate_name version <&3;
 do
@@ -103,7 +98,7 @@ do
                 cp err ../results/stage3/crates/$crate_name/miri.comp.log
             fi
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
-                MFLAGS="-Zmiri-descriptive-ub -Zmiri-backtrace=full $MEMORY_MODE_FLAG -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc"
+                MFLAGS="-Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1

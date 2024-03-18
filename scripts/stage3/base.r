@@ -127,7 +127,7 @@ prepare_errors <- function(dir, type) {
 
     error_roots <- error_roots %>%
         full_join(error_rust_locations, by = c("crate_name", "test_name")) %>%
-        mutate(is_foreign_error = is.na(error_root)) %>%
+        mutate(is_foreign_error = !is.na(error_root)) %>%
         mutate(error_root = ifelse(is.na(error_root), error_location_rust, error_root)) %>%
         select(-error_location_rust)
 

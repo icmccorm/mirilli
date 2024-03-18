@@ -50,14 +50,16 @@ if (file.exists(stats_file)) {
 for (file in list.files(file.path(build_dir), full.names = TRUE, recursive = TRUE)) {
     if (str_detect(file, ".stats.csv")) {
         contents <- read_csv(file.path(file), show_col_types = FALSE)
-        # if there's overlap between keys in stats and contents, print the overlapping keys and the filename
         overlapping_keys <- intersect(stats$key, contents$key)
         if (length(overlapping_keys) > 0) {
             print(paste0("Overlapping keys in ", basename(file), ":\n", paste(overlapping_keys, collapse = ",\n")))
             stop(1)
         }
+        stats <- stats %>% bind_rows(contents)
     }
 }
 stats %>%
+    mutate(key = str_to_lower(str_replace_all(str_replace_all(key, " ", "_"), "-", "_"))) %>%
     pivot_wider(names_from = key, values_from = value) %>%
     write.table(file = stats_file, sep = ",", row.names = FALSE, quote = TRUE)
+stats %>% write_csv(file.path(build_dir, "stats_long.csv"))
