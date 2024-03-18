@@ -32,8 +32,8 @@ class SBInvalidation:
 
 
 SB_STATE = f"({SBState.Unique.value}|{SBState.SharedReadOnly.value}|{SBState.SharedReadWrite.value})"
-
-STACK_ERROR_DEALLOCATING = re.compile(f"{SBOperation.deallocating.value} while item \[{SB_STATE} for {parse_shared.TAG}\] is strongly protected by call")
+STACK_ERROR_WEAK = re.compile(f"not granting access to tag {parse_shared.TAG} because that would remove \[{SB_STATE} for {parse_shared.TAG}\] which is (?:strongly|weakly) protected")
+STACK_ERROR_DEALLOCATING = re.compile(f"{SBOperation.deallocating.value} while item \[{SB_STATE} for {parse_shared.TAG}\] is (?:strongly|weakly) protected by call")
 STACK_ACTION = re.compile(f"(?:attempting a {RW} access using {parse_shared.TAG_NC}|trying to retag from {parse_shared.TAG_NC} for {SB_STATE} permission) at {parse_shared.ALLOCATION}, but that tag (?:only grants {SB_STATE}|does not exist)?")
 CREATION_STACK = re.compile(f"{parse_shared.TAG} was created by a {SB_STATE} retag")
 DESTRUCTION_STACK = re.compile(f"{parse_shared.TAG} was later invalidated at offsets {parse_shared.OFFSETS} by a (?:{SB_STATE}( function-entry)? retag( \(of a reference/box)?|{RW} access)")
@@ -44,12 +44,16 @@ def stack_error(help_text):
     error_line = help_text[0]
     action_rw = STACK_ACTION.search(error_line)
     action_dealloc = STACK_ERROR_DEALLOCATING.search(error_line)
+    action_protected = STACK_ERROR_WEAK.search(error_line)
     protected = False
     action = None
     retag_target = None
     permission_limit = None
     invalidation = None
     start_permission = None
+    if action_protected is not None:
+        protected = True
+        action = SBOperation.retag
     if action_dealloc is not None:
         (state, tag) = action_dealloc.groups()
         action = SBOperation.deallocating
@@ -82,8 +86,8 @@ def stack_error(help_text):
                         elif retag_of_comp is not None:
                             retag_type = SBInvalidationType.CompoundValue
                     invalidation = SBInvalidation(inval_action, retag_perm, retag_type)
-        error = SBError(action, start_permission, retag_target, permission_limit, protected, invalidation)
-        return error.summarize()
+    error = SBError(action, start_permission, retag_target, permission_limit, protected, invalidation)
+    return error.summarize()
 
 class SBError:
     def __init__(self, action = None, retag_target = None, permission = None, limit = None, protected = False, invalidation = None):
@@ -104,8 +108,8 @@ class SBError:
     def summarize(self):
         error_type = None
         if self.protected:
-            error_type = SBErrorType.Protected
-        if self.limit is not None:
+            error_type = SBErrorType.Framing
+        elif self.limit is not None:
             if self.limit == SBState.SharedReadOnly and self.action is not None:
                 error_type = SBErrorType.Insufficient
         else:
@@ -114,20 +118,19 @@ class SBError:
             else:
                 if self.invalidation.action == SBOperation.retag:
                     if self.invalidation.permission == SBState.Unique:
-                        error_type = SBErrorType.InvalidatedByUniqueRetag  
+                        error_type = SBErrorType.ExpiredByUniqueRetag  
                 elif self.invalidation.action == SBOperation.write:
-                    error_type = SBErrorType.InvalidatedByWrite
+                    error_type = SBErrorType.ExpiredByWrite
                 if self.invalidation.action == SBOperation.read:
-                    error_type = SBErrorType.InvalidatedByRead
-
-        if self.action is None or error_type is None:
+                    error_type = SBErrorType.ExpiredByRead
+        if error_type is None:
             print("Unrecognized Stacked Borrows error type: ", self.to_string())
             exit(1)
         return [self.action.value, error_type.value]
 class SBErrorType(Enum):
     Insufficient = "Insufficient"
-    OutOfBounds = "Out of Bounds"
-    InvalidatedByUniqueRetag = "Invalidated-Unique Retag"
-    InvalidatedByRead = "Invalidated-Read"
-    InvalidatedByWrite = "Invalidated-Write"
-    Protected = "Protected"
+    OutOfBounds = "Out of bounds"
+    ExpiredByUniqueRetag = "Expired-UniqueRetag"
+    ExpiredByRead = "Expired-Read"
+    ExpiredByWrite = "Expired-Write"
+    Framing = "Invalid Framing"

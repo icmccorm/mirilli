@@ -6,8 +6,15 @@ suppressPackageStartupMessages({
     library(xtable)
     library(ggplot2)
     library(ggrepel)
+    library(extrafont)
+    library(extrafontdb)
+    library(RColorBrewer)
 })
+loadfonts(quiet = TRUE)
 options(dplyr.summarise.inform = FALSE)
+
+stats_file <- file.path("./build/visuals/bugs.stats.csv")
+stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 as_link <- function(link_text, url) {
     return(paste0("\\href{", url, "}{", link_text, "}"))
@@ -16,16 +23,16 @@ as_link <- function(link_text, url) {
 parse_links <- function(links, item_text, parse_fn) {
     links %>%
         sapply(function(issue_text) {
-            str_split(issue_text, ",") %>%
+            as.list(strsplit(issue_text, ",")[[1]]) %>%
                 sapply(function(x) {
-                    parse_fn(x, item_text)
-                }) %>%
-                sapply(paste0)
+                    parse_fn(trimws(x), item_text)
+                })
         })
 }
 
+
 gh_id_parse_fn <- function(link, item_text) {
-    if (!is.na(link) & grepl(paste0(item_text, "/[0-9]+$"), link)) {
+    if (!is.na(link) && grepl(paste0(item_text, "/[0-9]+$"), link)) {
         issue_number <- str_extract(link, "[0-9]+$")
         as_link(paste0("\\#", issue_number), link)
     } else {
@@ -33,7 +40,7 @@ gh_id_parse_fn <- function(link, item_text) {
     }
 }
 commit_hash_parse_fn <- function(link, item_text) {
-    if (!is.na(link) & grepl(paste0(item_text, "/[0-9a-fA-F]+$"), link)) {
+    if (!is.na(link) && grepl(paste0(item_text, "/[0-9a-fA-F]+$"), link)) {
         issue_number <- str_extract(link, "[0-9a-fA-F]+$")
         # get the first 7 characters of the commit hash
         as_link(substr(issue_number, 1, 7), link)
@@ -42,17 +49,57 @@ commit_hash_parse_fn <- function(link, item_text) {
     }
 }
 
-bugs <- read_csv(file.path("./build/stage3/bugs.csv"), show_col_types = FALSE)
+
+
+bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
+    select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, cause, issue, pull_request, commit, bug_type_override, memory_mode) %>%
+    left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
+    mutate(
+        error_type_tree = ifelse(!is.na(bug_type_override), bug_type_override, error_type_tree)
+    ) %>%
+    mutate(error_type = ifelse(str_equal(error_type_tree, "Borrowing Violation"), "Tree Borrows Violation", error_type_tree)) %>%
+    filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue)) %>%
+    mutate(effect = ifelse(is_foreign_error_tree | is_foreign_error_stack, "LLVM", "Rust")) %>%
+    mutate(effect = ifelse(error_type == "Incorrect FFI Binding", "Binding", effect)) %>%
+    select(
+        bug_id,
+        crate_name,
+        version,
+        annotated_error_type,
+        root_crate_name,
+        root_crate_version,
+        test_name,
+        error_type,
+        cause,
+        effect,
+        issue,
+        pull_request,
+        commit
+    )
+location_stats <- bugs %>%
+    group_by(effect) %>%
+    summarize(n = n()) %>%
+    mutate(effect = paste0("location_", str_to_lower(effect))) %>%
+    rename(key = effect, value = n)
+stats <- stats %>% bind_rows(location_stats)
 
 formatted_bugs <- bugs %>%
+    mutate(crate_name = ifelse(is.na(root_crate_name), crate_name, root_crate_name)) %>%
+    mutate(version = ifelse(is.na(root_crate_version), version, root_crate_version)) %>%
     select(-root_crate_name, -root_crate_version) %>%
-    mutate(id = paste0("\\#", row_number())) %>%
+    mutate(bug_id = paste0("\\refstepcounter{bugcounter}\\label{", bug_id, "}\\ref{", bug_id, "}")) %>%
     mutate(
         issue = parse_links(issue, "issues", gh_id_parse_fn),
         pull_request = parse_links(pull_request, "pull", gh_id_parse_fn),
-        commit = parse_links(commit, "commit", commit_hash_parse_fn)
-    )
-colnames(formatted_bugs) <- c("ID", "Crate", "Version", "Test", "Error Type", "Issue(s)", "Pull Request(s)", "Commit(s)")
+        commit = parse_links(commit, "commit", commit_hash_parse_fn),
+        cause_effect = ifelse(cause == effect, cause, paste0(cause, "$\\rightarrow$ ", effect)),
+        error_type = ifelse(error_type == "Using Uninitialized Memory", "Uninitialized Memory", error_type)
+    ) %>%
+    mutate(annotated_error_type = ifelse(annotated_error_type == error_type, "-", annotated_error_type)) %>%
+    select(bug_id, crate_name, version, error_type, annotated_error_type, cause_effect, issue, pull_request, commit) %>%
+    arrange(error_type, annotated_error_type, commit) %>%
+    mutate(version = ifelse(version == "0.1.16+minimap2.2.26", "0.1.16\\tablefootnote{+minimap2.2.26}", version))
+colnames(formatted_bugs) <- c("ID", "Crate", "Version", "Error Category", "Error Type", "Cause/Effect", "Issue(s)", "Pull Request(s)", "Commit(s)")
 bold <- function(x) {
     paste("{\\textbf{", x, "}}", sep = "")
 }
@@ -60,7 +107,7 @@ escape_underscore <- function(x) {
     str_replace_all(x, "_", "\\\\_")
 }
 print(
-    xtable(formatted_bugs, type = "latex", align = "|c|l|c|l|l|l|c|c|c|"),
+    xtable(formatted_bugs, type = "latex", align = "|c|l|c|l|l|l||c|c|c|c|"),
     file = file.path("./build/visuals/bug_table.tex"),
     sanitize.text.function = escape_underscore,
     sanitize.colnames.function = bold,
@@ -76,27 +123,45 @@ bug_counts <- bugs %>%
     summarize(n = n()) %>%
     arrange(desc(n))
 
+bug_counts_plot <- ggplot(data = bug_counts, aes(x = 0.5, y = n, fill = reorder(error_type, n))) +
+    coord_polar("y", start = 0) +
+    xlim(c(-1, 1)) +
+    geom_bar(stat = "identity") +
+    guides(fill = guide_legend(ncol = 2, reverse = TRUE, override.aes = aes(label = ""))) +
+    theme_void(base_size = 10) +
+    theme(
+        legend.position = "right",
+        text = element_text(
+            family = "Linux Libertine Display",
+            color = "black",
+            size = 10
+        ),
+        title = element_blank()
+    ) +
+    geom_label(
+        aes(
+            label = n,
+            family = "Linux Libertine Display",
+            group = reorder(error_type, n),
+        ),
+        data = subset(bug_counts, n > 1),
+        size = 10 / .pt,
+        colour = "black",
+        fill = "white",
+        position = position_stack(vjust = 0.5)
+    ) +
+    scale_fill_brewer(palette = "Dark2")
 
-bug_counts_plot <- ggplot(data=bug_counts, aes(x=0.5, y=n)) +
-  coord_polar("y", start = 0) +
-  theme_void(base_size = 10) +
-  xlim(c(-1, 1)) +
-  geom_bar(aes(fill = reorder(error_type, n)), stat="identity") +
-  theme(legend.position = "right", text = element_text(family = "Linux Libertine Display", color = "black"), title = element_blank()) +
-  geom_label(data=subset(bug_counts, n>1), aes(x=0.5, label = n, family = "Linux Libertine Display", group = reorder(error_type, n)),colour = "black", position= position_stack(vjust=0.5)) 
+ggsave(file.path("./build/visuals/bugs.pdf"), plot = bug_counts_plot, width = 6, height = 1.5, dpi = 300)
 
-ggsave(file.path("./build/visuals/bugs.pdf"), plot = bug_counts_plot, width = 4, height = 1.8, dpi = 300)
-
-
-all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
-select(crate_name, version)
+all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download"))
 
 popularity <- bugs %>%
     mutate(crate_name = ifelse(!is.na(root_crate_name), root_crate_name, crate_name)) %>%
     mutate(version = ifelse(!is.na(root_crate_version), root_crate_version, version)) %>%
+    mutate(id = paste0("\\ref{", bug_id, "}")) %>%
     select(crate_name, version, id) %>%
     inner_join(all, by = c("crate_name", "version")) %>%
-    mutate(days_since_last_update = as.numeric(difftime(as.Date("2023-09-20"), as.Date(last_updated), units = "weeks"))) %>%
     select(
         crate_name,
         version,
@@ -107,16 +172,30 @@ popularity <- bugs %>%
     ) %>%
     mutate(avg_daily_downloads = as.integer(round(avg_daily_downloads, 0))) %>%
     mutate(last_updated = as.character(last_updated)) %>%
+    mutate(days_since_last_update = as.numeric(difftime(as.Date("2023-09-20"), as.Date(last_updated), units = "weeks"))) %>%
     arrange(desc(avg_daily_downloads))
+gt_ten_thousand <- popularity %>%
+    filter(avg_daily_downloads > 10000) %>%
+    nrow()
+lt_hundred <- popularity %>%
+    filter(avg_daily_downloads < 100) %>%
+    nrow()
+lt_ten <- popularity %>%
+    filter(avg_daily_downloads < 10) %>%
+    nrow()
 
+yrs_since_update <- round(mean(popularity$days_since_last_update) / 365, 1)
+stats <- stats %>% add_row(key = "daily_greater_than_10k", value = gt_ten_thousand)
+stats <- stats %>% add_row(key = "daily_less_than_100", value = lt_hundred)
+stats <- stats %>% add_row(key = "daily_less_than_10", value = lt_ten)
 
 popularity_formatted <- popularity %>%
-    mutate(daily = format(avg_daily_downloads, big.mark = ",", scientific = FALSE)) %>%
-    mutate(all_time = format(downloads, big.mark = ",", scientific = FALSE)) %>%
-    select(crate_name, version, daily, all_time, last_updated, id) %>%
-    group_by(crate_name, version, daily, all_time, last_updated) %>%
-    mutate(id = paste0("\\#", id)) %>%
-    summarize(bug_ids = paste0(id, collapse = ", ")) %>%
+    select(crate_name, version, avg_daily_downloads, downloads, last_updated, id) %>%
+    group_by(crate_name, version, avg_daily_downloads, downloads, last_updated) %>%
+    summarize(ids = paste0(id, collapse = ", ")) %>%
+    arrange(desc(downloads)) %>%
+    mutate(avg_daily_downloads = format(avg_daily_downloads, big.mark = ",", scientific = FALSE)) %>%
+    mutate(downloads = format(downloads, big.mark = ",", scientific = FALSE)) %>%
     ungroup()
 
 colnames(popularity_formatted) <- c("Crate", "Version", "Mean {\\scriptsize\\faFileDownload}\\ /\\ Day", "{\\scriptsize\\faFileDownload} All-Time", "Last Updated", "Bug IDs")
@@ -130,3 +209,50 @@ print(
     floating = FALSE,
     comment = FALSE
 )
+
+bugs <- read_csv(file.path("./build/stage3/bugs.csv"), show_col_types = FALSE) %>%
+    select(crate_name, version, test_name, error_type, annotated_error_type, issue, pull_request, commit) %>%
+    filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue))
+
+bugs_fixed <- bugs %>%
+    filter(!is.na(commit)) %>%
+    nrow()
+
+stats <- stats %>% add_row(key = "bugs_fixed", value = bugs_fixed)
+bug_stats <- bugs %>%
+    mutate(error_type = str_to_lower(error_type)) %>%
+    mutate(error_type = str_replace_all(error_type, " ", "_")) %>%
+    mutate(error_type = str_replace_all(error_type, "<T>::", "_")) %>%
+    mutate(error_type = str_replace_all(error_type, "()", ""))
+
+annotated_counts <- bugs %>%
+    group_by(annotated_error_type) %>%
+    summarize(n = n()) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{UnsafeCell<T>\\}", "unsafecell")) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\\\&mut T\\}", "mut_ref")) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\\\&T\\}", "ref")) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\*mut T\\}", "mut_ptr")) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\*const T\\}", "const_ptr")) %>%
+    mutate(key = paste0("annotated_", str_to_lower(str_replace_all(annotated_error_type, " ", "_"))), value = n) %>%
+    select(key, value)
+
+stats <- stats %>% bind_rows(annotated_counts)
+
+bug_counts <- bug_stats %>%
+    group_by(error_type) %>%
+    summarize(n = n()) %>%
+    mutate(error_type = paste0("error_count_", error_type)) %>%
+    rename(key = error_type, value = n)
+
+bug_crate_counts <- bug_stats %>%
+    select(crate_name, error_type) %>%
+    group_by(error_type) %>%
+    summarize(n = n_distinct(crate_name)) %>%
+    mutate(error_type = paste0("crate_count_", error_type)) %>%
+    rename(key = error_type, value = n)
+
+stats <- stats %>% bind_rows(bug_counts)
+stats <- stats %>% bind_rows(bug_crate_counts)
+stats <- stats %>% add_row(key = "num_bugs", value = nrow(bugs))
+stats <- stats %>% add_row(key = "num_crates_with_bugs", value = n_distinct(bugs$crate_name))
+stats %>% write_csv(stats_file)

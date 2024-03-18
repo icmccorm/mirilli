@@ -23,12 +23,13 @@ INTEROP_ERR_TXT <- "LLI Interoperation Error"
 UB_MAYBEUNINIT <- "Using Uninitialized Memory"
 UB_MEM_UNINIT <- "Invalid mem::uninitialized()"
 PASS_ERR_TEXT <- "Passed"
+SCALAR_MISMATCH_TEXT <- "Scalar Size Mismatch"
 
 UNWIND_ERR_TEXT <- "unwinding past the topmost frame of the stack"
 UNWIND_ERR_TYPE <- "Unwinding Past Topmost Frame"
 
-CROSS_LANGUAGE_ERR_TEXT <- "which is [C|Rust] heap memory, using [C|Rust] heap deallocation operation"
-CROSS_LANGUAGE_ERR_TYPE <- "Cross Language Deallocation"
+CROSS_LANGUAGE_ERR_TEXT <- "deallocating alloc"
+CROSS_LANGUAGE_ERR_TYPE <- "Cross-Language Deallocation"
 
 INVALID_VALUE_UNINIT_ERR_TYPE <- "Using Uninitialized Memory"
 INVALID_VALUE_UNINIT_ERR_TEXT <- "encountered uninitialized memory, but expected"
@@ -57,18 +58,20 @@ deduplicate_error_text <- function(df) {
 correct_error_type <- function(df) {
     df <- df %>%
         mutate(error_type = if_else(str_detect(error_text, UNWIND_ERR_TEXT), UNWIND_ERR_TYPE, error_type)) %>%
+        mutate(error_type = if_else(str_detect(error_text, "deallocating alloc"), CROSS_LANGUAGE_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, CROSS_LANGUAGE_ERR_TEXT), CROSS_LANGUAGE_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, INVALID_VALUE_UNALIGNED_ERR_TEXT), INVALID_VALUE_UNALIGNED_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, INVALID_ENUM_TAG_ERR_TEXT), INVALID_VALUE_ENUM_TAG_ERR_TYPE, error_type)) %>%
         mutate(error_type = if_else(str_detect(error_text, INVALID_VALUE_UNINIT_ERR_TEXT), INVALID_VALUE_UNINIT_ERR_TYPE, error_type)) %>%
-        mutate(error_type = if_else(str_detect(error_type, "deadlock"), "Deadlock", error_type))
+        mutate(error_type = if_else(str_detect(error_type, "deadlock"), "Deadlock", error_type)) %>%
+        mutate(error_type = if_else(str_detect(error_text, "is not supported for use in shims."), UNSUPP_ERR_TXT, error_type))
 }
-
 
 valid_error_type <- function(type, trace) {
     !(type %in% c(
         UNSUPP_ERR_TXT,
         LLI_ERR_TXT,
+        SCALAR_MISMATCH_TEXT,
         TIMEOUT_ERR_TXT,
         TIMEOUT_PASS_ERR_TXT,
         UB_MAYBEUNINIT,
@@ -124,7 +127,8 @@ prepare_errors <- function(dir, type) {
 
     error_roots <- error_roots %>%
         full_join(error_rust_locations, by = c("crate_name", "test_name")) %>%
-        mutate(error_root = if_else(is.na(error_root), error_location_rust, error_root)) %>%
+        mutate(is_foreign_error = !is.na(error_root)) %>%
+        mutate(error_root = ifelse(is.na(error_root), error_location_rust, error_root)) %>%
         select(-error_location_rust)
 
     errors <- errors %>%
@@ -144,7 +148,7 @@ prepare_errors <- function(dir, type) {
 }
 
 all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
-select(crate_name, version)
+    select(crate_name, version)
 
 compile_errors <- function(dir) {
     basename <- basename(dir)
@@ -173,9 +177,9 @@ compile_errors <- function(dir) {
     errors <- bind_rows(stack_errors, tree_errors)
 
     errors <- errors %>%
-        select(crate_name, test_name, borrow_mode, error_type, error_text, error_root, exit_code, actual_failure, exit_signal_no, action, kind) %>%
+        select(crate_name, test_name, borrow_mode, error_type, error_text, is_foreign_error, error_root, exit_code, assertion_failure, exit_signal_no, action, kind) %>%
         unique() %>%
-        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, error_root, exit_code, actual_failure, exit_signal_no, action, kind))
+        pivot_wider(names_from = borrow_mode, values_from = c(error_type, error_text, is_foreign_error, error_root, exit_code, assertion_failure, exit_signal_no, action, kind))
 
     status %>%
         full_join(errors, by = c("crate_name", "test_name")) %>%
@@ -193,14 +197,16 @@ compile_errors <- function(dir) {
             error_type_tree,
             error_text_stack,
             error_text_tree,
+            is_foreign_error_stack,
+            is_foreign_error_tree,
             error_root_stack,
             error_root_tree,
             action_stack,
             action_tree,
             kind_stack,
             kind_tree,
-            actual_failure_stack,
-            actual_failure_tree,
+            assertion_failure_stack,
+            assertion_failure_tree,
             exit_signal_no_stack,
             exit_signal_no_tree
         ) %>%
@@ -217,7 +223,7 @@ merge_passes_and_timeouts <- function(df) {
     )
 }
 
-deduplicate_errors <- function(df) {
+deduplicate <- function(df) {
     # we can only deduplicate errors that are not test failures, and that have a non-NA error root
     can_deduplicate <- df %>%
         filter(is.na(error_type_stack) | error_type_stack != TEST_FAILED_TXT) %>%
@@ -252,15 +258,7 @@ deduplicate_errors <- function(df) {
     return(bind_rows(not_deduplicable, deduplicated, error_in_deps))
 }
 
-remove_erroneous_failures <- function(df, dir) {
-    to_remove <- df %>%
-        filter(errored_exit_code(native_exit_code) & errored_exit_code(exit_code_stack) & errored_exit_code(exit_code_tree)) %>%
-        filter(str_detect(error_type_stack, TEST_FAILED_TXT)) %>%
-        filter(str_detect(error_type_tree, TEST_FAILED_TXT))
-    df %>% anti_join(to_remove, by = names(df)[names(to_remove) %in% names(df)])
-}
-
-keep_actual_errors <- function(df) {
+keep_only_valid_errors <- function(df) {
     df %>%
         # we only want to include cases where a test passed both native compilation and miri
         filter(passed(native_comp_exit_code) & passed(miri_comp_exit_code)) %>%
@@ -268,9 +266,9 @@ keep_actual_errors <- function(df) {
         # then, we require that the test errored in either stacked borrows or tree borrows
         filter(errored_exit_code(exit_code_stack) | errored_exit_code(exit_code_tree)) %>%
         # finally, there must be a valid error type in either category
-        filter(valid_error_type(error_type_stack, error_root_stack) | valid_error_type(error_type_tree, error_root_tree)) %>%
-        deduplicate_errors() %>%
-        remove_erroneous_failures()
+        mutate(valid_error_stack = valid_error_type(error_type_stack, error_root_stack)) %>%
+        mutate(valid_error_tree = valid_error_type(error_type_tree, error_root_tree)) %>%
+        filter(valid_error_tree | valid_error_stack)
 }
 
 compile_metadata <- function(dir) {
@@ -310,8 +308,8 @@ deduplicate_label_write <- function(df, path) {
             error_type_tree,
             exit_code_stack,
             exit_code_tree,
-            actual_failure_stack,
-            actual_failure_tree,
+            assertion_failure_stack,
+            assertion_failure_tree,
             exit_signal_no_stack,
             exit_signal_no_tree,
         ) %>%
@@ -320,9 +318,9 @@ deduplicate_label_write <- function(df, path) {
                 ifelse(errored_exit_code(exit_code_stack), "Both", "Tree"),
                 ifelse(errored_exit_code(exit_code_stack), "Stack", NA)
             ),
-            actual_failure = ifelse(errored_in == "Tree",
-                actual_failure_tree,
-                actual_failure_stack
+            assertion_failure = ifelse(errored_in == "Tree",
+                assertion_failure_tree,
+                assertion_failure_stack
             ),
             exit_signal_no = ifelse(errored_in == "Tree",
                 exit_signal_no_tree,
@@ -337,7 +335,7 @@ deduplicate_label_write <- function(df, path) {
             errored_in,
             error_type_stack,
             error_type_tree,
-            actual_failure,
+            assertion_failure,
             exit_signal_no
         ) %>%
         write_csv(path)

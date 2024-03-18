@@ -76,43 +76,44 @@ class TBError:
         if self.accessed_tag_transition.exists():
             if disabled_by(foreign_write, self.accessed_tag_transition):
                 # TBErrorType.DisabledByForeignWrite
-                error_type = TBErrorInsufficientType(TBState.Disabled,  indirection_type).to_string()
+                error_type = TBErrorTypeWithIndirection(TBErrorType.Expired,  indirection_type).to_string()
         elif self.conflicting_tag_transition.exists():
                 if disabled_by(foreign_write, self.conflicting_tag_transition):
                     # TBErrorType.DisabledByForeignWrite
-                    error_type = TBErrorInsufficientType(TBState.Disabled,  indirection_type).to_string()
+                    error_type = TBErrorTypeWithIndirection(TBErrorType.Expired,  indirection_type).to_string()
                 if frozen_by(foreign_read, self.conflicting_tag_transition):
                     # TBErrorType.FrozenByForeignRead
-                    error_type = TBErrorInsufficientType(TBState.Frozen,  indirection_type).to_string()
+                    error_type = TBErrorTypeWithIndirection(TBErrorType.Insufficient,  indirection_type).to_string()
         else:
             if self.conflicting_tag_transition.kind == TBRole.protected or self.conflicting_tag_transition.kind == TBRole.strongly_protected:
                 error_type = TBErrorType.BlockedByProtector.value
             if self.action_type == TBOperation.write or self.action_type == TBOperation.deallocation:
                 if self.accessed_tag_transition.start_state == TBState.Frozen:
-                    error_type = TBErrorInsufficientType(TBState.Frozen,  indirection_type).to_string()
+                    error_type = TBErrorTypeWithIndirection(TBErrorType.Insufficient,  indirection_type).to_string()
                 elif self.conflicting_tag_transition.start_state == TBState.Frozen:
-                    error_type = TBErrorInsufficientType(TBState.Frozen,  indirection_type).to_string()
+                    error_type = TBErrorTypeWithIndirection(TBErrorType.Insufficient,  indirection_type).to_string()
         if self.action_type is None or error_type is None or indirection_type is None:
             print("Unrecognized Tree Borrows error type")
             exit(1)
         return [self.action_type.value, error_type]
 
-class TBErrorInsufficientType:
-    def __init__(self, permission, indirection):
-        self.permission = permission
+class TBErrorTypeWithIndirection:
+    def __init__(self, error_type, indirection):
         self.indirection = indirection
+        self.error_type = error_type
     def to_string(self):
+        error_type = self.error_type.value
         indirection = self.indirection.value if self.indirection is not None else "NA"
-        permission = self.permission.value if self.permission is not None else "NA"
-        return f"{indirection}-{permission}"
+        return f"{error_type}-{indirection}"
     
 class TBErrorIndirectionType(Enum):
     Indirect = "Indirect"
     Direct = "Direct"
 
 class TBErrorType(Enum):
+    Expired = "Expired"
     Insufficient = "Insufficient"
-    BlockedByProtector = "Protected"
+    BlockedByProtector = "Invalid Framing"
 
 def foreign_write(tb_action):
     return tb_action.action == TBOperation.write and tb_action.relation == TBHierarchy.foreign

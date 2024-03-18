@@ -7,7 +7,7 @@ stage2_root <- file.path("./build/stage2")
 if (!dir.exists(stage2_root)) {
     dir.create(stage2_root)
 }
-stats_file <- file.path(stage2_root, "./stats.csv")
+stats_file <- file.path(stage2_root, "./stage2.stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 tests <- read_csv(
