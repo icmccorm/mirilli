@@ -1,0 +1,4 @@
+locale.bc
+ios.instantiations.bc
+iostream.bc
+ios.bc
