@@ -27,3 +27,5 @@ build
 **/*.zip
 archives
 *.csv
+extracted
+login.sh

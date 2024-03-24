@@ -18,7 +18,7 @@ RUN git submodule update --init ./rust
 FROM setup as libcxx-compile
 WORKDIR /usr/src/ffickle/rust/src/llvm-project/
 RUN mkdir build-libcxx
-RUN cmake -G Ninja -S runtimes -B build-libcxx -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -DLIBCXX_ADDITIONAL_COMPILE_FLAGS="--save-temps;-fno-threadsafe-statics" -DLIBCXX_ENABLE_THREADS="OFF" -DLIBCXXABI_ENABLE_THREADS="OFF" -DLIBUNWIND_ENABLE_THREADS="OFF" -DLLVM_ENABLE_THREADS="OFF" -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY="ON" -DLIBCXX_ENABLE_STATIC="ON" 
+RUN cmake -G Ninja -S runtimes -B build-libcxx -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -DLIBCXX_ADDITIONAL_COMPILE_FLAGS="--save-temps;-fno-threadsafe-statics;--stdlib=libc++" -DLIBCXX_ENABLE_THREADS="OFF" -DLIBCXXABI_ENABLE_THREADS="OFF" -DLIBUNWIND_ENABLE_THREADS="OFF" -DLLVM_ENABLE_THREADS="OFF" -DLIBCXX_ENABLE_STATIC="ON" 
 RUN ninja -C build-libcxx cxx cxxabi unwind
 
 FROM libcxx-compile as rust-compile
@@ -43,16 +43,10 @@ RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
 ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
+RUN ../scripts/misc/remove.sh /usr/src/ffickle/rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
 RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx.bc
 
 FROM rllvm-as-compile as ffickle-compile
 WORKDIR /usr/src/ffickle/
-RUN cargo search
-RUN cargo install cargo-dylint dylint-link
-RUN (rm -rf src/early/target/)
-RUN (rm -rf src/late/target/)
-RUN (cd src/early && cargo build)
-RUN (cd src/late && cargo build)
-ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
-ENV CC="clang -g -O0 --save-temps=obj"
-ENV CXX="clang -g -O0 --save-temps=obj"
+ENV CC="clang-16 -g -O0 --save-temps=obj"
+ENV CXX="clang++-16 -g -O0 --save-temps=obj"
