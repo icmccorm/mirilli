@@ -17,7 +17,13 @@ RUN rustup component add miri
 RUN rustup install nightly
 RUN git submodule update --init ./rust
 
-FROM setup as rust-compile
+FROM setup as libcxx-compile
+WORKDIR /usr/src/ffickle/rust/src/llvm-project/
+RUN mkdir build-libcxx
+RUN cmake -G Ninja -S runtimes -B build-libcxx -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -DLIBCXX_ADDITIONAL_COMPILE_FLAGS="--save-temps;-fno-threadsafe-statics;--stdlib=libc++" -DLIBCXX_ENABLE_THREADS="OFF" -DLIBCXXABI_ENABLE_THREADS="OFF" -DLIBUNWIND_ENABLE_THREADS="OFF" -DLLVM_ENABLE_THREADS="OFF" -DLIBCXX_ENABLE_STATIC="ON" 
+RUN ninja -C build-libcxx cxx cxxabi unwind
+
+FROM libcxx-compile as rust-compile
 WORKDIR /usr/src/ffickle/rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
