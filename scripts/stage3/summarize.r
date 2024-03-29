@@ -12,16 +12,34 @@ deduplication <- data.frame(state = character(), count = numeric(), type = chara
 
 zeroed_meta <- compile_metadata("./results/stage3/zeroed")
 uninit_meta <- compile_metadata("./results/stage3/uninit")
-num_tests_uninit <- uninit_meta %>%
-    filter(LLVMEngaged == 1) %>%
-    nrow()
-uninit_meta %>%
-    select(-crate_name, -test_name, -borrow_mode, -memory_mode) %>%
-    filter(LLVMEngaged == 1) %>%
-    pivot_longer(everything()) %>%
+
+meta <- uninit_meta %>%
+    bind_rows(zeroed_meta) 
+colnames(meta) <- c("crate_name", "test_name", "borrow_mode", "memory_mode", paste0("log_", colnames(meta)[-c(1, 2, 3, 4)]))
+
+meta_count <- meta %>%
+    filter(log_LLVMEngaged == 1) %>%
+    pivot_longer(cols=starts_with("log_"), names_to="log", names_prefix="log_", values_to="value") %>%
     filter(value == 1) %>%
-    group_by(name) %>%
-    summarize(n = n())
+    select(-borrow_mode, -memory_mode) %>%
+    unique()
+    
+stats <- meta_count %>%
+    select(-crate_name, -test_name, -value) %>%
+    group_by(log) %>%
+    summarize(n = n()) %>%
+    mutate(log = paste0("meta_", str_to_lower(log))) %>%
+    rename(key = log, value = n) %>%
+    bind_rows(stats)
+
+stats <- meta_count %>%
+    select(-test_name) %>%
+    unique() %>%
+    group_by(log) %>%
+    summarize(n = n()) %>%
+    mutate(log = paste0("meta_crates_", str_to_lower(log))) %>%
+    rename(key = log, value = n) %>%
+    bind_rows(stats)
 
 tests_engaged <- zeroed_meta %>%
     filter(LLVMEngaged == 1) %>%
@@ -63,8 +81,20 @@ engaged_constructor_zeroed <- zeroed_meta %>%
     select(crate_name, test_name) %>%
     unique()
 
-summarize_metadata(zeroed_meta) %>%
-    bind_rows(summarize_metadata(uninit_meta)) %>%
+zeroed_meta %>%
+    bind_rows(uninit_meta) %>%
+    select(-test_name, -borrow_mode, -memory_mode) %>%
+    filter(LLVMEngaged == 1) %>%
+    # set each column to 1 if it appears anywhere in a group
+    group_by(crate_name) %>%
+    summarize_all(~as.numeric(any(. == 1))) %>%
+    pivot_longer(
+        cols = -c(crate_name),
+        names_to = "flag_name",
+        values_to = "present"
+    ) %>%
+    group_by(flag_name) %>%
+    summarize(n = sum(present)) %>%
     write_csv(file.path(stage3_root, "metadata.csv"))
 
 zeroed_raw <- compile_errors("./results/stage3/zeroed") %>%
@@ -145,3 +175,4 @@ differed_in_uninit <- uninit %>%
 deduplication <- deduplication %>% pivot_wider(names_from = type, values_from = count)
 deduplication$total <- rowSums(deduplication[, -1], na.rm = TRUE)
 deduplication %>% write_csv(file.path(stage3_root, "deduplication.csv"))
+stats %>% write_csv(stats_file)

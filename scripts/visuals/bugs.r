@@ -49,18 +49,30 @@ commit_hash_parse_fn <- function(link, item_text) {
     }
 }
 
+all_errors <- read_csv(file.path("./build/stage3/errors.csv"), show_col_types = FALSE)
+
+ownership <- c("Tree Borrows")
+memory <- c("Memory Leaked", "Out of Bounds Access", "Cross-Language Free")
+typing <- c("Using Uninitialized Memory", "Unaligned Reference", "Invalid Enum Tag", "Incorrect FFI Binding")
 
 
 bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
-    select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, cause, issue, pull_request, commit, bug_type_override, memory_mode) %>%
+    select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, cause, issue, pull_request, commit, bug_type_override, memory_mode, effect_override, error_type_override) %>%
     left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
     mutate(
         error_type_tree = ifelse(!is.na(bug_type_override), bug_type_override, error_type_tree)
     ) %>%
-    mutate(error_type = ifelse(str_equal(error_type_tree, "Borrowing Violation"), "Tree Borrows Violation", error_type_tree)) %>%
+    mutate(error_type = ifelse(str_equal(error_type_tree, "Borrowing Violation"), "Tree Borrows", error_type_tree)) %>%
+    mutate(error_type = ifelse(!is.na(error_type_override), error_type_override, error_type)) %>%
     filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue)) %>%
     mutate(effect = ifelse(is_foreign_error_tree | is_foreign_error_stack, "LLVM", "Rust")) %>%
     mutate(effect = ifelse(error_type == "Incorrect FFI Binding", "Binding", effect)) %>%
+    mutate(effect = ifelse(!is.na(effect_override), effect_override, effect)) %>%
+    mutate(bug_category = ifelse(error_type %in% ownership, "Ownership", ifelse(error_type %in% memory, "Memory", ifelse(error_type %in% typing, "Typing", NA)))) %>%
+    mutate(error_type = ifelse(error_type == "Incorrect FFI Binding", "Incorrect Binding", error_type)) %>%
+    mutate(error_type = ifelse(error_type == "Unaligned Reference", "Alignment", error_type)) %>%
+    mutate(error_type = ifelse(error_type == "Using Uninitialized Memory", "Uninitialized Memory", error_type)) %>%
+    mutate(error_type = ifelse(error_type == "Tree Borrows Violation", "Tree Borrows", error_type)) %>%
     select(
         bug_id,
         crate_name,
@@ -74,8 +86,11 @@ bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
         effect,
         issue,
         pull_request,
-        commit
-    )
+        commit,
+        bug_category
+    ) %>%
+    mutate(cause_effect = paste0(cause, " $\\rightarrow$ ", effect))
+
 location_stats <- bugs %>%
     group_by(effect) %>%
     summarize(n = n()) %>%
@@ -92,8 +107,6 @@ formatted_bugs <- bugs %>%
         issue = parse_links(issue, "issues", gh_id_parse_fn),
         pull_request = parse_links(pull_request, "pull", gh_id_parse_fn),
         commit = parse_links(commit, "commit", commit_hash_parse_fn),
-        cause_effect = ifelse(cause == effect, cause, paste0(cause, "$\\rightarrow$ ", effect)),
-        error_type = ifelse(error_type == "Using Uninitialized Memory", "Uninitialized Memory", error_type)
     ) %>%
     mutate(annotated_error_type = ifelse(annotated_error_type == error_type, "-", annotated_error_type)) %>%
     select(bug_id, crate_name, version, error_type, annotated_error_type, cause_effect, issue, pull_request, commit) %>%
@@ -119,40 +132,24 @@ print(
 
 # create a pie chart of the bugs
 bug_counts <- bugs %>%
-    group_by(error_type) %>%
+    group_by(bug_category) %>%
     summarize(n = n()) %>%
     arrange(desc(n))
 
-bug_counts_plot <- ggplot(data = bug_counts, aes(x = 0.5, y = n, fill = reorder(error_type, n))) +
-    coord_polar("y", start = 0) +
-    xlim(c(-1, 1)) +
-    geom_bar(stat = "identity") +
-    guides(fill = guide_legend(ncol = 2, reverse = TRUE, override.aes = aes(label = ""))) +
-    theme_void(base_size = 10) +
-    theme(
-        legend.position = "right",
-        text = element_text(
-            family = "Linux Libertine Display",
-            color = "black",
-            size = 10
-        ),
-        title = element_blank()
-    ) +
-    geom_label(
-        aes(
-            label = n,
-            family = "Linux Libertine Display",
-            group = reorder(error_type, n),
-        ),
-        data = subset(bug_counts, n > 1),
-        size = 10 / .pt,
-        colour = "black",
-        fill = "white",
-        position = position_stack(vjust = 0.5)
-    ) +
-    scale_fill_brewer(palette = "Dark2")
-
-ggsave(file.path("./build/visuals/bugs.pdf"), plot = bug_counts_plot, width = 6, height = 1.5, dpi = 300)
+bug_counts_table <- bugs %>%
+    group_by(bug_category, cause_effect) %>%
+    summarize(n = n()) %>%
+    pivot_wider(names_from = bug_category, values_from = n) %>%
+    mutate_all(replace_na, 0) %>%
+    arrange(cause_effect)
+bug_counts_table <- bug_counts_table %>%
+    bind_rows(bug_counts_table %>% select(-cause_effect) %>% summarise_all(sum)) %>%
+    # add a new column, 'total', with the sum across each row
+    mutate(`Total` = rowSums(select(., -cause_effect))) %>%
+    mutate_all(~ ifelse(. == 0, "", as.character(.))) %>%
+    mutate(cause_effect = ifelse(is.na(cause_effect), "Total", cause_effect)) %>%
+    rename(`Cause\\rightarrow Effect` = cause_effect) %>%
+    write_csv(file.path("./build/visuals/bug_counts_table.csv"))
 
 all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download"))
 
@@ -210,7 +207,7 @@ print(
     comment = FALSE
 )
 
-bugs <- read_csv(file.path("./build/stage3/bugs.csv"), show_col_types = FALSE) %>%
+bugs <- bugs %>%
     select(crate_name, version, test_name, error_type, annotated_error_type, issue, pull_request, commit) %>%
     filter(!is.na(pull_request) | !is.na(commit) | !is.na(issue))
 

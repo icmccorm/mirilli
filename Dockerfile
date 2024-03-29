@@ -2,7 +2,7 @@ FROM ubuntu:23.04 as setup
 
 WORKDIR /usr/src/ffickle
 COPY . .
-RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm clang-16 llvm-16 make cmake git ninja-build vim -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm clang-16 llvm-16 make cmake git ninja-build cloc vim -y
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && chmod +x /tmp/rustup-init.sh \
     && sh /tmp/rustup-init.sh -y \
@@ -48,5 +48,12 @@ RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx
 
 FROM rllvm-as-compile as ffickle-compile
 WORKDIR /usr/src/ffickle/
-ENV CC="clang-16 -g -O0 --save-temps=obj"
-ENV CXX="clang++-16 -g -O0 --save-temps=obj"
+RUN cargo search
+#RUN cargo install cargo-dylint dylint-link
+#RUN (rm -rf src/early/target/)
+#RUN (rm -rf src/late/target/)
+#RUN (cd src/early && cargo build)
+#RUN (cd src/late && cargo build)
+#ENV DYLINT_LIBRARY_PATH="/usr/src/ffickle/src/early/target/debug/:/usr/src/ffickle/src/late/target/debug/"
+ENV CC="clang -g -O0 --save-temps=obj"
+ENV CXX="clang -g -O0 --save-temps=obj"

@@ -274,8 +274,9 @@ keep_only_valid_errors <- function(df) {
 compile_metadata <- function(dir) {
     stack_meta <- read_csv(file.path(dir, "metadata_stack.csv"), show_col_types = FALSE) %>% mutate(borrow_mode = "stack")
     tree_meta <- read_csv(file.path(dir, "metadata_tree.csv"), show_col_types = FALSE) %>% mutate(borrow_mode = "tree")
-    return(bind_rows(stack_meta, tree_meta) %>%
-        mutate(memory_mode = basename(dir)))
+    return (bind_rows(stack_meta, tree_meta) %>%
+        mutate(memory_mode = basename(dir)) %>%
+        select(crate_name, test_name, borrow_mode, memory_mode, everything()))
 }
 summarize_metadata <- function(df) {
     # pivot longer such that borrow_mode and memory_mode are still columns, but the rest are rows
