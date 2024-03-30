@@ -47,3 +47,6 @@ RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
 ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
 RUN ../scripts/misc/remove.sh /usr/src/ffickle/rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
 RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx.bc
+
+FROM rllvm-as-compile as final
+WORKDIR /usr/src/ffickle/
