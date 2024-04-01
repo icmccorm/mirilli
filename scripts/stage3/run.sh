@@ -103,7 +103,7 @@ do
                 cp err ../results/stage3/crates/$crate_name/miri.comp.log
             fi
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
-                MFLAGS="$MEMORY_MODE -Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc"
+                MFLAGS="$MEMORY_MODE -Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-symbolic-alignment-check -Zmiri-llvm-alignment-check-rust-only -Zmiri-disable-isolation -Zmiri-llvm-log -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
                 dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1
