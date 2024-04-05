@@ -16,26 +16,26 @@ RUN rustup default ${NIGHTLY}
 RUN rustup component add miri
 RUN rustup component add rust-src
 RUN rustup install nightly
-RUN git submodule update --init ./rust
+RUN git submodule update --init ./mirilli-rust
 
 FROM setup as libcxx-compile
-WORKDIR /usr/src/mirilli/rust/src/llvm-project/
+WORKDIR /usr/src/mirilli/mirilli-rust/src/llvm-project/
 RUN mkdir build-libcxx
 RUN cmake -G Ninja -S runtimes -B build-libcxx -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -DLIBCXX_ADDITIONAL_COMPILE_FLAGS="--save-temps;-fno-threadsafe-statics;--stdlib=libc++" -DLIBCXX_ENABLE_THREADS="OFF" -DLIBCXXABI_ENABLE_THREADS="OFF" -DLIBUNWIND_ENABLE_THREADS="OFF" -DLLVM_ENABLE_THREADS="OFF" -DLIBCXX_ENABLE_STATIC="ON" 
 RUN ninja -C build-libcxx cxx cxxabi unwind
 
 FROM libcxx-compile as rust-compile
-WORKDIR /usr/src/mirilli/rust
+WORKDIR /usr/src/mirilli/mirilli-rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
 RUN git submodule update --init ./src/llvm-sys
-ENV LLVM_SYS_170_PREFIX=/usr/src/mirilli/rust/build/host/llvm/
+ENV LLVM_SYS_170_PREFIX=/usr/src/mirilli/mirilli-rust/build/host/llvm/
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build && ./x.py install
-RUN rustup toolchain link mirilli /usr/src/mirilli/rust/build/host/stage2/
+RUN rustup toolchain link mirilli /usr/src/mirilli/mirilli-rust/build/host/stage2/
 RUN rustup default mirilli
 
 FROM rust-compile as miri-compile
-WORKDIR /usr/src/mirilli/rust
+WORKDIR /usr/src/mirilli/mirilli-rust
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py install miri
 RUN cargo miri setup
@@ -46,8 +46,8 @@ RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
 ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
-RUN ../scripts/misc/remove.sh /usr/src/mirilli/rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
-RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/mirilli/libcxx.bc
+RUN ../scripts/misc/remove.sh /usr/src/mirilli/mirilli-rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
+RUN cd ../mirilli-rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/mirilli/libcxx.bc
 
 FROM rllvm-as-compile as final
 WORKDIR /usr/src/mirilli
