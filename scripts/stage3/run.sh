@@ -23,6 +23,8 @@ if [ "$2" == "-z" ]; then
     MEMORY_MODE="-Zmiri-llvm-zero-init"
 fi
 
+rustup default mirilli
+
 while IFS=, read -r test_name crate_name version <&3;
 do
     SUCCEEDED_DOWNLOADING=0

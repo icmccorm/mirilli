@@ -1,6 +1,6 @@
 FROM ubuntu:23.04 as setup
 
-WORKDIR /usr/src/ffickle
+WORKDIR /usr/src/mirilli
 COPY . .
 RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm clang-16 llvm-16 make cmake git ninja-build cloc vim -y
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
@@ -18,35 +18,36 @@ RUN rustup install nightly
 RUN git submodule update --init ./rust
 
 FROM setup as libcxx-compile
-WORKDIR /usr/src/ffickle/rust/src/llvm-project/
+WORKDIR /usr/src/mirilli/rust/src/llvm-project/
 RUN mkdir build-libcxx
 RUN cmake -G Ninja -S runtimes -B build-libcxx -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -DLIBCXX_ADDITIONAL_COMPILE_FLAGS="--save-temps;-fno-threadsafe-statics;--stdlib=libc++" -DLIBCXX_ENABLE_THREADS="OFF" -DLIBCXXABI_ENABLE_THREADS="OFF" -DLIBUNWIND_ENABLE_THREADS="OFF" -DLLVM_ENABLE_THREADS="OFF" -DLIBCXX_ENABLE_STATIC="ON" 
 RUN ninja -C build-libcxx cxx cxxabi unwind
 
 FROM libcxx-compile as rust-compile
-WORKDIR /usr/src/ffickle/rust
+WORKDIR /usr/src/mirilli/rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
 RUN git submodule update --init ./src/llvm-sys
-ENV LLVM_SYS_170_PREFIX=/usr/src/ffickle/rust/build/host/llvm/
+ENV LLVM_SYS_170_PREFIX=/usr/src/mirilli/rust/build/host/llvm/
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build && ./x.py install
-RUN rustup toolchain link miri-custom /usr/src/ffickle/rust/build/host/stage2/
-RUN rustup default miri-custom
+RUN rustup toolchain link mirilli /usr/src/mirilli/rust/build/host/stage2/
+RUN rustup default mirilli
 
 FROM rust-compile as miri-compile
-WORKDIR /usr/src/ffickle/rust
+WORKDIR /usr/src/mirilli/rust
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py build miri
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} ./x.py install miri
 RUN cargo miri setup
 
 FROM miri-compile as rllvm-as-compile
-WORKDIR /usr/src/ffickle/rllvm-as
+WORKDIR /usr/src/mirilli/rllvm-as
 RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_170_PREFIX=${LLVM_SYS_170_PREFIX} cargo build --release
-ENV PATH="/usr/src/ffickle/rllvm-as/target/release:${PATH}"
-RUN ../scripts/misc/remove.sh /usr/src/ffickle/rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
-RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx.bc
+ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
+RUN ../scripts/misc/remove.sh /usr/src/mirilli/rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
+RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/mirilli/libcxx.bc
 
 FROM rllvm-as-compile as final
-WORKDIR /usr/src/ffickle/
+WORKDIR /usr/src/mirilli/replication/
+RUN cargo install cargo-download
