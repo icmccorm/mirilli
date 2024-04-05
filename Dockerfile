@@ -49,5 +49,5 @@ RUN ../scripts/misc/remove.sh /usr/src/mirilli/rust/src/llvm-project/build-libcx
 RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/mirilli/libcxx.bc
 
 FROM rllvm-as-compile as final
-WORKDIR /usr/src/mirilli/replication/
+WORKDIR /usr/src/mirilli
 RUN cargo install cargo-download

@@ -2,7 +2,7 @@ Follow these instructions to replicate one of the aliasing violations we detecte
 
 1. Execute the following command to download the version of the library bzip2 where we located a Tree Borrows violation.
 ```
-cargo-download bzip2==0.4.4 -x -o bzip2 && cd bzip2
+./scripts/misc/cargo-download bzip2 0.4.4 && cd extracted
 ```
 This will enter into a new directory containing the contents of the library. 
 

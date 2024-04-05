@@ -1,5 +1,5 @@
 [submodule "rust"]
-	path = rust
+	path = mirilli-rust
 	url = https://github.com/icmccorm/rust.git
 	branch = miri
 	shallow = true
