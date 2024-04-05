@@ -14,6 +14,7 @@ ENV CXX="clang++-16 -g -O0 --save-temps=obj"
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
 RUN rustup component add miri
+RUN rustup component add rust-src
 RUN rustup install nightly
 RUN git submodule update --init ./rust
 

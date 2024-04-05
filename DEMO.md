@@ -2,16 +2,36 @@ Follow these instructions to replicate one of the aliasing violations we detecte
 
 1. Execute the following command to download the version of the library bzip2 where we located a Tree Borrows violation.
 ```
-./scripts/misc/cargo-download bzip2 0.4.4 && cd extracted
+./scripts/misc/cargo-download.sh bzip2 0.4.4 && cd extracted
 ```
 This will enter into a new directory containing the contents of the library. 
 
-2. Execute the following command
+2. First, we will confirm that an unmodified version of Miri cannot detect the bug in this library due to lack of foreign function support. Switch to the nightly toolchain that we used as our baseline for the evaluation:
+```
+rustup default nightly-2023-09-25-x86_64-unknown-linux-gnu
+```
+Then, execute the following test case:
+```
+cargo miri test -- bufread::tests::bug_61
+```
+Confirm that you see the following result:
+```
+error: unsupported operation: can't call foreign function `BZ2_bzDecompressInit` on OS `linux`
+   --> src/mem.rs:215:24
+    |
+215 |             assert_eq!(ffi::BZ2_bzDecompressInit(&mut *raw, 0, small as c_int), 0);
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ can't call foreign function `BZ2_bzDecompressInit` on OS `linux`
+```
+
+2. Now, we will confirm that MiriLLI can detect the bug in this test case. Switch to the `mirilli` toolchain with the following command:
+```
+rustup default mirilli
+```
+Then, execute the same test case under Tree Borrows:
 ```
 MIRIFLAGS='-Zmiri-llvm-read-uninit -Zmiri-tree-borrows' cargo miri test -- bufread::tests::bug_61
 ```
-
-3. Confirm that you see the following result:
+Confirm that you see the following result:
 ```
 ---- Foreign Error Trace ----
 
