@@ -25,10 +25,3 @@ we implemented several configuration flags that change the behavior of MiriLLI. 
 We rely on the following additional dependencies to implement our integration with LLI:
 * [llvm-sys](https://crates.io/crates/llvm-sys)
 * [inkwell](https://crates.io/crates/inkwell)
-
-## Coauthors
-* [Joshua Sunshine](https://www.cs.cmu.edu/~jssunshi/)
-* [Jonathan Aldrich](https://www.cs.cmu.edu/~aldrich/)
-
-## Contributors
-* [Tomas Dougan](https://github.com/taurreco)
