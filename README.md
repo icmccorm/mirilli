@@ -24,5 +24,8 @@ we implemented several configuration flags that change the behavior of MiriLLI. 
 * `-Zmiri-llvm-alignment-check-rust-only` - Disables alignment checking in LLVM, unless the memory being accessed has been allocated by Rust.
 
 ## Coauthors
-* Joshua Sunshine (https://www.cs.cmu.edu/~jssunshi/)
-* Jonathan Aldrich (https://www.cs.cmu.edu/~aldrich/)
+* [Joshua Sunshine](https://www.cs.cmu.edu/~jssunshi/)
+* [Jonathan Aldrich](https://www.cs.cmu.edu/~aldrich/)
+
+## Contributors
+* [Tomas Dougan](https://github.com/taurreco)
