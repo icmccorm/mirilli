@@ -49,4 +49,4 @@ RUN ../scripts/misc/remove.sh /usr/src/ffickle/rust/src/llvm-project/build-libcx
 RUN cd ../rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/ffickle/libcxx.bc
 
 FROM rllvm-as-compile as final
-WORKDIR /usr/src/ffickle/
+WORKDIR /usr/src/mirilli
