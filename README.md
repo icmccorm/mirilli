@@ -22,6 +22,6 @@ we implemented several configuration flags that change the behavior of MiriLLI. 
 * `-Zmiri-llvm-alignment-check-rust-only` disables alignment checking in LLVM unless the memory being accessed has been allocated by Rust.
 
 ## Implementation
-We rely on the following additional dependencies to implement our integration with LLI:
+We rely on forks of the following crates to implement our integration with LLI:
 * [llvm-sys](https://crates.io/crates/llvm-sys)
-* [inkwell](https://crates.io/crates/inkwell)
+* [inkwell](https://github.com/icmccorm/inkwell)
