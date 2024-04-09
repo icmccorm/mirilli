@@ -25,3 +25,6 @@ we implemented several configuration flags that change the behavior of MiriLLI. 
 We rely on forks of the following crates to implement our integration with LLI:
 * [llvm-sys](https://crates.io/crates/llvm-sys)
 * [inkwell](https://github.com/icmccorm/inkwell)
+
+## Contributors
+This paper was coauthored by [Joshua Sunshine](https://www.cs.cmu.edu/~jssunshi/) and [Jonathan Aldrich](https://www.cs.cmu.edu/~aldrich/). [Tomas Dougan](https://github.com/taurreco) assisted with part of the implementation of MiriLLI during his summer [REUSE](https://www.cmu.edu/scs/s3d/reuse/) Project.
