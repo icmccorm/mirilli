@@ -17,7 +17,7 @@ stats_file <- file.path("./build/visuals/bugs.stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 as_link <- function(link_text, url) {
-    return(paste0("\\href{", url, "}{", link_text, "}"))
+    return(paste0("\\buglink{", url, "}{", link_text, "}"))
 }
 
 parse_links <- function(links, item_text, parse_fn) {
@@ -55,7 +55,6 @@ ownership <- c("Tree Borrows")
 memory <- c("Memory Leaked", "Out of Bounds Access", "Cross-Language Free")
 typing <- c("Using Uninitialized Memory", "Unaligned Reference", "Invalid Enum Tag", "Incorrect FFI Binding")
 
-
 bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
     select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, cause, issue, pull_request, commit, bug_type_override, memory_mode, effect_override, error_type_override) %>%
     left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
@@ -68,7 +67,7 @@ bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
     mutate(effect = ifelse(is_foreign_error_tree | is_foreign_error_stack, "LLVM", "Rust")) %>%
     mutate(effect = ifelse(error_type == "Incorrect FFI Binding", "Binding", effect)) %>%
     mutate(effect = ifelse(!is.na(effect_override), effect_override, effect)) %>%
-    mutate(bug_category = ifelse(error_type %in% ownership, "Ownership", ifelse(error_type %in% memory, "Memory", ifelse(error_type %in% typing, "Typing", NA)))) %>%
+    mutate(bug_category = ifelse(error_type %in% ownership, "Ownership", ifelse(error_type %in% memory, "Allocation", ifelse(error_type %in% typing, "Typing", NA)))) %>%
     mutate(error_type = ifelse(error_type == "Incorrect FFI Binding", "Incorrect Binding", error_type)) %>%
     mutate(error_type = ifelse(error_type == "Unaligned Reference", "Alignment", error_type)) %>%
     mutate(error_type = ifelse(error_type == "Using Uninitialized Memory", "Uninitialized Memory", error_type)) %>%
@@ -230,6 +229,8 @@ annotated_counts <- bugs %>%
     mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\\\&T\\}", "ref")) %>%
     mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\*mut T\\}", "mut_ptr")) %>%
     mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\*const T\\}", "const_ptr")) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{const\\}", "const")) %>%
+    mutate(annotated_error_type = str_replace_all(annotated_error_type, "\\\\littlerust\\{\\\\&T as \\*mut T\\}", "const_ref_as_mut_ptr")) %>%
     mutate(key = paste0("annotated_", str_to_lower(str_replace_all(annotated_error_type, " ", "_"))), value = n) %>%
     select(key, value)
 

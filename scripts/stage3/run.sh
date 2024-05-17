@@ -83,7 +83,7 @@ do
 
             if [ ! -f "./$crate_name.sum.bc" ]; then
                 echo "Assembling bytecode files..."
-                cp /usr/src/ffickle/libcxx.bc ./libcxx.bc
+                cp /usr/src/mirilli/libcxx.bc ./libcxx.bc
                 rllvm-as "./$crate_name.sum.bc"
                 RLLVM_AS_EXITCODE=$?
                 echo "Exit: $RLLVM_AS_EXITCODE"    

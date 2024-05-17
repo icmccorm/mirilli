@@ -20,7 +20,8 @@ NO_FAULT <- c(NA, "Timeout", "Unsupported Operation")
 
 deduplicated_borrowing_errors <- read_csv(file.path("./build/stage3/errors.csv"), show_col_types = FALSE) %>%
     filter(error_type_stack == "Borrowing Violation" | error_type_tree == "Borrowing Violation") %>%
-    deduplicate()
+    deduplicate() %>%
+    filter(memory_mode == "uninit")
 
 deduplicated_borrowing_errors %>% filter(kind_stack == "Invalid Framing")
 
