@@ -1,7 +1,10 @@
 FROM rocker/verse:4.3.1 AS setup
 WORKDIR /usr/src/mirilli
 COPY . .
-RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm clang-18 llvm-18 make cmake git ninja-build cloc vim -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm make cmake git ninja-build vim -y
+RUN curl -O https://apt.llvm.org/llvm.sh
+RUN chmod +x llvm.sh
+RUN ./llvm.sh 18 all
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && chmod +x /tmp/rustup-init.sh \
     && sh /tmp/rustup-init.sh -y \
