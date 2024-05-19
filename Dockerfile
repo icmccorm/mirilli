@@ -1,5 +1,4 @@
-FROM ubuntu:23.04 as setup
-
+FROM rocker/verse:4.3.1 AS setup
 WORKDIR /usr/src/mirilli
 COPY . .
 RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm clang-18 llvm-18 make cmake git ninja-build cloc vim -y
@@ -17,14 +16,12 @@ RUN rustup component add miri
 RUN rustup component add rust-src
 RUN rustup install nightly
 RUN git submodule update --init ./mirilli-rust
+RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
+ENV RENV_PATHS_LIBRARY renv/library
+RUN R -e "renv::restore()"
+RUN make
 
-FROM setup as libcxx-compile
-WORKDIR /usr/src/mirilli/mirilli-rust/src/llvm-project/
-RUN mkdir build-libcxx
-RUN cmake -G Ninja -S runtimes -B build-libcxx -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" -DCMAKE_C_COMPILER=clang-18 -DCMAKE_CXX_COMPILER=clang++-18 -DLIBCXX_ADDITIONAL_COMPILE_FLAGS="--save-temps;-fno-threadsafe-statics;--stdlib=libc++" -DLIBCXX_ENABLE_THREADS="OFF" -DLIBCXXABI_ENABLE_THREADS="OFF" -DLIBUNWIND_ENABLE_THREADS="OFF" -DLLVM_ENABLE_THREADS="OFF" -DLIBCXX_ENABLE_STATIC="ON" 
-RUN ninja -C build-libcxx cxx cxxabi unwind
-
-FROM libcxx-compile as rust-compile
+FROM setup as rust-compile
 WORKDIR /usr/src/mirilli/mirilli-rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
@@ -46,8 +43,6 @@ RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
-RUN ../scripts/misc/remove.sh /usr/src/mirilli/mirilli-rust/src/llvm-project/build-libcxx ../scripts/misc/exclude_libcxx.txt
-RUN cd ../mirilli-rust/src/llvm-project/build-libcxx && rllvm-as /usr/src/mirilli/libcxx.bc
 
 FROM rllvm-as-compile as final
 WORKDIR /usr/src/mirilli
