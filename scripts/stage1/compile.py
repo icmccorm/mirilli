@@ -1,7 +1,6 @@
 import json
 import os
 import sys
-from tqdm import tqdm
 
 if (len(sys.argv) == 1):
     print(f"Usage: python3 compile.py [raw data] [destination dir]")
@@ -113,7 +112,7 @@ if (os.path.isdir(walk_dir)):
         if dir == "early":
             early = os.path.join(walk_dir, dir)
             print("Processing early lint results...")
-            for early_result in tqdm(os.listdir(early)):
+            for early_result in os.listdir(early):
                 path_to_early_result = os.path.join(early, early_result)
                 name, early_result_json = read_json(
                     path_to_early_result, early_result)
@@ -127,7 +126,7 @@ if (os.path.isdir(walk_dir)):
         if dir == "late":
             late = os.path.join(walk_dir, dir)
             print("Processing late lint results...")
-            for late_result in tqdm(os.listdir(late)):
+            for late_result in os.listdir(late):
                 path_to_late_result = os.path.join(late, late_result)
                 name, late_result_json = read_json(
                     path_to_late_result, late_result)
@@ -147,7 +146,7 @@ if (os.path.isdir(walk_dir)):
         if dir == "tests":
             tests = os.path.join(walk_dir, dir)
             print("Processing test results...")
-            for test_result in tqdm(os.listdir(tests)):
+            for test_result in os.listdir(tests):
                 path_to_test_result = os.path.join(tests, test_result)
                 with open(path_to_test_result, "r") as test_result_txt:
                     crate_name = os.path.splitext(os.path.basename(path_to_test_result))[0]
