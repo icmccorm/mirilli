@@ -29,4 +29,3 @@ archives
 *.csv
 extracted
 login.sh
-renv
