@@ -1,7 +1,7 @@
 FROM rocker/verse:4.3.1 AS setup
 WORKDIR /usr/src/mirilli
 COPY . .
-RUN apt-get update -y && apt-get upgrade -y && apt-get install pkg-config libssl-dev openssl gcc curl clang llvm make cmake git ninja-build vim -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install lsb-release wget software-properties-common gnupg pkg-config libssl-dev openssl gcc curl clang llvm make cmake git ninja-build vim -y
 RUN curl -O https://apt.llvm.org/llvm.sh
 RUN chmod +x llvm.sh
 RUN ./llvm.sh 18 all
