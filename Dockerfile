@@ -19,10 +19,6 @@ RUN rustup component add miri
 RUN rustup component add rust-src
 RUN rustup install nightly
 RUN git submodule update --init ./mirilli-rust
-RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
-ENV RENV_PATHS_LIBRARY renv/library
-RUN R -e "renv::restore()"
-RUN make
 
 FROM setup as rust-compile
 WORKDIR /usr/src/mirilli/mirilli-rust
