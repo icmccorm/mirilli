@@ -9,17 +9,15 @@ If you have Docker, you can build an image with `docker build .` that has our cu
 
 To be able to call foreign functions, MiriLLI needs access to the LLVM bitcode of the foreign library. Clang will produce LLVM bitcode files during compilation if you pass the flag `--save-temps=obj`. In our Docker image, we override the global C and C++ compilers to use these flags by default: This ensures that bitcode files will be produced and stored in the `target` directory when building a crate that statically links against C or C++ code. Alternatively, you can compile a foreign library separately, assemble its files into a single module with [llvm-as](https://llvm.org/docs/CommandGuide/llvm-as.html) and place it in the directory where you invoke Miri. MiriLLI recursively searches for all bitcode files in the directory where it is invoked, so running it is the same as running an unmodified version of Miri (e.g. `cargo miri test`).
 
-we implemented several configuration flags that change the behavior of MiriLLI. Each of these can be provided through the `MIRIFLAGS` environment variable.
+we implemented several configuration flags that change the behavior of MiriLLI. Each of these can be provided through the `MIRIFLAGS` environment variable. By default, LLVM is allowed to read uninitialized and unaligned memory.
 
 * `-Zmiri-extern-bc-file=[filename.bc]` searches for the indicated LLVM bitcode file and uses it as the single source of foreign function definitions. Any other bitcode files present in the root directory will be ignored.
 
-* `-Zmiri-llvm-read-uninit` allows reading uninitialized memory in LLVM
+* `-Zmiri-llvm-memory-zeroed` zero-initializes all static, stack, and heap memory in LLVM. 
 
-* `-Zmiri-llvm-zero-all` zero-initializes all static, stack, and heap memory in LLVM. 
+* `-Zmiri-llvm-enable-alignment-check-all` checks all memory accesses in LLVM for alignment.
 
-* `-Zmiri-llvm-disable-alignment-check` disables alignment checking in LLVM.
-
-* `-Zmiri-llvm-alignment-check-rust-only` disables alignment checking in LLVM unless the memory being accessed has been allocated by Rust.
+* `-Zmiri-llvm-enable-alignment-check-rust` checks only memory accesses to Rust-allocated memory for alignment in LLVM.
 
 ## Implementation
 We rely on forks of the following crates to implement our integration with LLI:
