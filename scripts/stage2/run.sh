@@ -48,7 +48,7 @@ do
                     OUTPUT_DIR="../results/stage2/logs/$crate_name/"
                     echo "Logging tests to $OUTPUT_FILE"
                     mkdir -p "$OUTPUT_DIR"
-                    cp ./rustc_list.txt "$OUTPUT_DIR/all.csv"
+                    cp ./rustc_list.txt "$OUTPUT_DIR/population.csv"
                     while read -r test_name <&4; 
                     do
                         rm -f err

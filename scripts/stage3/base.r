@@ -147,7 +147,7 @@ prepare_errors <- function(dir, type) {
     return(errors)
 }
 
-all <- read_csv(file.path("./results/all.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
+all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
     select(crate_name, version)
 
 compile_errors <- function(dir) {

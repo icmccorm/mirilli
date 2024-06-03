@@ -1,0 +1,16 @@
+lsb-release
+wget
+software-properties-common
+gnupg
+pkg-config
+libssl-dev
+openssl
+gcc
+curl
+clang
+llvm
+make
+cmake
+git
+ninja-build
+vim
