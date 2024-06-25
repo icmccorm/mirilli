@@ -3,7 +3,7 @@ import os
 import sys
 
 if (len(sys.argv) == 1):
-    print(f"Usage: python3 compile.py [raw data] [destination dir]")
+    print("Usage: python3 compile.py [raw data] [destination dir]")
     exit(1)
 walk_dir = sys.argv[1]
 
