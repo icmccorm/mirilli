@@ -13,6 +13,8 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 ENV NIGHTLY="nightly-2023-09-25"
 ENV CC="clang-18 -g -O0 --save-temps=obj"
 ENV CXX="clang++-18 -g -O0 --save-temps=obj"
+ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
+ENV LLVM_SYS_181_PREFIX="/usr/src/mirilli/mirilli-rust/build/host/llvm/"
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
 RUN rustup component add miri
@@ -24,7 +26,7 @@ FROM setup AS setup-renv
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "renv::restore()"
 
-FROM setup as rust-compile
+FROM setup-renv as rust-compile
 WORKDIR /usr/src/mirilli/mirilli-rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
@@ -45,7 +47,6 @@ WORKDIR /usr/src/mirilli/rllvm-as
 RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
-ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
 
 FROM rllvm-as-compile as final
 WORKDIR /usr/src/mirilli
