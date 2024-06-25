@@ -1,26 +1,32 @@
 import os
 import sys
-import json
 import re
 
-RE_MAYBEUNINIT = re.compile(r"error: .*\n.  --> .*\n(    \|\n)*([0-9]+[ ]+\|.* (((std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\)))")
-RE_MEM_UNINIT = re.compile(r"error: .*\n.  --> .*\n(    \|\n)*([0-9]+[ ]+\|.* (((std::){0,1}mem::){0,1}(uninitialized\(\)))")
+RE_MAYBEUNINIT = re.compile(
+    r"error: .*\n.  --> .*\n(    \|\n)*([0-9]+[ ]+\|.* (((std::){0,1}mem::){0,1}(MaybeUninit::uninit\(\).assume_init\(\)))"
+)
+RE_MEM_UNINIT = re.compile(
+    r"error: .*\n.  --> .*\n(    \|\n)*([0-9]+[ ]+\|.* (((std::){0,1}mem::){0,1}(uninitialized\(\)))"
+)
+
 
 def failed():
-    print(f"Usage: python3 collate.py [data dir]")
+    print("Usage: python3 collate.py [data dir]")
     exit(1)
 
-if(len(sys.argv) != 2):
+
+if len(sys.argv) != 2:
     failed()
 
 root_dir = sys.argv[1]
 if not os.path.exists(root_dir):
-    failed()            
+    failed()
 data_dir = os.path.join(root_dir, "crates")
 
 # ensure that the directory stage3/crates exists in walk_dir
 if not os.path.exists(data_dir):
     failed()
+
 
 def extract_error_trace(text):
     lines = []
@@ -39,6 +45,8 @@ def extract_error_trace(text):
 
 def is_maybeuninit():
     pass
+
+
 def is_mem_uninit(text):
     # find if there's a match against RE_MAYBEUNINIT
     # if so, return the line number and the index where the innermost capturing group starts
@@ -48,7 +56,6 @@ def is_mem_uninit(text):
         return None
     else:
         return (match.group(2), match.start(3))
-    
 
 
 stack_errors_path = os.path.join(root_dir, "stack_error_roots.csv")
@@ -80,9 +87,9 @@ first_visited_tree = True
 for crate in os.listdir(data_dir):
     stack_dir = os.path.join(data_dir, crate, "stack")
     if os.path.exists(stack_dir):
-        (reps,status) = extract_representatives(crate, stack_dir)
+        (reps, status) = extract_representatives(crate, stack_dir)
         for test in reps:
-            stack_errors_file.write(f"{crate},{test},\"{reps[test]}\"\n")
+            stack_errors_file.write(f'{crate},{test},"{reps[test]}"\n')
             stack_errors_file.flush()
         if first_visited_stack and flag_headers is not None:
             stack_meta_file.write(flag_headers + "\n")
@@ -95,10 +102,10 @@ for crate in os.listdir(data_dir):
     tree_dir = os.path.join(data_dir, crate, "tree")
 
     if not os.path.exists(tree_dir):
-        first_visited = (flag_headers is None)
+        first_visited = flag_headers is None
         (reps, status) = extract_representatives(crate, tree_dir)
         for test in reps:
-            tree_errors_file.write(f"{crate},{test},\"{reps[test]}\"\n")
+            tree_errors_file.write(f'{crate},{test},"{reps[test]}"\n')
             tree_errors_file.flush()
         if first_visited_tree and flag_headers is not None:
             tree_meta_file.write(flag_headers + "\n")
