@@ -151,7 +151,7 @@ bug_counts_table <- bug_counts_table %>%
   mutate(fix_loc = ifelse(is.na(fix_loc), "Total", fix_loc)) %>%
   write_csv(file.path("./build/visuals/bug_counts_table.csv"))
 
-all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download"))
+all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE)
 
 popularity <- bugs %>%
   mutate(crate_name = ifelse(!is.na(root_crate_name), root_crate_name, crate_name)) %>%

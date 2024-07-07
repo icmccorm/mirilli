@@ -15,6 +15,7 @@ uninit_meta <- compile_metadata("./results/stage3/uninit")
 
 meta <- uninit_meta %>%
   bind_rows(zeroed_meta)
+
 colnames(meta) <- c("crate_name", "test_name", "borrow_mode", "memory_mode", paste0("log_", colnames(meta)[-c(1, 2, 3, 4)]))
 
 meta_count <- meta %>%
@@ -76,11 +77,6 @@ engaged_in_only_one_mode <- zeroed_meta %>%
 
 stats <- stats %>% add_row(key = "num_tests_not_engaged_one", value = engaged_in_only_one_mode %>% nrow())
 
-engaged_constructor_zeroed <- zeroed_meta %>%
-  filter(LLVMInvokedConstructor == 1) %>%
-  select(crate_name, test_name) %>%
-  unique()
-
 zeroed_meta %>%
   bind_rows(uninit_meta) %>%
   select(-test_name, -borrow_mode, -memory_mode) %>%
@@ -118,9 +114,13 @@ stats <- stats %>% add_row(key = "num_failures_raw", value = failures_raw %>% nr
 error_to_examine <- function(error_type, signal_no, assertion_failure) {
   error_type == "Test Failed" & ((is.na(signal_no) & assertion_failure) | signal_no != 9)
 }
+
 failures <- all_errors %>%
   filter(!errored_exit_code(native_exit_code)) %>%
-  filter(error_to_examine(error_type_stack, exit_signal_no_stack, assertion_failure_stack) | error_to_examine(error_type_tree, exit_signal_no_tree, assertion_failure_tree)) %>%
+  filter(
+    error_to_examine(error_type_stack, exit_signal_no_stack, assertion_failure_stack) 
+    | error_to_examine(error_type_tree, exit_signal_no_tree, assertion_failure_tree)
+  ) %>%
   mutate(borrow_mode = ifelse(error_type_stack == "Test Failed", "stack", "tree")) %>%
   select(crate_name, test_name, exit_signal_no_stack, memory_mode, borrow_mode) %>%
   unique() %>%
@@ -130,11 +130,13 @@ failures <- all_errors %>%
   write_csv(file.path(stage3_root, "failures.csv"))
 
 deduplication <- add_row(deduplication, state = "After", count = failures %>% nrow(), type = "Failures")
+
 stats <- stats %>% add_row(key = "num_failures", value = failures %>% nrow())
 
 uninit <- uninit_raw %>%
   merge_passes_and_timeouts() %>%
   select(-memory_mode)
+
 zeroed <- zeroed_raw %>%
   merge_passes_and_timeouts() %>%
   select(-memory_mode)
@@ -143,7 +145,6 @@ deduplicate_with_logging <- function(df, mode) {
   raw_errors <- df %>%
     keep_only_valid_errors() %>%
     unique()
-
   deduplication <<- add_row(deduplication, state = "Before", count = raw_errors %>% nrow(), type = mode)
   stats <<- stats %>% add_row(key = paste0("num_errors_", mode, "_raw"), value = raw_errors %>% nrow())
   errors <- raw_errors %>%
@@ -175,4 +176,7 @@ differed_in_uninit <- uninit %>%
 deduplication <- deduplication %>% pivot_wider(names_from = type, values_from = count)
 deduplication$total <- rowSums(deduplication[, -1], na.rm = TRUE)
 deduplication %>% write_csv(file.path(stage3_root, "deduplication.csv"))
+
+
+
 stats %>% write_csv(stats_file)
