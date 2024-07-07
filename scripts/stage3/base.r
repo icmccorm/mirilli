@@ -40,6 +40,10 @@ INVALID_VALUE_UNALIGNED_ERR_TEXT <- "invalid value: encountered an unaligned ref
 INVALID_ENUM_TAG_ERR_TEXT <- "but expected a valid enum tag"
 INVALID_VALUE_ENUM_TAG_ERR_TYPE <- "Invalid Enum Tag"
 
+DEPENDENCY_PATH_TEXT <- "/root/.cargo/registry/src/index.crates.io"
+
+UNSUPPORTED_ERROR_TYPES <- c(LLI_ERR_TXT, UNSUPP_ERR_TXT, SCALAR_MISMATCH_TEXT)
+
 can_deduplicate_without_error_root <- function(error_type) {
   return(error_type %in% c(LLI_ERR_TXT, UNSUPP_ERR_TXT, TIMEOUT_ERR_TXT, TIMEOUT_PASS_ERR_TXT, TERMINATED_EARLY_ERR_TXT))
 }
@@ -76,7 +80,7 @@ valid_error_type <- function(type, trace) {
     TIMEOUT_PASS_ERR_TXT,
     UB_MAYBEUNINIT,
     UB_MEM_UNINIT
-  )) | (type %in% c(UB_MAYBEUNINIT, UB_MEM_UNINIT) & str_starts(trace, "/root/.cargo/registry/src/index.crates.io"))
+  )) | (type %in% c(UB_MAYBEUNINIT, UB_MEM_UNINIT) & error_in_dependency(trace))
 }
 passed <- function(exit_code) {
   exit_code == 0
@@ -103,7 +107,7 @@ overflowed_in_either_mode <- function(df) {
 }
 
 error_in_dependency <- function(error_root) {
-  str_detect(error_root, "/root/.cargo/registry/src/index.crates.io-")
+  str_detect(error_root, DEPENDENCY_PATH_TEXT)
 }
 
 possible_non_failure_bug <- function(error_type, trace) {
@@ -136,7 +140,7 @@ prepare_errors <- function(dir, type) {
     correct_error_type() %>%
     deduplicate_error_text()
 
-  exit_codes <- read_csv(file.path(dir, paste0("status_", type, ".csv")), col_names = c("exit_code", "crate_name", "test_name"), show_col_types = FALSE)
+  exit_codes <- read_csv(file.path(dir, paste0("status_", type, ".csv")), show_col_types = FALSE)
 
   errors <- errors %>%
     full_join(exit_codes, by = c("crate_name", "test_name")) %>%
@@ -147,7 +151,7 @@ prepare_errors <- function(dir, type) {
   return(errors)
 }
 
-all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE, col_names = c("crate_name", "version", "last_updated", "downloads", "percentile_downloads", "avg_daily_downloads", "percentile_daily_download")) %>%
+all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE) %>%
   select(crate_name, version)
 
 compile_errors <- function(dir) {
@@ -157,17 +161,15 @@ compile_errors <- function(dir) {
 
   tree_errors <- prepare_errors(dir, "tree")
 
-  status_col_names <- col_names <- c("exit_code", "crate_name", "test_name")
-
-  native_comp_status <- read_csv(file.path(dir, "status_native_comp.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
+  native_comp_status <- read_csv(file.path(dir, "status_native_comp.csv"), show_col_types = FALSE) %>%
     rename(native_comp_exit_code = exit_code) %>%
     unique()
 
-  native_status <- read_csv(file.path(dir, "status_native.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
+  native_status <- read_csv(file.path(dir, "status_native.csv"), show_col_types = FALSE) %>%
     rename(native_exit_code = exit_code) %>%
     unique()
 
-  miri_comp_status <- read_csv(file.path(dir, "status_miri_comp.csv"), col_names = status_col_names, show_col_types = FALSE) %>%
+  miri_comp_status <- read_csv(file.path(dir, "status_miri_comp.csv"), show_col_types = FALSE) %>%
     rename(miri_comp_exit_code = exit_code) %>%
     unique()
 
@@ -278,6 +280,8 @@ compile_metadata <- function(dir) {
     mutate(memory_mode = basename(dir)) %>%
     select(crate_name, test_name, borrow_mode, memory_mode, everything()))
 }
+
+
 summarize_metadata <- function(df) {
   # pivot longer such that borrow_mode and memory_mode are still columns, but the rest are rows
   # get all column names except for borrow_mode and memory_mode

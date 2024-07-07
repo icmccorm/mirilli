@@ -12,9 +12,9 @@ if (!dir.exists(stage1_output_dir)) {
 stats_file <- file.path(stage1_output_dir, "./stage1.stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
-comp_status <- read_csv(file.path(stage1_input_dir, "status_comp.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
+comp_status <- read_csv(file.path(stage1_input_dir, "status_comp.csv"), show_col_types = FALSE)
 
-lint_status <- read_csv(file.path(stage1_input_dir, "status_lint.csv"), col_names = c("crate_name", "version", "exit_code"), show_col_types = FALSE)
+lint_status <- read_csv(file.path(stage1_input_dir, "status_lint.csv"), show_col_types = FALSE)
 
 num_comp_all <- comp_status %>% nrow()
 stats <- stats %>% add_row(key = "num_crates_all", value = num_comp_all)
@@ -38,7 +38,7 @@ num_had_tests <- test_counts %>%
 stats <- stats %>% add_row(key = "num_crates_had_tests", value = num_had_tests)
 
 
-has_bytecode <- read_csv(file.path(stage1_input_dir, "has_bytecode.csv"), col_names = c("crate_name", "version"), show_col_types = FALSE) %>% arrange(crate_name)
+has_bytecode <- read_csv(file.path(stage1_input_dir, "has_bytecode.csv"), show_col_types = FALSE) %>% arrange(crate_name)
 num_had_bytecode <- has_bytecode %>%
     select(crate_name) %>%
     unique() %>%
