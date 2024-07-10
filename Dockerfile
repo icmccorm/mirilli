@@ -21,6 +21,7 @@ RUN rustup component add miri
 RUN rustup component add rust-src
 RUN rustup install nightly
 RUN git submodule update --init ./mirilli-rust
+RUN git submodule update --init ./rllvm-as
 
 FROM setup AS setup-renv
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
@@ -42,12 +43,12 @@ RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py build miri
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py install miri
 RUN cargo miri setup
 
-FROM miri-compile as rllvm-as-compile
+FROM miri-compile as rllvm-compile
 WORKDIR /usr/src/mirilli/rllvm-as
 RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 
-FROM rllvm-as-compile as final
+FROM rllvm-compile as final
 WORKDIR /usr/src/mirilli
 RUN cargo install cargo-download
