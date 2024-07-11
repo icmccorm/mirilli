@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
 })
 options(dplyr.summarise.inform = FALSE)
 
-stage1_input_dir <- file.path("./results/stage1")
+stage1_input_dir <- file.path("./dataset/stage1")
 stage1_output_dir <- file.path("./build/stage1")
 if (!dir.exists(stage1_output_dir)) {
     dir.create(stage1_output_dir)

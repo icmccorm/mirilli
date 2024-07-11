@@ -1,10 +1,10 @@
 #!/bin/bash
 
 echo "Preparing directories..."
-rm -rf ./results/stage2
+rm -rf ./dataset/stage2
 rm -rf ./temp
 
-RESULT_DIR=./results/stage2
+RESULT_DIR=./dataset/stage2
 mkdir -p "$RESULT_DIR"
 mkdir "$RESULT_DIR/info"
 mkdir "$RESULT_DIR/logs"
@@ -13,11 +13,10 @@ touch "$RESULT_DIR/failed_download.csv"
 touch "$RESULT_DIR/status_miri_comp.csv"
 touch "$RESULT_DIR/status_rustc_comp.csv"
 touch "$RESULT_DIR/tests.csv"
-
-RESULT_DIR=./results/stage2
+RESULT_DIR=./dataset/stage2
 for file in "$1"/*.zip; do
     unzip -q "$file"
-    ROOT="./results/stage2"
+    ROOT="./dataset/stage2"
     echo "$file"
     FILES=$(find "$ROOT/info/" -name "*.csv")
     for csv_file in $FILES; do

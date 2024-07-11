@@ -1,6 +1,7 @@
 options(warn = 2)
 source("./scripts/stage3/base.r")
 stage3_root <- file.path("./build/stage3/")
+
 if (!dir.exists(stage3_root)) {
   dir.create(stage3_root)
 }
@@ -10,8 +11,8 @@ stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FAL
 
 deduplication <- data.frame(state = character(), count = numeric(), type = character(), stringsAsFactors = FALSE)
 
-zeroed_meta <- compile_metadata("./results/stage3/zeroed")
-uninit_meta <- compile_metadata("./results/stage3/uninit")
+zeroed_meta <- compile_metadata(file.path(stage3_root, "zeroed"))
+uninit_meta <- compile_metadata(file.path(stage3_root, "uninit"))
 
 meta <- uninit_meta %>%
   bind_rows(zeroed_meta)
@@ -93,10 +94,10 @@ zeroed_meta %>%
   summarize(n = sum(present)) %>%
   write_csv(file.path(stage3_root, "metadata.csv"))
 
-zeroed_raw <- compile_errors("./results/stage3/zeroed") %>%
+zeroed_raw <- compile_errors("./build/stage3/zeroed", "./dataset/stage3/zeroed") %>%
   inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
-uninit_raw <- compile_errors("./results/stage3/uninit") %>%
+uninit_raw <- compile_errors("./build/stage3/uninit", "./dataset/stage3/uninit") %>%
   inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
@@ -172,11 +173,5 @@ differed_in_uninit <- uninit %>%
   anti_join(zeroed, na_matches = c("na"), by = names(zeroed)[names(zeroed) %in% names(uninit)]) %>%
   deduplicate_with_logging("uninit") %>%
   write_csv(file.path(stage3_root, "diff_errors_uninit.csv"))
-
-deduplication <- deduplication %>% pivot_wider(names_from = type, values_from = count)
-deduplication$total <- rowSums(deduplication[, -1], na.rm = TRUE)
-deduplication %>% write_csv(file.path(stage3_root, "deduplication.csv"))
-
-
 
 stats %>% write_csv(stats_file)

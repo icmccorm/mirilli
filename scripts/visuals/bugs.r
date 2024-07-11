@@ -55,7 +55,7 @@ ownership <- c("Tree Borrows")
 memory <- c("Memory Leaked", "Out of Bounds Access", "Cross-Language Free")
 typing <- c("Using Uninitialized Memory", "Unaligned Reference", "Invalid Enum Tag", "Incorrect FFI Binding")
 
-bugs <- read_csv(file.path("./results/bugs.csv"), show_col_types = FALSE) %>%
+bugs <- read_csv(file.path("./dataset/bugs.csv"), show_col_types = FALSE) %>%
   select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, fix_loc, issue, pull_request, commit, bug_type_override, memory_mode, error_loc_override, error_type_override) %>%
   left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
   mutate(
@@ -151,7 +151,7 @@ bug_counts_table <- bug_counts_table %>%
   mutate(fix_loc = ifelse(is.na(fix_loc), "Total", fix_loc)) %>%
   write_csv(file.path("./build/visuals/bug_counts_table.csv"))
 
-all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE)
+all <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE)
 
 popularity <- bugs %>%
   mutate(crate_name = ifelse(!is.na(root_crate_name), root_crate_name, crate_name)) %>%

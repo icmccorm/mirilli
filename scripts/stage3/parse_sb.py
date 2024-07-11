@@ -1,16 +1,8 @@
 import re
 import parse_shared
 from enum import Enum
-
-
-class SBOperation(Enum):
-    read = "read"
-    write = "write"
-    retag = "retag"
-    deallocating = "deallocating"
-
-
-RW = f"({SBOperation.read.value}|{SBOperation.write.value})"
+from parse_shared import Operation
+RW = f"({Operation.read.value}|{Operation.write.value})"
 
 
 class SBState(Enum):
@@ -43,7 +35,7 @@ STACK_ERROR_WEAK = re.compile(
     f"not granting access to tag {parse_shared.TAG} because that would remove \[{SB_STATE} for {parse_shared.TAG}\] which is (?:strongly|weakly) protected"
 )
 STACK_ERROR_DEALLOCATING = re.compile(
-    f"{SBOperation.deallocating.value} while item \[{SB_STATE} for {parse_shared.TAG}\] is (?:strongly|weakly) protected by call"
+    f"{Operation.dealloc.value}ating while item \[{SB_STATE} for {parse_shared.TAG}\] is (?:strongly|weakly) protected by call"
 )
 STACK_ACTION = re.compile(
     f"(?:attempting a {RW} access using {parse_shared.TAG_NC}|trying to retag from {parse_shared.TAG_NC} for {SB_STATE} permission) at {parse_shared.ALLOCATION}, but that tag (?:only grants {SB_STATE}|does not exist)?"
@@ -71,18 +63,18 @@ def stack_error(help_text):
     start_permission = None
     if action_protected is not None:
         protected = True
-        action = SBOperation.retag
+        action = Operation.retag
     if action_dealloc is not None:
         (state, tag) = action_dealloc.groups()
-        action = SBOperation.deallocating
+        action = Operation.dealloc
         start_permission = SBState[state]
         protected = True
     if action_rw is not None:
         (action, retag_target, permission_limit) = action_rw.groups()
         action = (
-            SBOperation[action]
-            if action in SBOperation.__members__
-            else SBOperation.retag
+            Operation[action]
+            if action in Operation.__members__
+            else Operation.retag
         )
         retag_target = (
             SBState[retag_target] if retag_target in SBState.__members__ else None
@@ -107,7 +99,7 @@ def stack_error(help_text):
                         destruction.groups()
                     )
                     inval_action = (
-                        SBOperation[op] if op is not None else SBOperation.retag
+                        Operation[op] if op is not None else Operation.retag
                     )
                     retag_type = None
                     if retag_perm is not None:
@@ -172,12 +164,12 @@ class SBError:
             if self.invalidation is None:
                 error_type = SBErrorType.OutOfBounds
             else:
-                if self.invalidation.action == SBOperation.retag:
+                if self.invalidation.action == Operation.retag:
                     if self.invalidation.permission == SBState.Unique:
                         error_type = SBErrorType.ExpiredByUniqueRetag
-                elif self.invalidation.action == SBOperation.write:
+                elif self.invalidation.action == Operation.write:
                     error_type = SBErrorType.ExpiredByWrite
-                if self.invalidation.action == SBOperation.read:
+                if self.invalidation.action == Operation.read:
                     error_type = SBErrorType.ExpiredByRead
         if error_type is None:
             print("Unrecognized Stacked Borrows error type: ", self.to_string())
@@ -191,4 +183,4 @@ class SBErrorType(Enum):
     ExpiredByUniqueRetag = "Expired-UniqueRetag"
     ExpiredByRead = "Expired-Read"
     ExpiredByWrite = "Expired-Write"
-    Framing = "Invalid Framing"
+    Framing = "Framing"

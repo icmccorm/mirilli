@@ -41,52 +41,33 @@ errors_tree <- errors %>%
 
 results <- bind_rows(errors_stack, errors_tree)
 
-miri_unsupp <- results %>% 
-    filter(error_type %in% c("Unsupported Operation", "Scalar Size Mismatch"))
-miri_unsupp_test_count <- miri_unsupp %>% select(crate_name, test_name) %>% unique() %>% nrow()
+unsupp <- results %>% 
+    filter(error_type %in% c("Unsupported Operation", "Scalar Size Mismatch", "LLI Internal Error"))
+unsupp_test_count <- unsupp %>% select(crate_name, test_name) %>% unique() %>% nrow()
 
-llvm_unsupp <- results %>% 
-    filter(error_type %in% c("LLI Internal Error"))
-llvm_unsupp_test_count <- llvm_unsupp %>% select(crate_name, test_name) %>% unique() %>% nrow()
-
-filter_miri_unsupp <- function(df) {
+filter_unsupp <- function(df) {
     df %>%
-        mutate(error_text = ifelse(str_detect(error_text, "can't call foreign function"), "ffi", error_text)) %>%
+        mutate(error_text = ifelse(str_detect(error_text, "can't call foreign function"), "dyn_asm", error_text)) %>%
         mutate(error_text = ifelse(str_detect(error_text, "is not supported for use in shims"), "llvm_type_shim", error_text)) %>%
         mutate(error_text = ifelse(str_detect(error_text, "scalar size mismatch"), "llvm_type_shim", error_text)) %>%
-        mutate(error_text = ifelse(error_text %in% c("llvm_type_shim", "ffi"), error_text, "other"))
-}
-
-filter_llvm_unsupp <- function(df) {
-    df %>%
         mutate(error_text = ifelse(str_detect(error_text, "only supports float and double"), "x86_fp80", error_text)) %>%
         mutate(error_text = ifelse(str_detect(error_text, "x86_fp80"), "x86_fp80", error_text)) %>%
-        mutate(error_text = ifelse(str_detect(error_text, "Inline assembly"), "asm", error_text)) %>%
+        mutate(error_text = ifelse(str_detect(error_text, "Inline assembly"), "dyn_asm", error_text)) %>%
         mutate(error_text = ifelse(str_detect(error_text, "LLVM instruction not supported"), "inst", error_text)) %>%
-        mutate(error_text = ifelse(error_text %in% c("x86_fp80", "asm", "inst"), error_text, "other"))
+        mutate(error_text = ifelse(error_text %in% c("x86_fp80", "dyn_asm", "inst", "llvm_type_shim"), error_text, "other"))
 }
 
-miri_unsupp_avg <- miri_unsupp %>% 
-    filter_miri_unsupp %>%
+unsupp_avg <- unsupp %>% 
+    filter_unsupp %>%
     group_by(error_text, borrow_mode, memory_mode) %>% 
     summarize(n= n()) %>%
     group_by(error_text) %>%
     summarize(n = mean(n)) %>%
-    mutate(n = round(n / miri_unsupp_test_count * 100)) %>%
+    mutate(n = round(n / unsupp_test_count * 100)) %>%
     rename(key = error_text, value = n) %>%
-    mutate(key = paste0("error_avg_percentage_unsupp_miri_", key))
+    mutate(key = paste0("error_avg_percentage_unsupp_", key))
 
-llvm_unsupp_avg <- llvm_unsupp %>%
-    filter_llvm_unsupp %>%
-    group_by(error_text, borrow_mode, memory_mode) %>% 
-    summarize(n = n()) %>%
-    group_by(error_text) %>%
-    summarize(n = mean(n)) %>%
-    mutate(n = round(n / llvm_unsupp_test_count * 100)) %>% 
-    rename(key = error_text, value = n) %>%
-    mutate(key = paste0("error_avg_percentage_unsupp_llvm_", key))
-
-stats <- stats %>% bind_rows(llvm_unsupp_avg, miri_unsupp_avg)
+stats <- stats %>% bind_rows(unsupp_avg)
 
 results_ungrouped <- results %>%
   group_by(memory_mode, borrow_mode, error_type) %>%
@@ -128,7 +109,7 @@ results_ungrouped <- results %>%
   ungroup()
 
 test_results_grouped <- results_ungrouped %>%
-  filter(!(str_detect(error_type, "Unsupported Operation in"))) %>%
+  filter((str_detect(error_type, "Unsupported Operation in"))) %>%
   mutate(error_type = "Unsupported Operation") %>%
   group_by(memory_mode, borrow_mode, error_type) %>%
   summarize(
@@ -137,9 +118,6 @@ test_results_grouped <- results_ungrouped %>%
   ) %>%
   bind_rows(results_ungrouped) %>%
   ungroup()
-
-
-
 
 test_results_averaged <- test_results_grouped %>%
   mutate(

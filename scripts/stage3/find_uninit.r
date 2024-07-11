@@ -1,10 +1,10 @@
 library(dplyr)
 library(readr)
-all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE) %>%
+all <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE) %>%
   select(crate_name, version)
 
-errors_stack <- read_csv("./results/stage3/errors_stack.csv")
-roots_stack <- read_csv("./results/stage3/stack_error_roots.csv")
+errors_stack <- read_csv("./dataset/stage3/errors_stack.csv")
+roots_stack <- read_csv("./dataset/stage3/stack_error_roots.csv")
 
 rerun_stack <- errors_stack %>%
   filter(error_text == "using uninitialized data, but this operation requires initialized memory") %>%
@@ -13,8 +13,8 @@ rerun_stack <- errors_stack %>%
   inner_join(all, by = c("crate_name")) %>%
   select(test_name, crate_name, version)
 
-errors_tree <- read_csv("./results/stage3/errors_tree.csv")
-roots_tree <- read_csv("./results/stage3/tree_error_roots.csv")
+errors_tree <- read_csv("./dataset/stage3/errors_tree.csv")
+roots_tree <- read_csv("./dataset/stage3/tree_error_roots.csv")
 
 rerun_tree <- errors_tree %>%
   filter(error_text == "using uninitialized data, but this operation requires initialized memory") %>%

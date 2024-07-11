@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 
 TAG_NC = "<(?:[0-9]*|wildcard)>"
 OFFSETS = "\[0x[0-9a-f]+\.\.0x[0-9a-f]+\]"
@@ -11,3 +12,9 @@ RE_MAYBEUNINIT = re.compile(
 RE_MEM_UNINIT = re.compile(
     r"(error): .*\n.  --> .*\n(?:    \|\n)*([0-9]+[ ]+\|.* )(:?(:?std::){0,1}mem::){0,1}(uninitialized\(\))"
 )
+
+class Operation(Enum):
+    read = "read"
+    write = "write"
+    retag = "retag"
+    dealloc = "dealloc"
