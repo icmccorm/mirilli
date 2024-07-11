@@ -1,19 +1,10 @@
 import re
 import parse_shared
 from enum import Enum
+from parse_shared import Operation
 
 TB_COLUMNS = ["action", "kind"]
-
-
-class TBOperation(Enum):
-    read = "read"
-    write = "write"
-    retag = "retag"
-    deallocation = "deallocation"
-
-
-TB_ACTION = f"({TBOperation.read.value}|{TBOperation.write.value}|{TBOperation.retag.value}|{TBOperation.deallocation.value})(?: access)?"
-
+TB_ACTION = f"({Operation.read.value}|{Operation.write.value}|{Operation.retag.value}|{Operation.dealloc.value})(?:ation)?(?: access)?"
 
 class TBHierarchy(Enum):
     foreign = "foreign"
@@ -109,18 +100,15 @@ class TBError:
         )
         if self.accessed_tag_transition.exists():
             if disabled_by(foreign_write, self.accessed_tag_transition):
-                # TBErrorType.DisabledByForeignWrite
                 error_type = TBErrorTypeWithIndirection(
                     TBErrorType.Expired, indirection_type
                 ).to_string()
         elif self.conflicting_tag_transition.exists():
             if disabled_by(foreign_write, self.conflicting_tag_transition):
-                # TBErrorType.DisabledByForeignWrite
                 error_type = TBErrorTypeWithIndirection(
                     TBErrorType.Expired, indirection_type
                 ).to_string()
             if frozen_by(foreign_read, self.conflicting_tag_transition):
-                # TBErrorType.FrozenByForeignRead
                 error_type = TBErrorTypeWithIndirection(
                     TBErrorType.Insufficient, indirection_type
                 ).to_string()
@@ -129,10 +117,10 @@ class TBError:
                 self.conflicting_tag_transition.kind == TBRole.protected
                 or self.conflicting_tag_transition.kind == TBRole.strongly_protected
             ):
-                error_type = TBErrorType.BlockedByProtector.value
+                error_type = TBErrorType.Framing.value
             if (
-                self.action_type == TBOperation.write
-                or self.action_type == TBOperation.deallocation
+                self.action_type == Operation.write
+                or self.action_type == Operation.dealloc
             ):
                 if self.accessed_tag_transition.start_state == TBState.Frozen:
                     error_type = TBErrorTypeWithIndirection(
@@ -167,33 +155,33 @@ class TBErrorIndirectionType(Enum):
 class TBErrorType(Enum):
     Expired = "Expired"
     Insufficient = "Insufficient"
-    BlockedByProtector = "Invalid Framing"
+    Framing = "Framing"
 
 
 def foreign_write(tb_action):
     return (
-        tb_action.action == TBOperation.write
+        tb_action.action == Operation.write
         and tb_action.relation == TBHierarchy.foreign
     )
 
 
 def foreign_read(tb_action):
     return (
-        tb_action.action == TBOperation.read
+        tb_action.action == Operation.read
         and tb_action.relation == TBHierarchy.foreign
     )
 
 
 def child_write(tb_action):
     return (
-        tb_action.action == TBOperation.write
+        tb_action.action == Operation.write
         and tb_action.relation == TBHierarchy.child
     )
 
 
 def child_read(tb_action):
     return (
-        tb_action.action == TBOperation.read and tb_action.relation == TBHierarchy.child
+        tb_action.action == Operation.read and tb_action.relation == TBHierarchy.child
     )
 
 
@@ -231,7 +219,7 @@ def parse_tb_subtype(action, help_text):
             error = TB_ERROR.search(line)
             if error is not None:
                 info_text += "Error: " + str(error.groups()) + "\n"
-                access_type = TBOperation[action]
+                access_type = Operation[action]
                 continue
         if accessed_child is None:
             relation = RELATION_TREE.search(line)
@@ -268,11 +256,11 @@ def parse_tb_subtype(action, help_text):
             action_type = action_type if action_type is not None else retag_action_type
             if referrent == TBRole.accessed.value:
                 accessed_destruction_relation = TBHierarchy[action_relation]
-                accessed_destruction_type = TBOperation[action_type]
+                accessed_destruction_type = Operation[action_type]
                 accessed_destruction = TBState[result_state]
             else:
                 conflicting_destruction_relation = TBHierarchy[action_relation]
-                conflicting_destruction_type = TBOperation[action_type]
+                conflicting_destruction_type = Operation[action_type]
                 conflicting_destruction = TBState[result_state]
             continue
 
@@ -299,7 +287,6 @@ def parse_tb_subtype(action, help_text):
         conflicting_transition,
     )
     return tb_error.summarize()
-
 
 def tb_error(help_text):
     error_text = help_text[0]

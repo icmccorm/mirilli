@@ -24,15 +24,15 @@ message_fail_counts <- function(df) {
 
 failed <- FALSE
 
-all_crates <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE) %>%
+all_crates <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE) %>%
   select(crate_name, version)
 
-exclude_crates <- read_csv(file.path("./results/exclude.csv"), show_col_types = FALSE)
+exclude_crates <- read_csv(file.path("./dataset/exclude.csv"), show_col_types = FALSE)
 
 # STAGE 1
 print_stage(1)
-stage1_failed_download <- read_csv(file.path("./results/stage1/failed_download.csv"), show_col_types = FALSE)
-stage1_visited <- read_csv(file.path("./results/stage1/visited.csv"), show_col_types = FALSE)
+stage1_failed_download <- read_csv(file.path("./dataset/stage1/failed_download.csv"), show_col_types = FALSE)
+stage1_visited <- read_csv(file.path("./dataset/stage1/visited.csv"), show_col_types = FALSE)
 missed_stage1 <- all_crates %>%
   anti_join(stage1_visited, by = c("crate_name", "version")) %>%
   anti_join(stage1_failed_download, by = c("crate_name", "version"))
@@ -48,8 +48,8 @@ if (missed_stage1_count > 1) {
 # STAGE 2
 print_stage(2)
 all_crates_stage2 <- read_csv(file.path("./build/stage1/stage2.csv"), show_col_types = FALSE)
-stage2_failed_download <- read_csv(file.path("./results/stage2/failed_download.csv"), show_col_types = FALSE)
-stage2_visited <- read_csv(file.path("./results/stage2/visited.csv"), show_col_types = FALSE)
+stage2_failed_download <- read_csv(file.path("./dataset/stage2/failed_download.csv"), show_col_types = FALSE)
+stage2_visited <- read_csv(file.path("./dataset/stage2/visited.csv"), show_col_types = FALSE)
 missed_stage2 <- all_crates_stage2 %>%
   anti_join(stage2_visited, by = c("crate_name", "version")) %>%
   anti_join(stage2_failed_download, by = c("crate_name", "version"))
@@ -60,7 +60,7 @@ if (missed_stage2_count > 1) {
 } else {
   message("✓ - All crates were visited in stage2")
 }
-status_native_comp_stage2 <- read_csv(file.path("./results/stage2/status_rustc_comp.csv"), show_col_types = FALSE) %>%
+status_native_comp_stage2 <- read_csv(file.path("./dataset/stage2/status_rustc_comp.csv"), show_col_types = FALSE) %>%
   filter(exit_code != 0)
 
 erroneous_stage2_count <- status_native_comp_stage2 %>% nrow()
@@ -73,11 +73,11 @@ if (erroneous_stage2_count > 1) {
 } else {
   message(paste0("✓ - All crates continued to compile in stage2"))
 }
-status_miri_comp <- read_csv(file.path("./results/stage2/status_miri_comp.csv"), show_col_types = FALSE) %>%
+status_miri_comp <- read_csv(file.path("./dataset/stage2/status_miri_comp.csv"), show_col_types = FALSE) %>%
   filter(exit_code != 0) %>%
   select(crate_name)
 
-tests <- read_csv(file.path("./results/stage2/tests.csv"), show_col_types = FALSE) %>%
+tests <- read_csv(file.path("./dataset/stage2/tests.csv"), show_col_types = FALSE) %>%
   filter(!is.na(test_name)) %>%
   select(crate_name)
 
@@ -93,8 +93,8 @@ get_visited_tests <- function(dir) {
     unique()
 }
 
-visited_tests_zeroed <- get_visited_tests("./results/stage3/zeroed/")
-visited_tests_uninit <- get_visited_tests("./results/stage3/uninit/")
+visited_tests_zeroed <- get_visited_tests("./dataset/stage3/zeroed/")
+visited_tests_uninit <- get_visited_tests("./dataset/stage3/uninit/")
 visited_tests_all <- bind_rows(visited_tests_zeroed, visited_tests_uninit) %>% unique()
 
 missing_tests <- intended_tests_stage3 %>%
@@ -136,8 +136,8 @@ internal_validation_stage3 <- function(dir) {
   }
 }
 
-internal_validation_stage3("./results/stage3/zeroed")
-internal_validation_stage3("./results/stage3/uninit")
+internal_validation_stage3("./dataset/stage3/zeroed")
+internal_validation_stage3("./dataset/stage3/uninit")
 
 tests_missed_zeroed_uninit <- visited_tests_zeroed %>%
   anti_join(visited_tests_uninit, by = c("crate_name", "test_name")) %>%
@@ -156,8 +156,8 @@ read_activated <- function(path) {
   return(bind_rows(activated_tree, activated_stack) %>% unique())
 }
 
-activated_zeroed <- read_activated("./results/stage3/zeroed")
-activated_uninit <- read_activated("./results/stage3/uninit")
+activated_zeroed <- read_activated("./dataset/stage3/zeroed")
+activated_uninit <- read_activated("./dataset/stage3/uninit")
 
 
 if (activated_zeroed %>% anti_join(activated_uninit) %>% nrow() == 0) {

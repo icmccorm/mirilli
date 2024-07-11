@@ -4,7 +4,7 @@ import re
 import parse_tb
 import parse_shared
 import parse_sb
-
+from parse_shared import Operation
 
 def read_flags(FLAGS_CSV_PATH):
     with open(FLAGS_CSV_PATH, "r") as f:
@@ -13,7 +13,7 @@ def read_flags(FLAGS_CSV_PATH):
         return flags
 
 
-FLAGS_CSV_PATH = "./results/stage3/flags.csv"
+FLAGS_CSV_PATH = "./dataset/stage3/flags.csv"
 FLAGS = read_flags(FLAGS_CSV_PATH)
 
 
@@ -37,23 +37,26 @@ FILES_TO_CLOSE = []
 
 
 def failed():
-    print("Usage: python3 collate.py [data dir]")
+    print("Usage: python3 collate.py [data dir] [out dir]")
     exit(1)
 
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     failed()
 
 root_dir = sys.argv[1]
 if not os.path.exists(root_dir):
     failed()
 
+output_dir = sys.argv[2]
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+
 base = os.path.basename(root_dir)
 data_dir = os.path.join(root_dir, "crates")
 
 if not os.path.exists(data_dir):
     failed()
-
 
 def open_csv(dir, name, headers):
     global FILES_TO_CLOSE
@@ -233,13 +236,13 @@ def extract_error_info(is_tree_borrows, text):
 
 
 (stack_roots, tree_roots) = open_csv_for_both(
-    root_dir, "error_roots", ["crate_name", "test_name", "error_root"]
+    output_dir, "error_roots", ["crate_name", "test_name", "error_root"]
 )
 (stack_meta, tree_meta) = open_csv_for_both(
-    root_dir, "metadata", ["crate_name", "test_name"] + FLAGS
+    output_dir, "metadata", ["crate_name", "test_name"] + FLAGS
 )
 (stack_info, tree_info) = open_csv_for_both(
-    root_dir,
+    output_dir,
     "error_info",
     [
         "crate_name",
@@ -252,10 +255,10 @@ def extract_error_info(is_tree_borrows, text):
     ],
 )
 tree_summary = open_csv(
-    root_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS
+    output_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS
 )
 stack_summary = open_csv(
-    root_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS
+    output_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS
 )
 
 print(f"Processing errors from '{os.path.basename(base)}' mode...")
@@ -267,12 +270,8 @@ for crate in os.listdir(data_dir):
         parse_directory(
             False, crate_name, stack_dir, stack_roots, stack_meta, stack_info
         )
-    else:
-        print(f"No 'stack' directory found for {crate}")
     if os.path.exists(tree_dir):
         parse_directory(True, crate_name, tree_dir, tree_roots, tree_meta, tree_info)
-    else:
-        print(f"No 'tree' directory found for {crate}")
 for file in FILES_TO_CLOSE:
     file.flush()
     file.close()

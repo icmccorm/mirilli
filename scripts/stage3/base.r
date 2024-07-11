@@ -118,9 +118,9 @@ keep_only_ub <- function(df) {
   df %>% filter(possible_non_failure_bug(error_type_stack, error_root_stack) | possible_non_failure_bug(error_type_tree, error_root_tree))
 }
 
-prepare_errors <- function(dir, type) {
-  error_path <- file.path(dir, paste0("error_info_", type, ".csv"))
-  root_path <- file.path(dir, paste0("error_roots_", type, ".csv"))
+prepare_errors <- function(build_dir, status_dir, type) {
+  error_path <- file.path(build_dir, paste0("error_info_", type, ".csv"))
+  root_path <- file.path(build_dir, paste0("error_roots_", type, ".csv"))
 
   errors <- read_csv(error_path, show_col_types = FALSE) %>%
     inner_join(all, by = c("crate_name"))
@@ -140,36 +140,38 @@ prepare_errors <- function(dir, type) {
     correct_error_type() %>%
     deduplicate_error_text()
 
-  exit_codes <- read_csv(file.path(dir, paste0("status_", type, ".csv")), show_col_types = FALSE)
+  exit_codes <- read_csv(file.path(status_dir, paste0("status_", type, ".csv")), show_col_types = FALSE)
 
   errors <- errors %>%
     full_join(exit_codes, by = c("crate_name", "test_name")) %>%
     mutate(error_type = if_else(timed_out(exit_code), TIMEOUT_ERR_TXT, error_type)) %>%
     mutate(borrow_mode = type)
-  borrow_summary <- read_csv(file.path(dir, paste0(type, "_summary.csv")), show_col_types = FALSE)
+
+  borrow_summary <- read_csv(file.path(build_dir, paste0(type, "_summary.csv")), show_col_types = FALSE)
+
   errors <- errors %>% full_join(borrow_summary, by = c("crate_name", "test_name"))
   return(errors)
 }
 
-all <- read_csv(file.path("./results/population.csv"), show_col_types = FALSE) %>%
+all <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE) %>%
   select(crate_name, version)
 
-compile_errors <- function(dir) {
-  basename <- basename(dir)
+compile_errors <- function(build_dir, status_dir) {
+  basename <- basename(status_dir)
 
-  stack_errors <- prepare_errors(dir, "stack")
+  stack_errors <- prepare_errors(build_dir, status_dir, "stack")
 
-  tree_errors <- prepare_errors(dir, "tree")
+  tree_errors <- prepare_errors(build_dir, status_dir, "tree")
 
-  native_comp_status <- read_csv(file.path(dir, "status_native_comp.csv"), show_col_types = FALSE) %>%
+  native_comp_status <- read_csv(file.path(status_dir, "status_native_comp.csv"), show_col_types = FALSE) %>%
     rename(native_comp_exit_code = exit_code) %>%
     unique()
 
-  native_status <- read_csv(file.path(dir, "status_native.csv"), show_col_types = FALSE) %>%
+  native_status <- read_csv(file.path(status_dir, "status_native.csv"), show_col_types = FALSE) %>%
     rename(native_exit_code = exit_code) %>%
     unique()
 
-  miri_comp_status <- read_csv(file.path(dir, "status_miri_comp.csv"), show_col_types = FALSE) %>%
+  miri_comp_status <- read_csv(file.path(status_dir, "status_miri_comp.csv"), show_col_types = FALSE) %>%
     rename(miri_comp_exit_code = exit_code) %>%
     unique()
 
