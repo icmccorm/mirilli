@@ -9,11 +9,11 @@ R -e "renv::restore()"
 ```
 Execute the following command to download the dataset and decompress it. 
 ```
-curl -O https://zenodo.org/records/12727040/files/dataset.zip && unzip dataset.zip
+curl -O https://zenodo.org/records/12727040/files/dataset.zip && unzip -qq dataset.zip
 ```
 Files will be placed into the folder `dataset` in the root directory. The dataset is >400MB, so this may take a little while. Once the dataset is downloaded and decompressed, you can compile it with the following command:
 ```
-make build
+make
 ```
 
 ## Root Directory - (`dataset/`)

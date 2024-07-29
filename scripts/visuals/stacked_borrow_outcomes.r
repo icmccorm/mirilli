@@ -22,7 +22,7 @@ calculate_location <- function(kind_stack, error_root_stack, error_root_tree) {
   )
 }
 
-NO_FAULT <- c(NA, "Timeout", "Unsupported Operation")
+NO_FAULT <- c(NA, "Unsupported Operation")
 
 deduplicated_borrowing_errors <- read_csv(
   file.path("./build/stage3/errors.csv"),
@@ -35,31 +35,27 @@ deduplicated_borrowing_errors <- read_csv(
   deduplicate() %>%
   filter(memory_mode == "uninit")
 
-deduplicated_borrowing_errors %>%
-  filter(kind_stack == "Invalid Framing")
-
-stack_crates_total <- deduplicated_borrowing_errors %>%
-  filter(error_type_stack == "Borrowing Violation") %>%
-  filter(is_foreign_error_stack) %>%
-  select(crate_name) %>%
-  unique() %>%
-  nrow()
-
-stats <- stats %>%
-  add_row(key = "stack_crates_total", value = stack_crates_total)
-
-stack_errors <- deduplicated_borrowing_errors %>%
+foreign_sb_errors <- deduplicated_borrowing_errors %>%
   filter(error_type_stack == "Borrowing Violation") %>%
   filter(is_foreign_error_stack)
 
-num_crates_stack <- stack_errors %>%
-  select(crate_name) %>%
-  unique() %>%
+foreign_sb_error_crates <- foreign_sb_errors %>% 
+  select(crate_name) %>% 
+  unique() %>% 
   nrow()
-stats <- stats %>%
-  add_row(key = "stack_crate_total", value = num_crates_stack)
 
-stack_counts <- stack_errors %>%
+foreign_sb_error_tests <- foreign_sb_errors %>% 
+  select(crate_name, test_name) %>% 
+  unique() %>% 
+  nrow()
+  
+stats <- stats %>%
+  add_row(key = "stack_crates_total", value = foreign_sb_error_crates)
+
+stats <- stats %>%
+  add_row(key = "stack_tests_total", value = foreign_sb_error_tests)
+
+stack_counts <- foreign_sb_errors %>%
   select(kind_stack, crate_name) %>%
   group_by(kind_stack) %>%
   summarise(
@@ -67,10 +63,10 @@ stack_counts <- stack_errors %>%
     n = paste0(n(), "/", n_distinct(crate_name))
   )
 
-tree_outcomes <- stack_errors %>%
+tree_outcomes <- foreign_sb_errors %>%
   mutate(
     error_type_tree = ifelse(
-      error_type_tree %in% c(NA, "Timeout", "Unsupported Operation"),
+      error_type_tree %in% NO_FAULT,
       "None", ifelse(
         error_type_tree != "Borrowing Violation", "Non-TB",
         calculate_location(kind_stack, error_root_stack, error_root_tree)
@@ -84,6 +80,16 @@ tree_outcome_counts <- tree_outcomes %>%
     count = n(), crates = n_distinct(crate_name),
     n = paste0(n(), "/", n_distinct(crate_name))
   )
+
+tree_none <- tree_outcomes %>% 
+  filter(error_type_tree == "None")
+tree_none_crates <- tree_none %>% select(crate_name) %>% unique() %>% nrow()
+tree_none_tests <- tree_none %>% select(crate_name, test_name) %>% unique() %>% nrow()
+
+stats <- stats %>%
+  add_row(key = "stack_no_tb_crates_total", value = tree_none_crates)
+stats <- stats %>%
+  add_row(key = "stack_no_tb_tests_total", value = tree_none_tests)
 
 tree_crate_counts <- tree_outcomes %>%
   group_by(kind_stack) %>%
@@ -104,11 +110,10 @@ stats <- stats %>%
 stack_error_total <- stack_counts %>%
   summarise(count = sum(count)) %>%
   pull(count)
+
 stats <- stats %>%
   add_row(key = "stack_error_total", value = stack_error_total)
-stack_crate_total <- stack_counts %>%
-  summarise(count = sum(crates)) %>%
-  pull(count)
+
 stack_error_counts <- stack_counts %>%
   select(kind_stack, count) %>%
   mutate(
@@ -123,6 +128,7 @@ stack_error_counts <- stack_counts %>%
     value = count
   ) %>%
   select(key, value)
+  
 stack_crate_counts <- stack_counts %>%
   select(kind_stack, crates) %>%
   mutate(
@@ -138,6 +144,7 @@ stack_crate_counts <- stack_counts %>%
     value = crates
   ) %>%
   select(key, value)
+
 stats <- stats %>%
   bind_rows(stack_error_counts) %>%
   bind_rows(stack_crate_counts)
@@ -157,16 +164,20 @@ tree_error_counts <- tree_outcome_counts %>%
     )
   ) %>%
   select(key, value)
+
 tree_no_tb_total <- tree_error_counts %>%
   summarise(value = sum(value)) %>%
   pull(value)
+
 stats <- stats %>%
   bind_rows(tree_error_counts)
+
 stats <- stats %>%
   add_row(key = "stack_error_no_tb_total", value = tree_no_tb_total)
 
 stats %>%
   write_csv(file.path("./build/visuals/sb.stats.csv"))
+
 tree_outcome_counts %>%
   select(-crates, -count) %>%
   pivot_wider(names_from = error_type_tree, values_from = n) %>%
