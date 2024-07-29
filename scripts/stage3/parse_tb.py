@@ -144,7 +144,7 @@ class TBErrorTypeWithIndirection:
     def to_string(self):
         error_type = self.error_type.value
         indirection = self.indirection.value if self.indirection is not None else "NA"
-        return f"{error_type}-{indirection}"
+        return f"{error_type}"
 
 
 class TBErrorIndirectionType(Enum):

@@ -30,7 +30,6 @@ parse_links <- function(links, item_text, parse_fn) {
     })
 }
 
-
 gh_id_parse_fn <- function(link, item_text) {
   if (!is.na(link) && grepl(paste0(item_text, "/[0-9]+$"), link)) {
     issue_number <- str_extract(link, "[0-9]+$")
@@ -51,9 +50,10 @@ commit_hash_parse_fn <- function(link, item_text) {
 
 all_errors <- read_csv(file.path("./build/stage3/errors.csv"), show_col_types = FALSE)
 
-ownership <- c("Tree Borrows")
-memory <- c("Memory Leaked", "Out of Bounds Access", "Cross-Language Free")
+ownership <- c("Tree Borrows", "Out of Bounds Access")
+memory <- c("Memory Leaked", "Cross-Language Free", "Dangling Int Pointer")
 typing <- c("Using Uninitialized Memory", "Unaligned Reference", "Invalid Enum Tag", "Incorrect FFI Binding")
+
 
 bugs <- read_csv(file.path("./dataset/bugs.csv"), show_col_types = FALSE) %>%
   select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, fix_loc, issue, pull_request, commit, bug_type_override, memory_mode, error_loc_override, error_type_override) %>%
@@ -86,14 +86,21 @@ bugs <- read_csv(file.path("./dataset/bugs.csv"), show_col_types = FALSE) %>%
     issue,
     pull_request,
     commit,
-    bug_category
+    bug_category,
+    kind_tree
   )
+
+#%bugs %>% filter(bug_category == "Ownership") %>% 
+#  group_by(kind_tree) %>%
+#  summarize(n = n()) %>%
+
 location_stats <- bugs %>%
   group_by(error_loc) %>%
   summarize(n = n()) %>%
   mutate(error_loc = paste0("location_", str_to_lower(error_loc))) %>%
   rename(key = error_loc, value = n)
 stats <- stats %>% bind_rows(location_stats)
+
 
 formatted_bugs <- bugs %>%
   mutate(crate_name = ifelse(is.na(root_crate_name), crate_name, root_crate_name)) %>%
@@ -131,10 +138,27 @@ print(
   comment = FALSE
 )
 
-bug_counts <- bugs %>%
+bug_category_counts <- bugs %>%
   group_by(bug_category) %>%
   summarize(n = n()) %>%
-  arrange(desc(n))
+  arrange(desc(n)) %>%
+  mutate(bug_category = paste0("error_category_", str_to_lower(bug_category))) %>%
+  rename(
+    key = bug_category,
+    value = n
+  ) 
+stats <- stats %>% bind_rows(bug_category_counts)
+
+bug_category_crate_counts <- bugs %>% 
+  group_by(bug_category) %>%
+  # number of unique crates per bug_category
+  summarize(n = n_distinct(crate_name)) %>%
+  mutate(bug_category = paste0("error_category_crates_", str_to_lower(bug_category))) %>%
+  rename(
+    key = bug_category,
+    value = n
+  ) 
+stats <- stats %>% bind_rows(bug_category_crate_counts)
 
 bug_counts_table <- bugs %>%
   group_by(bug_category, fix_loc, error_loc) %>%
