@@ -17,7 +17,7 @@ git submodule update --init
 ```
 Then, enter the `mirilli-rust` submodule and [follow the steps](https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html) from the Rust project for building the Rust toolchain and Miri from source. 
 
-To build our dataset, follow the instructions in [DATASET.md](https://github.com/icmccorm/mirilli/blob/main/DATASET.md).
+To download and compile our dataset, follow the instructions in [DATASET.md](https://github.com/icmccorm/mirilli/blob/main/DATASET.md). 
 
 ##  Configuration
 To be able to call foreign functions, MiriLLI needs access to the LLVM bitcode of the foreign library. Clang will produce LLVM bitcode files during compilation if you pass the flag `--save-temps=obj`. In our Docker image, we override the global C and C++ compilers to use these flags by default: This ensures that bitcode files will be produced and stored in the `target` directory when building a crate that statically links against C or C++ code. Alternatively, you can compile a foreign library separately, assemble its files into a single module with [llvm-as](https://llvm.org/docs/CommandGuide/llvm-as.html) and place it in the directory where you invoke Miri. MiriLLI recursively searches for all bitcode files in the directory where it is invoked, so running it is the same as running an unmodified version of Miri (e.g. `cargo miri test`).
