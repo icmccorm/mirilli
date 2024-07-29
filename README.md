@@ -1,7 +1,6 @@
 # A Study of Undefined Behavior Across Foreign Function Boundaries in Rust Libraries
-
 This repository is the replication package for the publication ``A Study of Undefined Behavior Across Foreign Function Boundaries in Rust Libraries''. 
-It contains the implementation of MiriLLI, which is an extension to Miri that allows it to execute foreign functions by interpreting LLVM bitcode. We use [LLI](https://llvm.org/docs/CommandGuide/lli.html): an LLVM interpreter included within the LLVM toolchain. 
+It contains the implementation of MiriLLI, which is an extension to Miri that allows it to execute foreign functions by interpreting LLVM bitcode. We provide The TeX source for our paper and its appendix in the mirilli-tex submodule. The appendix is also available [as a PDF](https://github.com/icmccorm/mirilli/blob/main/appendix.pdf) in the root directory. 
 
 ## Setup
 Our Dockerfile builds an image with our custom Rust toolchain set as the global default with MiriLLI installed. You can build it using the following command:
@@ -36,4 +35,4 @@ We implemented several configuration flags that change the behavior of MiriLLI. 
 ## Implementation
 We rely on forks of the following crates to implement our integration with LLI:
 * [llvm-sys](https://crates.io/crates/llvm-sys)
-* [inkwell](https://github.com/icmccorm/inkwell)
+* [inkwell](https://crates.io/crates/inkwell)
