@@ -102,6 +102,13 @@ location_stats <- bugs %>%
 stats <- stats %>% bind_rows(location_stats)
 
 
+id_list <- bugs %>% select(bug_id) %>% 
+  mutate(bug_id = paste0("\\stepcounter{bugcounter}\\label{", bug_id, "}")) %>%
+  # concatenate with "\n"
+  summarize(bug_id = paste(bug_id, collapse = "\n")) %>%
+  pull() %>%
+  write(file.path("./build/visuals/bug_ids.tex"))
+
 formatted_bugs <- bugs %>%
   mutate(crate_name = ifelse(is.na(root_crate_name), crate_name, root_crate_name)) %>%
   mutate(version = ifelse(is.na(root_crate_version), version, root_crate_version)) %>%
@@ -151,7 +158,6 @@ stats <- stats %>% bind_rows(bug_category_counts)
 
 bug_category_crate_counts <- bugs %>% 
   group_by(bug_category) %>%
-  # number of unique crates per bug_category
   summarize(n = n_distinct(crate_name)) %>%
   mutate(bug_category = paste0("error_category_crates_", str_to_lower(bug_category))) %>%
   rename(

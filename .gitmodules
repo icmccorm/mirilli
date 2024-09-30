@@ -6,6 +6,3 @@
 [submodule "rllvm-as"]
 	path = rllvm-as
 	url = https://github.com/icmccorm/rllvm-as
-[submodule "mirilli-tex"]
-	path = mirilli-tex
-	url = https://github.com/icmccorm/mirilli-tex
