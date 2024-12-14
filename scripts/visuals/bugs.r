@@ -124,7 +124,7 @@ formatted_bugs <- bugs %>%
   arrange(error_type, annotated_error_type, commit) %>%
   mutate(version = ifelse(version == "0.1.16+minimap2.2.26", "0.1.16\\tablefootnote{+minimap2.2.26}", version))
 
-colnames(formatted_bugs) <- c("ID", "Crate", "Version", "Error Category", "Error Type", "Fix", "Error", "Issue(s)", "Pull Request(s)", "Commit(s)")
+colnames(formatted_bugs) <- c("ID", "Crate", "Version", "Error Category", "Error Type", "Error", "Fix", "Issue(s)", "Pull Request(s)", "Commit(s)")
 
 bold <- function(x) {
   paste("{\\textbf{", x, "}}", sep = "")
