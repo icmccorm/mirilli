@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}Results}{2}{section.1}%
+\contentsline {section}{\numberline {2}Semantics}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Domains}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Type Syntax}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Value Syntax}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Environments}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Conversion}{5}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Store Operations}{6}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Metafunctions}{7}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Well-formedness}{8}{subsection.2.8}%
+\contentsline {subsection}{\numberline {2.9}Proofs}{8}{subsection.2.9}%
+\contentsline {subsection}{\numberline {2.10}Parameter Passing}{11}{subsection.2.10}%

@@ -1,0 +1,29 @@
+
+\begin{infersection}{$\mu(\ell) = \tpl{b, \varrho}$}{The store $\mu$ maps the location $\ell$ to the byte $b$ with provenance $\varrho$.}
+\inferrule[Store]{\ell \mapsto \tpl{b, \varrho} \in \mu}{\mu(\ell) = \tpl{b, \varrho}}
+\end{infersection}
+
+\begin{infersection}{$\mu(\ell,m) = \overline{\tpl{b, \varrho}}^m$}{Reading a value of size $m$ from location $\ell$ produces a list of $m$ pairs of bytes and provenance values.}
+\inferrule[Store-Slice]{\mu(\ell), \ldots, \mu(\ell+m-1) = \overline{\tpl{b, \varrho}}^m }{\mu(\ell,m) = \overline{\tpl{b, \varrho}}^m}
+\\
+\end{infersection}
+
+\begin{infersection}{$\expose{\sigma}{\varrho} = \sigma'$}{Exposing the tag $\varrho$ produces the updated tag set $\sigma'$.}
+\inferrule[Ex-Tag]{}{\expose{\sigma}{t} = \sigma \cup \{t\}}
+\and
+\inferrule[Ex-Null]{}{\expose{\sigma}{\provnone} = \sigma}
+\and
+\inferrule[Ex-Wild]{}{\expose{\sigma}{\provwildcard} = \sigma}
+\end{infersection}
+
+\begin{infersection}{$\mu \vdash \memwrite{\ell}{v} \dashv \mu'$}{Writing the value $v$ to the store $\mu$ at location $\ell$ produces the updated store $\mu'$.}
+\inferrule[W-Bytes]{\ell \in \dom{\mu_0} \\\\ \forall i \in [0,n-1].\mu_{i+1} = \mu_i[\ell + i \mapsto \tpl{b_i,\provnone}] }{\heap_0 \vdash \memwrite{\ell}{\bytes^n} \dashv \heap_n}
+\and
+\inferrule[W-Ptr]{\ell \in \dom{\mu_0} \\ \ell \triangleq \bytes^{\ptrsize} \\\\ \forall i \in [0,\ptrsize - 1].\mu_{i+1} = \mu_i[\ell + i \mapsto \tpl{b_i,\btag}] }{\heap_0 \vdash \memwrite{\ell}{\vptr{\ell}{\btag}} \dashv \heap_n}
+\end{infersection}
+
+\begin{infersection}{$\mu;\sigma \vdash \memread{\ell}{\tau} = v \dashv \sigma'$}{Reading a rust value $\valrust$ of type $\trust$ from the store $\mu$ at location $\ell$ produces the updated tag set $\sigma'$.}
+\inferrule[R-Int]{\mu[\ell, n] = \overline{\tpl{b,\btag}}^n \\\\ \forall i \in [1,n]. \expose{\sigma_{i-1}}{\btag_i} = \sigma_i}{\mu;\sigma_0 \vdash \memread{\ell}{\tint{n}} = \bytes^n \dashv \sigma_n}
+\and
+\inferrule[R-Ptr]{\mu[\ell, \ptrsize] = \overline{\tpl{b,\btag}}^{\ptrsize} \\\\ \ell' \triangleq \bytes^{\ptrsize} \\ \forall i \in [1,\ptrsize].\btag_i = \btag' }{\mu;\sigma \vdash \memread{\ell}{*\trust} = \vptr{\ell'}{\btag'} \dashv \sigma}
+\end{infersection}

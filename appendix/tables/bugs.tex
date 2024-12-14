@@ -1,0 +1,119 @@
+\small
+\begin{longtable}{|c|l|c|l|l|c|c|c|c|c|}
+\caption{Unique bugs detected by our tool, sorted Miri's error label (``Error Category'') and our additional classification (``Error Type''). A ``-'' indicates that our classification is the same as Miri's label. When a commit is listed in the last column, it indicates that the bug has been fixed. If multiple commits were used to fix a bug, we provide the last commit in the series.}
+\label{appendix:table:bugs}\\
+
+\hline
+{\textbf{ID}} & {\textbf{Crate}} & {\textbf{Version}} & {\textbf{Error Category}} & {\textbf{Error Type}} & {\textbf{Error}} & {\textbf{Fix}} & {\textbf{Issue(s)}} & {\textbf{Pull(s)}} & {\textbf{Commit(s)}} \\ 
+\hline
+\hline
+\endfirsthead
+
+\multicolumn{10}{c}%
+{{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+{\textbf{ID}} & {\textbf{Crate}} & {\textbf{Version}} & {\textbf{Error Category}} & {\textbf{Error Type}} & {\textbf{Fix}} & {\textbf{Error}} & {\textbf{Issue(s)}} & {\textbf{Pull(s)}} & {\textbf{Commit(s)}} \\ 
+\hline
+\hline
+\endhead 
+\hline \multicolumn{10}{|r|}{{Continued on next page}} \\ \hline
+\endfoot
+\endlastfoot
+   \hline
+ \refstepcounter{bugcounter}\label{jh-rs:1}\ref{jh-rs:1} & jh-rs & 0.1.0 & Alignment & Invalid Transmutation & Rust & Rust & \buglink{https://github.com/DaanA32/jh-rs/issues/1}{\#1} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{quickjs:regex:3}\ref{quickjs:regex:3} & quickjs\_regex & 0.2.3 & Cross-Language Free & - & LLVM & Rust & \buglink{https://github.com/hjiayz/quickjs\_regex/issues/2}{\#2} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{tree-sitter-cpp:1}\ref{tree-sitter-cpp:1} & tree-sitter & 0.20.3 & Dangling Int Pointer & Null Pointer Dereference & LLVM & LLVM & \buglink{https://github.com/bonede/tree-sitter-ng/issues/8}{\#8} &  & \buglink{https://github.com/tree-sitter/tree-sitter/commit/4676cd42004465bb22ab66efe4e582ca3317b74e}{4676cd4} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{everrs:1}\ref{everrs:1} & everrs & 0.2.1 & Incorrect Binding & Incorrect Integer Width & Binding & Binding & \buglink{https://github.com/rot256/everrs/issues/1}{\#1} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{quickjs:regex:1}\ref{quickjs:regex:1} & quickjs\_regex & 0.2.3 & Incorrect Binding & Incorrect Integer Width & Binding & Binding &  & \buglink{https://github.com/hjiayz/quickjs\_regex/pull/1}{\#1} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{secp256k1:1}\ref{secp256k1:1} & secp256k1 & 0.28.0 & Incorrect Binding & Incorrect Integer Width & Binding & Binding & \buglink{https://github.com/rust-bitcoin/rust-secp256k1/issues/669}{\#669} & \buglink{https://github.com/rust-bitcoin/rust-secp256k1/pull/670}{\#670} & \buglink{https://github.com/rust-bitcoin/rust-secp256k1/commit/60a5e36c14a25f756358c108b7b53fd469576e70}{60a5e36} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec-number-sys:2}\ref{dec-number-sys:2} & dec-number-sys & 0.0.25 & Incorrect Binding & Missing Return Type & Binding & Binding &  & \buglink{https://github.com/wisbery/dec-number-sys/pull/2}{\#2} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{spritz:cipher:1}\ref{spritz:cipher:1} & spritz\_cipher & 0.1.0 & Incorrect Binding & Missing Return Type & Binding & Binding &  & \buglink{https://github.com/tl8roy/spritz\_cipher/pull/1}{\#1} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{special-fun:1}\ref{special-fun:1} & special-fun & 0.2.0 & Incorrect Binding & Missing Return Type & Binding & Binding & \buglink{https://github.com/vks/special-fun/issues/14}{\#14} & \buglink{https://github.com/vks/special-fun/pull/13}{\#13} & \buglink{https://github.com/vks/special-fun/commit/ded37f81122fdbd2471e70cad26c3d00a3e61b84}{ded37f8} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{lcms2:2}\ref{lcms2:2} & lcms2 & 6.0.0 & Invalid Enum Tag & Logical Error & Rust & Rust &  &  & \buglink{https://github.com/kornelski/rust-lcms2/commit/85218b6aa266fe6c50c09ef23937f0cd10ff3a7c}{85218b6} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{bchlib:1}\ref{bchlib:1} & bchlib & 0.2.1 & Memory Leaked & Missing C Destructor & Rust & Rust & \buglink{https://github.com/yuvadm/bchlib/issues/1}{\#1} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{libcmark-sys:1}\ref{libcmark-sys:1} & libcmark-sys & 0.1.0 & Memory Leaked & Missing C Destructor & Rust & Rust & \buglink{https://github.com/bnavetta/rcmark/issues/3}{\#3} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{tinyspline-sys:1}\ref{tinyspline-sys:1} & tinyspline-sys & 0.2.0 & Memory Leaked & Missing C Destructor & Rust & Rust & \buglink{https://github.com/Jellonator/tinyspline-sys/issues/1}{\#1} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{tree-sitter-svelte:1}\ref{tree-sitter-svelte:1} & tree-sitter-svelte & 0.10.2 & Memory Leaked & Missing C Destructor & Rust & Rust & \buglink{https://github.com/Himujjal/tree-sitter-svelte/issues/46}{\#46} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{x42ltc-sys:1}\ref{x42ltc-sys:1} & x42ltc-sys & 0.0.5 & Memory Leaked & Missing C Destructor & Rust & Rust & \buglink{https://github.com/jmaibaum/x42ltc/issues/1}{\#1} & \buglink{https://github.com/jmaibaum/x42ltc/pull/2}{\#2} & \buglink{https://github.com/jmaibaum/x42ltc/commit/1c594f22ebae2a8fc61ce9657b0c22461916b037}{1c594f2} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{minimp3:ex-sys:1}\ref{minimp3:ex-sys:1} & minimp3\_ex-sys & 0.1.1 & Memory Leaked & Missing C Destructor & Rust & Rust &  & \buglink{https://github.com/mgeier/minimp3\_ex-sys/pull/5}{\#5} & \buglink{https://github.com/mgeier/minimp3\_ex-sys/commit/33bea0d08ee4ecf2164727576aeb64bae4556bb6}{33bea0d} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{fluidlite:1}\ref{fluidlite:1} & fluidlite & 0.2.1 & Memory Leaked & Missing from Raw & Rust & Rust & \buglink{https://github.com/katyo/fluidlite-rs/issues/15}{\#15} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{ytnef:1}\ref{ytnef:1} & ytnef & 0.2.0 & Memory Leaked & Missing from Raw & Rust & Rust & \buglink{https://github.com/alechussey/ytnef/issues/1}{\#1} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{zmq:1}\ref{zmq:1} & zmq & 0.10.0 & Memory Leaked & Missing from Raw & Rust & Rust & \buglink{https://github.com/erickt/rust-zmq/issues/387}{\#387} & \buglink{https://github.com/erickt/rust-zmq/pull/388}{\#388} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{libhydrogen:1}\ref{libhydrogen:1} & libhydrogen & 0.4.1 & Memory Leaked & Missing from Raw & Rust & Rust & \buglink{https://github.com/jedisct1/rust-libhydrogen/issues/11}{\#11} &  & \buglink{https://github.com/jedisct1/rust-libhydrogen/commit/bddff45499844b56f56b53559e3b899488280c5a}{bddff45} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{crypto:pimitives:1}\ref{crypto:pimitives:1} & crypto\_pimitives & 0.1.1 & Out of Bounds Access & - & LLVM & Rust & \buglink{https://github.com/elalfer/rust-crypto-pimitives/issues/1}{\#1} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec:2}\ref{dec:2} & dec & 0.4.8 & Out of Bounds Access & - & LLVM & LLVM & \buglink{https://github.com/MaterializeInc/rust-dec/issues/76}{\#76} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec-number-sys:3}\ref{dec-number-sys:3} & dec-number-sys & 0.0.25 & Out of Bounds Access & - & LLVM & LLVM & \buglink{https://github.com/MaterializeInc/rust-dec/issues/76}{\#76} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{quickjs:regex:2}\ref{quickjs:regex:2} & quickjs\_regex & 0.2.3 & Out of Bounds Access & - & LLVM & Rust &  & \buglink{https://github.com/hjiayz/quickjs\_regex/pull/1}{\#1} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{mseed:1}\ref{mseed:1} & mseed & 0.5.0 & Out of Bounds Access & - & LLVM & Rust &  &  & \buglink{https://github.com/damb/mseed/commit/0cfede149eaae7b677a8cb3b1f1b21daf0965c22}{0cfede1} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{bad64:1}\ref{bad64:1} & bad64 & 0.6.0 & Out of Bounds Access & - & LLVM & LLVM &  &  & \buglink{https://github.com/yrp604/bad64-sys/commit/6dbd961380968c83fae3ba8f7be036292addd692}{6dbd961} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{tectonic:engine:bibtex:1}\ref{tectonic:engine:bibtex:1} & tectonic\_engine\_bibtex & 0.2.1 & Tree Borrows & Freeing Through \littlerust{\&mut T} & LLVM & Rust &  & \buglink{https://github.com/tectonic-typesetting/tectonic/pull/1129}{\#1129} & \buglink{https://github.com/tectonic-typesetting/tectonic/commit/c64e5243467fe94a1a6abe95cf8163ac2b3faacd}{c64e524} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{sgp4-rs:1}\ref{sgp4-rs:1} & sgp4-rs & 0.4.0 & Tree Borrows & Incorrect Integer Width & LLVM & Binding & \buglink{https://github.com/nsat/sgp4-rs/issues/29}{\#29} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{tetsy-secp256k1}\ref{tetsy-secp256k1} & tetsy-secp256k1 & 0.7.0 & Tree Borrows & Incorrect \littlerust{const} & LLVM & Rust & \buglink{https://github.com/tetcoin/tetsy-secp256k1/issues/3}{\#3} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{lsmlite-rs:1}\ref{lsmlite-rs:1} & lsmlite-rs & 0.1.0 & Tree Borrows & Incorrect \littlerust{const} & LLVM & Binding &  & \buglink{https://github.com/helsing-ai/lsmlite-rs/pull/5}{\#5} & \buglink{https://github.com/helsing-ai/lsmlite-rs/commit/2e0cf9065822b542c00ea7fb7541723c27d3d725}{2e0cf90} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{ms5837:1}\ref{ms5837:1} & ms5837 & 0.2.1 & Tree Borrows & Incorrect \littlerust{const} & LLVM & Rust &  & \buglink{https://github.com/silvergasp/ms5837-driver/pull/26}{\#26} & \buglink{https://github.com/silvergasp/ms5837-driver/commit/7be05c1f0874b33115c9175c5340c7183d0a716f}{7be05c1} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec-number-sys:1}\ref{dec-number-sys:1} & dec-number-sys & 0.0.25 & Tree Borrows & Incorrect \littlerust{const} & LLVM & Binding & \buglink{https://github.com/wisbery/dec-number-sys/issues/1}{\#1} & \buglink{https://github.com/wisbery/dec-number-sys/pull/2}{\#2} & \buglink{https://github.com/wisbery/dec-number-sys/commit/4a12cce4b774a7e10f62f444933250f44601cb2f}{4a12cce} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{foreign-types:1}\ref{foreign-types:1} & foreign-types & 0.5.0 & Tree Borrows & Phantom \littlerust{UnsafeCell<T>} & LLVM & Rust & \buglink{https://github.com/sfackler/foreign-types/issues/24}{\#24} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{bzip2:1}\ref{bzip2:1} & bzip2 & 0.4.4 & Tree Borrows & Sharing \littlerust{\&mut T} & LLVM & Rust & \buglink{https://github.com/alexcrichton/bzip2-rs/issues/94}{\#94} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{littlefs2:2}\ref{littlefs2:2} & littlefs2 & 0.4.0 & Tree Borrows & Sharing \littlerust{\&mut T} & LLVM & Rust &  & \buglink{https://github.com/trussed-dev/littlefs2/pull/54}{\#54} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{littlefs2:1}\ref{littlefs2:1} & littlefs2 & 0.4.0 & Tree Borrows & Sharing \littlerust{\&mut T} & LLVM & Rust &  & \buglink{https://github.com/trussed-dev/littlefs2/pull/54}{\#54} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{spng:1}\ref{spng:1} & spng & 0.2.0-alpha.2 & Tree Borrows & Sharing \littlerust{\&mut T} & Rust & Rust & \buglink{https://github.com/aloucks/spng-rs/issues/11}{\#11} & \buglink{https://github.com/aloucks/spng-rs/pull/12}{\#12} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{flate2:1}\ref{flate2:1} & flate2 & 1.0.27 & Tree Borrows & Sharing \littlerust{\&mut T} & LLVM & Rust & \buglink{https://github.com/rust-lang/flate2-rs/issues/392}{\#392} & \buglink{https://github.com/rust-lang/flate2-rs/pull/394}{\#394} & \buglink{https://github.com/rust-lang/flate2-rs/commit/0a584f4a0c465e33b52219e8ac74f2ec9a489f9f}{0a584f4} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{librsync:1}\ref{librsync:1} & librsync & 0.2.3 & Tree Borrows & \littlerust{\&T as *mut T} & Rust & Rust & \buglink{https://github.com/mbrt/librsync-rs/issues/23}{\#23} &  &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{blitsort-sys:1}\ref{blitsort-sys:1} & blitsort-sys & 0.1.0 & Tree Borrows & \littlerust{\&T as *mut T} & LLVM & Rust & \buglink{https://github.com/impasse/blitsort-sys/issues/1}{\#1} & \buglink{https://github.com/impasse/blitsort-sys/pull/2}{\#2} &  \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec:1}\ref{dec:1} & dec & 0.4.8 & Tree Borrows & \littlerust{\&T as *mut T} & LLVM & Rust & \buglink{https://github.com/MaterializeInc/rust-dec/issues/74}{\#74} & \buglink{https://github.com/wisbery/dec-number-sys/pull/2}{\#2} & \buglink{https://github.com/MaterializeInc/rust-dec/commit/ece7d846fb7a8996935b29e33e062c597d7bf5c9}{ece7d84} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{lcms2:1}\ref{lcms2:1} & lcms2 & 6.0.0 & Tree Borrows & \littlerust{\&T as *mut T} & LLVM & Rust &  & \buglink{https://github.com/kornelski/rust-lcms2/pull/18}{\#18} & \buglink{https://github.com/kornelski/rust-lcms2/commit/28626ed9d7b180f7dde606c643d4cc6367cf82ec}{28626ed} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{lcms2:3}\ref{lcms2:3} & lcms2 & 6.0.0 & Tree Borrows & \littlerust{\&T as *mut T} & LLVM & Rust &  &  & \buglink{https://github.com/kornelski/rust-lcms2/commit/5d3b648ae5b9f9ccb70e49c37501a8a11600d6c0}{5d3b648} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{klu-rs:1}\ref{klu-rs:1} & klu-rs & 0.4.0 & Tree Borrows & \littlerust{\&T as *mut T} & LLVM & Rust &  & \buglink{https://github.com/pascalkuthe/klu-rs/pull/1}{\#1} & \buglink{https://github.com/pascalkuthe/klu-rs/commit/c5e89d16afa997423076f70fbb6fc26f7a6bb518}{c5e89d1} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{minimap2-sys:1}\ref{minimap2-sys:1} & minimap2-sys & 0.1.16\tablefootnote{+minimap2.2.26} & Uninitialized Memory & Erroneous Failure & Rust & Rust &  &  & \buglink{https://github.com/jguhlin/minimap2-rs/commit/2ac2a6d4c8712d1534a63e895cd862c72c563b25}{2ac2a6d} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec:3}\ref{dec:3} & dec & 0.4.8 & Uninitialized Memory & Incomplete Initialization & Rust & Rust & \buglink{https://github.com/MaterializeInc/rust-dec/issues/76}{\#76} & \buglink{https://github.com/MaterializeInc/rust-dec/pull/77}{\#77} & \buglink{https://github.com/icmccorm/rust-dec/commit/3545623bc3515eebb6b4313c3c43477c657f3f39}{3545623} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{dec:4}\ref{dec:4} & dec & 0.4.8 & Uninitialized Memory & Incomplete Initialization & LLVM & Rust & \buglink{https://github.com/MaterializeInc/rust-dec/issues/76}{\#76} & \buglink{https://github.com/MaterializeInc/rust-dec/pull/77}{\#77} & \buglink{https://github.com/icmccorm/rust-dec/commit/3545623bc3515eebb6b4313c3c43477c657f3f39}{3545623} \\ 
+    \hline
+ \refstepcounter{bugcounter}\label{xxhrs:1}\ref{xxhrs:1} & xxhrs & 2.0.0 & Uninitialized Memory & Uninitialized Padding & Rust & Rust &  & \buglink{https://github.com/koraa/xxhrs/pull/10}{\#10} & \buglink{https://github.com/koraa/xxhrs/commit/def77e56eadace143cc4af15b89615844073b4f3}{def77e5} \\ 
+    \hline
+\end{longtable}

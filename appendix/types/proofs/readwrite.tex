@@ -1,0 +1,17 @@
+\begin{proof}
+By inversion, guided by the structure of ${v:\tau}$. Since ${v:\tau}$ is a well-formed, scalar-typed value, we have ${\vdash v:\tau}$ and $\scalar{\tau}$. It follows that $v$ is either a byte string $\bytes$ or a pointer $\vptr{\ell'}{\varrho}$ to some location $\ell$ with some provenance $\varrho$.
+\begin{bycases}
+\begin{case}{$v\triangleq \bytes^n$}
+By Lemma~\ref{lemma:canonical} we have that ${\tau \triangleq \tint{n}}$. By inversion of \textsc{W-Bytes} and for ${i \in [0, n - 1]}$, the store $\mu'$ maps each location ${\ell + i}$ to the tuple ${\tpl{b_{i+1}, \cdot}}$. By \textsc{Store} and \textsc{Store-List}, we have that
+\[
+\mu'(\ell), \ldots, \mu'(\ell + n-1) = \mu'(\ell, n) = \overline{\tpl{b, \cdot}}^n
+\]
+Exposing the null provenance of each byte leave $\sigma$ unchanged (\textsc{Ex-Null}). We can now apply $\textsc{R-Int}$ to read the original value $\bytes$ back from the store. 
+\end{case}
+\begin{case}{$v\triangleq \vptr{\ell}{\varrho}$}
+By Lemma~\ref{lemma:canonical} and since $\scalar{\tau}$, we have that $\tau$ is either $*\trust$ of $\opaqueptr$. Each are treated equivalently. We can implicitly convert the location $\ell$ into the byte string, $\bytes^\ptrsize$, so we proceed as in the first case. However, instead of the null provenance, we have:
+$${\mu'(\ell, \ptrsize) = \overline{\tpl{b, \varrho}}^{\ptrsize}}$$
+Each $\varrho_i$ is equivalent to the provenance $\varrho$ of the pointer value. Now, we can apply $\textsc{R-Ptr}$ to reach our goal by reading the original value $\vptr{\ell}{\varrho}$ back from the store.
+\end{case}
+\end{bycases}
+\end{proof}

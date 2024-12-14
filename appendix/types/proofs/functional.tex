@@ -1,0 +1,40 @@
+
+\begin{bycases}
+\begin{case}{$\vallvm:\tllvm \triangleq \bytes:\tllvm$}
+\label{case:bytes}
+By Lemma~\ref{lemma:compatible}, $\valrust:\trust$ can take one of the following forms:
+\begin{subcase}{$\valrust:\trust \triangleq \bytes:\tbase$}
+Both typed values are interconvertible by \textsc{C-Int}.
+\end{subcase}
+\begin{subcase}{$\valrust:\trust \triangleq \vptr{\ell}{\provwildcard}:\trust$}
+By inversion of \textsc{C-PtrFromInt}, we have $\ell \triangleq \bytes$. We can now apply \textsc{C-PtrToInt} to achieve our goal.
+\end{subcase}
+\begin{subcase}{$\valrust:\trust \triangleq \vptr{\ell}{\provwildcard}:\tpl{\trust, 0}$ and $\scalar{\trust}$}
+\label{case:bytes:subcase:field}
+By inversion of \textsc{C-FieldFromScalar}, we have:
+$$\mu;\sigma \vdash \valbase:\trust \convertsfrom \valbase:\tllvm \dashv \mu'';\sigma \quad\quad\quad \mu'' \vdash \memwrite{\ell}{\bytes} \dashv \mu' \quad\quad \scalar{\tllvm}$$
+By the induction hypothesis and Lemma~\ref{lemma:readwrite}, we have:
+$$\mu'\sigma \vdash \memread{\ell}{\trust} \dashv \mu';\sigma'' \quad \quad \mu'; \sigma'' \vdash \trust \convertsto \valbase \dashv \mu';\sigma'$$
+ Now we can apply \textsc{C-FieldToScalar} to reach our goal.
+\end{subcase}
+\begin{subcase}{$\valrust:\trust \triangleq \vptr{\ell}{\provwildcard}:\trustprod$}
+By inversion of \textsc{C-ProdFromInt}, we have:
+$$\size{\trustprod}=q \quad\quad \mu\dashv \memwrite{\ell, \bytes}\dashv \mu'$$
+By Lemma~\ref{lemma:readwrite}, we have:
+$$\mu'\sigma \vdash \memread{\ell}{\trust} \dashv \mu';\sigma'$$
+We can apply \textsc{C-ProdToInt} to reach our goal.
+\end{subcase}
+\end{case}
+\begin{case}{$\vallvm:\tllvm \triangleq \vptr{\ell}{\varrho}:\opaqueptr$}
+By Lemma~\ref{lemma:compatible}, $\valrust:\trust$ must take the following forms:
+\begin{subcase}{$\valrust:\trust \triangleq \vptr{\ell}{\varrho}:*\trust$ for some $\trust$}
+Both typed values are interconvertible by \textsc{C-PointerFromPointer} and \textsc{C-AnyToPointer}.
+\end{subcase}
+\begin{subcase}{$\valrust:\trust \triangleq \vptr{\ell}{\varrho}:\tpl{\trust, 0}$ for some $\trust$}
+Equivalent to Case~\ref{case:bytes}, Subcase~\ref{case:bytes:subcase:field}.
+\end{subcase}
+\end{case}
+\begin{case}{$\vallvm:\tllvm \triangleq \tpl{\overline{\vallvm}}:\overline{\tllvm}$}
+By Lemma~\ref{lemma:compatible}, $\valrust:\trust$ must be equivalent to ${\vptr{\ell}{\varrho}:\trustprod}$ for some $\trustprod$, which is interconvertible by \textsc{C-Product} and the induction hypothesis.
+\end{case}
+\end{bycases}

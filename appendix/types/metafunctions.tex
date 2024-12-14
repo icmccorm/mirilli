@@ -1,0 +1,44 @@
+\begin{infersection}{$\size{\tau} = n$}{The type $\tau$ has size $n$.}
+\inferrule[TS-Int]{}{\size{\tint{n}} = n}
+\and
+\inferrule[TS-R-Ptr]{}{\size{* \trust} = \ptrsize}
+\and
+\inferrule[TS-L-Ptr]{}{\size{\opaqueptr} = \ptrsize}
+\\
+\inferrule[TS-R-Field]{\size{\trust} + m = n}{\size{\rfield{c}{\trust}{m}} = n}
+\and
+\inferrule[TS-R-Prod]{\Sigma_{i=1}^m (\size{\trustprod_i}) = n}{\size{\overline{\trustprod}^m} = n}
+\and
+\inferrule[TS-L-Prod]{\Sigma_{i=1}^m (\size{\tllvm_i}) = n}{\size{\overline{\tllvm}^m} = n}
+\end{infersection}
+
+\begin{infersection}{$\scalar{\tau}$}{The type $\tau$ is a scalar.}
+\inferrule{}{\scalar{\tint{n}}}
+\and
+\inferrule{}{\scalar{*\trust}}
+\and
+\inferrule{}{\scalar{\opaqueptr}}
+\end{infersection}
+
+
+
+\begin{infersection}{$\fields{\valrust: \trustprod} = \overline{\valrust:\trust}$}{The rust product value $\valrust: \trustprod$ can be represented as a list of field values $\valrust:\trust$}
+\inferrule{\forall i \in [1, n].o_i = \Sigma_{j=1}^{i-1}(\size{\trustprod_j})}{\fields{\vptr{\lloc}{\varrho} : \overline{\trustprod}^n} = \overline{\vptr{\lloc + o_i}{\btag}:\trustprod_i}^n}
+\end{infersection}
+
+\begin{infersection}{$\homog{\trust}$}{The type $\trust$ is a homogeneous aggregate.}
+\inferrule*{}{\homog{\tbase}}
+\and
+\inferrule*{}{\homog{*\trust}}
+\and
+\inferrule*{\exists\trust . \forall \tpl{\trust', n} \in \trustprod. n = 0 \wedge \trust' = \trust \wedge \homog{\trust}}{\homog{\trustprod}}
+\end{infersection}
+
+\begin{infersection}{$\scalareq{\tau} = \tau'$}{The type $\tau$ is equivalent to the type $\tau'$}
+\inferrule{}{\scalareq{\tbase} = \tbase}
+\and
+\inferrule{}{\scalareq{*\trust} = \opaqueptr}
+\and
+\inferrule{}{\scalareq{\opaqueptr} = *\trust}
+\end{infersection}
+
