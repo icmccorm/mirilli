@@ -1,0 +1,18 @@
+\begin{proof} By induction on value conversion. Cases in either direction are equivalent; here, we consider the forwards case ($\rightsquigarrow$) of a Rust value $\valrust:\trust$ being converted into an LLVM value. 
+By Lemma~\ref{lemma:compatible}, if the Rust value is an integer such that $\valrust:\trust \triangleq \bytes:\tbase$, then the LLVM value has the same type, so size is preserved. 
+The remaining cases involve products and pointers, where the Rust value takes the form $\tpl{\ell, \varrho}$ for some $\trust$.
+\begin{bycases}
+\begin{case}{$\trust \triangleq *\trust$}
+Then the the LLVM value is either an opaque pointer (\textsc{C-Pointer}) or an integer with a size equal to the size of a pointer (\textsc{C-PointerToInt}).
+\end{case}
+\begin{case}{$\trust \triangleq \tpl{\trustprod, 0}$}
+By inversion of \textsc{FieldToScalar}, the induction hypothesis, and $\textsc{TS-R-Field}$.
+\end{case}
+\begin{case}{$\trust \triangleq \trustprod, \tllvm:\vallvm \triangleq \bytes:\tint{q}$}
+By inversion of \textsc{C-ProductToInt} we have $\size{\trustprod} = q$, which is equal to the size of the value read from memory. 
+\end{case}
+\begin{case}{$\trust \triangleq \trustprod, \tllvm:\vallvm \triangleq \tpl{\overline{\vallvm}}:\overline{\tllvm}$}
+By inversion of \textsc{C-Product} and the induction hypothesis, size is preserved for each field, so size is preserved for the entire product.
+\end{case}
+\end{bycases}
+\end{proof}

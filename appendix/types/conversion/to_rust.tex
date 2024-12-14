@@ -1,0 +1,5 @@
+\inferrule[C-PointerFromInt]{\ell \triangleq \bytes}{\mu;\sigma \vdash \vptr{\ell}{\provwildcard}:*\trust \leftsquigarrow \bytes : \tint{\ptrsize} \dashv \mu;\sigma}
+\\
+\inferrule[C-FieldFromScalar]{ \mu'' \vdash \memwrite{\ell}{\valbase} \dashv \mu' \\\\ \mu;\sigma\vdash \valbase:\trust \convertsfrom \valbase:\tllvm \dashv \mu'';\sigma}{\mu;\sigma \vdash \vptr{\ell}{\btag} : \rfield{o}{\trust}{0} \convertsfrom \valbase : \tllvm \dashv \mu';\sigma}
+\and
+\inferrule[C-ProductFromInt]{\size{\trustprod} = q \\ \mu \vdash \memwrite{\ell}{\bytes} \dashv \mu'}{\mu;\sigma \vdash \vptr{\ell}{\btag} : \trustprod \convertsfrom \bytes : \tint{q} \dashv \mu';\sigma}

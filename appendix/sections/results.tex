@@ -1,0 +1,14 @@
+\begin{table}[H]
+\small
+\caption{Download counts for each crate where a bug was found, sorted by ``All-Time''. The mean download count per day is aggregated across the 6 months between March 20th and September 20th, 2023.}
+\label{appendix:table:popularity}
+\input{tables/popularity.tex}
+\end{table}
+\begin{landscape}
+\input{tables/bugs.tex}
+\begin{table}[H]
+\caption{Test results across each of the three evaluation modes. In the ``Zeroed'' mode, all stack and heap memory from LLVM is zero-initialized. In the ``Uninitialized'' mode, LLVM is allowed to read uninitialized bytes without throwing an error.}
+\label{appendix:table:tests}
+\input{tables/tests.tex}
+\end{table}
+\end{landscape}

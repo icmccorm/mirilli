@@ -1,0 +1,5 @@
+\inferrule[C-Pointer]{\\}{\mu;\sigma \vdash \vptr{\ell}{\varrho} : \trust \interconverts \vptr{\ell}{\btag} : \opaqueptr \dashv \mu;\sigma}
+\and
+\inferrule[C-Int]{}{\mu;\sigma \vdash \bytes^n:\tint{n} \interconverts \bytes^n:\tint{n} \dashv \mu;\sigma}
+\and
+\inferrule[C-Product]{\fields{\vptr{\lloc}{\btag} :\overline{\trustprod}^n} = \overline{\valrust:\trustprod}^n \\\\\forall i \in [1,n].\ \mu_{i-1};\sigma_{i-1} \vdash \valrust:\trustprod \interconverts \vallvm : \tllvm_i \dashv \mu_i;\sigma_i}{\mu_0,\sigma_0 \vdash \vptr{\lloc}{\btag} :\overline{\trustprod}^n \interconverts \tpl{\overline{\vallvm}}:\overline{\tllvm}^n \dashv \mu_n;\sigma_n}

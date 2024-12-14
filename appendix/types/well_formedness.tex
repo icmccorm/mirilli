@@ -1,0 +1,11 @@
+\begin{infersection}{$\vdash v: \tau$}{The typed value $v:\tau$ is well-formed.}
+\inferrule[WF-Int]{}{\vdash \bytes^n:\tint{n}}
+\and
+\inferrule[WF-LLVMPtr]{}{\vdash \vptr{\ell}{\varrho}:\opaqueptr}
+\and
+\inferrule[WF-RustPtr]{}{\vdash \vptr{\ell}{\varrho}:*\trust}
+\\
+\inferrule[WF-Rustprod]{}{\vdash \vptr{\ell}{\varrho}:\trustprod}
+\and
+\inferrule[WF-LLVMProd]{\forall i \in [1,n] \vdash \vallvm_i : \tllvm_i }{\vdash \tpl{\overline{\vallvm}^n} : \overline{\tllvm}^n}
+\end{infersection}

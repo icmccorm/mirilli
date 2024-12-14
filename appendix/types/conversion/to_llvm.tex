@@ -1,0 +1,5 @@
+\inferrule[C-PointerToInt]{\ell \triangleq \bytes \\ \expose{\sigma}{\btag} = \sigma'}{\mu;\sigma \vdash \vptr{\ell}{\btag}:*\trust \convertsto \bytes : \tint{\ptrsize} \dashv \mu;\sigma'}
+\\
+\inferrule[C-FieldToScalar]{\mu;\sigma \vdash \memread{\ell}{\trust} = \valbase \dashv \sigma'' \\\\ \mu;\sigma''\vdash \valbase:\trust \rightsquigarrow \valbase:\tllvm \dashv \mu;\sigma'}{\mu;\sigma \vdash \vptr{\ell}{\btag} : \rfield{o}{\trust}{0} \convertsto \valbase : \tllvm \dashv \mu;\sigma'}
+\and
+\inferrule[C-ProductToInt]{\size{\trustprod} = q \\\\ \mu;\sigma \vdash \memread{\ell}{\tint{q}} = \bytes \dashv \sigma'}{\mu;\sigma \vdash \vptr{\lloc}{\btag} : \trustprod \convertsto \bytes : \tint{q} \dashv \mu;\sigma'}

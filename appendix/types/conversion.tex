@@ -1,0 +1,11 @@
+\begin{infersection}{$\mu;\sigma \vdash \valrust:\trust \interconverts \vallvm:\tllvm \dashv \mu';\sigma'$}{Under the store $\mu$ and tag set $\sigma$, Rust values $\valrust$ of type $\trust$ and LLVM values $\vallvm$ of type $\tllvm$ are interconvertible, producing the updated store $\mu'$ and tag set $\sigma'$.}
+\input{types/conversion/bidirectional.tex}
+\end{infersection}
+
+\begin{infersection}{$\mu;\sigma \vdash \valrust:\trust  \convertsto \vallvm:\tllvm \dashv \mu;\sigma'$}{Under the store $\mu$ and tag set $\sigma$, Rust values $\valrust$ of type $\trust$ can be converted to LLVM values $\vallvm$ of type $\tllvm$, producing the updated tag set $\sigma'$}
+\input{types/conversion/to_llvm.tex}
+\end{infersection}
+
+\begin{infersection}{$\mu;\sigma \vdash \valrust:\trust \convertsfrom \vallvm:\tllvm \dashv \mu;\sigma'$}{Under the store $\mu$ and tag set $\sigma$, LLVM values $\valrust$ of type $\tllvm$ can be converted to Rust values $\valrust$ of type $\trust$, producing the updated store $\mu'$}
+\input{types/conversion/to_rust.tex}
+\end{infersection}

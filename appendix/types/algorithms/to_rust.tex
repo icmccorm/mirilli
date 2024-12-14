@@ -1,0 +1,35 @@
+\Comment{A list of typed values provided by Rust}    
+$R \gets [\overline{\valrust, \trust}^n]$\;
+\Comment{A list of LLVM types.}    
+$L \gets [\overline{\tllvm}^n]$\;
+\Comment{A calling convention; either `$\m{static}$' or `$\m{variable}$'.}  
+$C \gets c$\;
+\Comment{The list of converted arguments}  
+$A \gets []$\;
+\Comment{The initial store and tag set.}  
+$\mathcal{S} \gets \mu;\sigma$\;
+\While{$R$ is not empty}{
+    $\valrust_i:\trust_i \gets \m{next}(R)$\;
+    \eIf{L is not empty}{
+        $\tllvm_j \gets \m{next}(L)$\;
+        \eIf{$\size{\trust_i} = \size{\tllvm_j}$}{
+            $\store \gets \store'$ where $\store \vdash \valrust_i:\trust_i \rightsquigarrow \vallvm_j:\tllvm_j \dashv\store'$\;
+            $A \gets A \concatenate [\vallvm_j:\tllvm_j$]\;
+            \Continue
+        }{
+        \Multiline{We only expand homogeneous aggregates when converting from Rust; in the other direction, we skip directly to an error.}
+        \If{$\trust \triangleq \overline{\trustprod}^n$ and $\homog{\trust}$}{
+                \If{$\m{len}(L) \geq n + \m{len}(R)$}{
+                    $R \gets R \concatenate [\fields{\valrust_i:\trust_i}$]\;
+                    \Continue
+                }
+            }
+        }
+    }{
+        \If{$L$ is empty and $C = \cconvvar$ and $\scalar{\trust_i}$}{
+            $L \gets L \concatenate [\scalareq{\trust_i}]$;\
+            \Continue
+        }
+    }
+    $\m{error}()$
+}

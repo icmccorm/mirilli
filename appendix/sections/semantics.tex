@@ -1,0 +1,120 @@
+\begin{tabular}{llll}
+\cbox{red} & Rust & \cbox{blue} & LLVM
+\end{tabular}
+
+\subsection{Domains}
+\label{appendix:types:domains}
+\input{types/domains.tex}
+
+\subsection{Type Syntax}
+\label{appendix:types:type_syntax}
+\input{types/type_syntax.tex}
+
+\subsection{Value Syntax}
+\label{appendix:types:value_syntax}
+\input{types/value_syntax.tex}
+
+\subsection{Environments}
+\label{appendix:types:environments}
+\input{types/environments.tex}
+
+\subsection{Conversion}
+\label{appendix:types:conversion}
+\input{types/conversion.tex}
+
+\subsection{Store Operations}
+\label{appendix:types:store}
+\input{types/heap.tex}
+
+\subsection{Metafunctions}
+\label{appendix:types:meta}
+\input{types/metafunctions.tex}
+
+\subsection{Well-formedness}
+\label{appendix:types:wf}
+\input{types/well_formedness.tex}
+
+\subsection{Proofs}
+\label{appendix:types:proofs}
+\begin{lemma}[Canonical Forms]
+\label{lemma:canonical}
+For all values $v$, if $\vdash v:\tau$, then 
+\begin{enumerate}
+\item If $v\triangleq \bytes^n$, then $\tau \triangleq \tint{n}$.
+\item If $\valrust \triangleq \vptr{\ell}{\varrho}$, then $\tau$ is either $*\trust$ or $\trustprod$ in Rust, or $\opaqueptr$ in LLVM.
+\item If $v\triangleq \tpl{\overline{\vallvm}^n}$ then $\tau$ is an LLVM product type $\overline{\tllvm}^n$
+\end{enumerate}
+\begin{proof}
+By inspection of $\vdash v:\tau$.
+\end{proof}
+\end{lemma}
+
+\begin{lemma}[Compatible Forms]
+\label{lemma:compatible}
+For all Rust typed values $\valrust:\trust$ and LLVM typed values $\vallvm:\tllvm$,\\ 
+if $\mu;\sigma \vdash \valrust:\trust \rightsquigarrow \vallvm:\tllvm \dashv \mu;\sigma'$ then $\valrust:\trust$ determines the possible forms of $\vallvm:\tllvm$.
+\begin{enumerate}
+\item If $\valrust:\trust \triangleq \bytes^n:\tint{n}$, then $\vallvm:\tllvm \triangleq \valrust:\trust$
+\item If $\valrust:\trust \triangleq \vptr{\ell}{\varrho}:\trust$, then $\vallvm:\tllvm$ is either:
+\begin{enumerate}
+\item An opaque pointer of the form $\vptr{\ell}{\varrho}:\opaqueptr$.
+\item An integer of the form $\bytes^n:\tint{n}$.
+\item An LLVM product type $\tpl{\overline{\vallvm}}:\overline{\tllvm}$.
+\end{enumerate}
+\end{enumerate}
+Similarly, if $\mu;\sigma \vdash \valrust:\trust \convertsfrom \vallvm:\tllvm \dashv \mu';\sigma$\\
+then the form of $\vallvm:\tllvm$ determines the possible forms of $\valrust:\trust$.
+\begin{enumerate}
+\item If $\vallvm:\tllvm \triangleq \bytes^n:\tint{n}$, then $\valrust:\trust$ is either:
+\begin{enumerate}
+\item An integer value of the same form.
+\item A pointer value of the form $\vptr{\ell}{\provwildcard}:*\trust$
+\item A Rust product value $\vptr{\ell}{\varrho} : \trustprod$ stored at some valid location $\ell$.
+\end{enumerate}
+\item If $\vallvm:\tllvm \triangleq \vptr{\ell}{\varrho}:\opaqueptr$, then $\valrust:\trust$ is either:
+\begin{enumerate}
+\item A Rust product value $\vptr{\ell}{\varrho}:\trustprod$ for some $\trustprod$
+\item A Rust pointer value $\vptr{\ell}{\varrho}:*\trust$ for some $\trust$.
+\end{enumerate}
+\item If $\vallvm:\tllvm \triangleq \tpl{\overline{\tllvm}}:\overline{\tllvm}$ then $\valrust:\trust$ must be a Rust product value $\vptr{\ell}{\varrho}:\trustprod$ for some $\trustprod$.
+\end{enumerate}
+\begin{proof}
+By Lemma~\ref{lemma:canonical} and inspection of the syntax for the value conversion judgement.
+\end{proof}
+\end{lemma}
+
+\begin{restatable}{lemma}{readwrite}
+\label{lemma:readwrite}
+For all well-formed, typed scalar values $v:\tau$ and all valid heap locations $\ell$, we have:
+$$\mu \vdash \memwrite{\ell}{v} \dashv \mu' \quad \Rightarrow \quad \mu';\sigma \vdash \memread{\ell}{\tau} = v\dashv \sigma'$$
+\end{restatable} 
+\input{types/proofs/readwrite.tex}
+
+\begin{restatable}[Conversion is semi-functional]{theorem}{semifunctional}
+\label{thm:bidirectionality}
+For all well-typed values ${\valrust:\trust}$ and ${\vallvm:\tllvm}$, there exists some heaps $\mu, \mu'$ and tag sets $\sigma, \sigma'$ such that
+$${\mu;\sigma \vdash \valrust :\trust \convertsfrom \vallvm:\tllvm \dashv \mu'\sigma} \Rightarrow 
+{\mu';\sigma \vdash \valrust :\trust \convertsto \vallvm:\tllvm \dashv \mu'\sigma'}$$
+\end{restatable}
+Converting an LLVM value to Rust may affect the heap, but it will not change the tag set. Likewise, converting a Rust value to LLVM may affect the tag set but it will not change the contents of the heap.
+\input{types/proofs/functional.tex}
+
+\begin{restatable}[Equal size is required]{theorem}{semifunctional}
+\label{thm:size}
+Value conversion will succeed if and only if Rust and LLVM values have the same size.
+For all well-typed values ${\valrust:\trust}$ and ${\vallvm:\tllvm}$, if there exists some heaps $\mu, \mu'$ and tag sets $\sigma, \sigma'$ such that either
+$${\mu;\sigma \vdash \valrust :\trust \convertsfrom \vallvm:\tllvm \dashv \mu';\sigma} \quad\quad\quad \text{or} \quad\quad\quad
+{\mu;\sigma \vdash \valrust :\trust \convertsto \vallvm:\tllvm \dashv \mu;\sigma'}$$
+Then either $\size{\trust} = \size{\tllvm}$ or $\tllvm = \opaqueptr$. That is, conversion will get ``stuck'' (which is reported as undefined behavior) if the types on either side of the boundary have unequal size, unless the LLVM type is an opaque pointer.
+\end{restatable}
+\input{types/proofs/size.tex}
+
+\subsection{Parameter Passing}
+\SetKwComment{Comment}{// }{}
+\SetKwComment{Multiline}{/* }{ */}
+\begin{algorithm}[H]
+\small
+\caption{Converting a list of LLVM arguments to Rust arguments.}
+\label{alg:to_rust}
+\input{types/algorithms/to_rust.tex}
+\end{algorithm}

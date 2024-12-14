@@ -1,0 +1,258 @@
+%%
+%% This is file `plstx.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% plstx.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2011 by Jesse A. Tov
+%% 
+%% This file may be distributed and/or modified under the This file
+%% conditions of the LaTeX Project Public License, either version 1.2 of
+%% this license or (at your option) any later version. The latest version
+%% of this license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{plstx}
+ [2011/03/26 v0.2 (grammars for programming language syntax)]
+\RequirePackage{keyval}
+\RequirePackage{calc}
+\RequirePackage{listproc}
+\define@key{plstx}{align continue}{\def\plstx@align@continue{#1}}
+\define@key{plstx}{align is one of}{\def\plstx@align@isoneof{#1}}
+\define@key{plstx}{align nonterm}{\def\plstx@align@nonterm{#1}}
+\define@key{plstx}{continue center}[]{\def\plstx@align@continue{\plstx@center}}
+\define@key{plstx}{continue left}[]{\def\plstx@align@continue{\plstx@left}}
+\define@key{plstx}{continue right}[]{\def\plstx@align@continue{\plstx@right}}
+\define@key{plstx}{continue}[]{\def\plstx@continue{#1}}
+\define@key{plstx}{gutter}{%
+  \def\plstx@gutter@left{\kern#1}%
+  \def\plstx@gutter@right{\kern#1}}
+\define@key{plstx}{gutter left text}{\def\plstx@gutter@left{#1}}
+\define@key{plstx}{gutter left}{\def\plstx@gutter@left{\kern#1}}
+\define@key{plstx}{gutter right text}{\def\plstx@gutter@right{#1}}
+\define@key{plstx}{gutter right}{\def\plstx@gutter@right{\kern#1}}
+\define@key{plstx}{gutter text}{%
+  \def\plstx@gutter@left{#1}%
+  \def\plstx@gutter@right{#1}}
+\define@key{plstx}{is one of center}[]{\def\plstx@align@isoneof{\plstx@center}}
+\define@key{plstx}{is one of left}[]{\def\plstx@align@isoneof{\plstx@left}}
+\define@key{plstx}{is one of right}[]{\def\plstx@align@isoneof{\plstx@right}}
+\define@key{plstx}{is one of}{\def\plstx@isoneof{#1}}
+\define@key{plstx}{label skip text}{\def\plstx@labelskip{#1}}
+\define@key{plstx}{label skip}{\def\plstx@labelskip{\kern#1}}
+\define@key{plstx}{label style}[]{\def\plstx@label@style{#1}}
+\define@key{plstx}{left margin}[1em]{\def\plstx@margin@left{\kern#1}}
+\define@key{plstx}{many per line}[]{\let\plstx@one@per@line\@secondoftwo}
+\define@key{plstx}{margin}[1em]{%
+  \def\plstx@margin@left{\kern#1}%
+  \def\plstx@margin@right{\kern#1}}
+\define@key{plstx}{nonterm center}[]{\def\plstx@align@nonterm{\plstx@center}}
+\define@key{plstx}{nonterm left}[]{\def\plstx@align@nonterm{\plstx@left}}
+\define@key{plstx}{nonterm right}[]{\def\plstx@align@nonterm{\plstx@right}}
+\define@key{plstx}{nonterm style}[]{\def\plstx@nonterm@style{#1}}
+\define@key{plstx}{one per line}[]{\let\plstx@one@per@line\@firstoftwo}
+\define@key{plstx}{or skip text}{\def\plstx@orskip{#1}}
+\define@key{plstx}{or skip}{\def\plstx@orskip{\kern#1}}
+\define@key{plstx}{or}{\def\plstx@or{#1}}
+\define@key{plstx}{rhs style}[]{\def\plstx@rhs@style{#1}}
+\define@key{plstx}{right margin}[1em]{\def\plstx@margin@right{\kern#1}}
+\newcommand*\plstx@set{\setkeys{plstx}}
+\let\plstxset\plstx@set\relax
+\plstx@set{
+  continue      = \vert,
+  continue right,
+  gutter        = 4pt,
+  is one of     = {::=},
+  is one of center,
+  label skip    = 1pc,
+  label style   = \emph,
+  many per line,
+  margin        = 0pt,
+  nonterm center,
+  nonterm style = \ensuremath,
+  or            = \vert,
+  or skip       = 4pt,
+  rhs style     = \ensuremath,
+}
+\def\plstx@left#1{#1\hfill}
+\def\plstx@right#1{\hfill#1}
+\def\plstx@center#1{\hfill#1\hfill}
+\newcommand\plstx@parseRHS[2]{%
+  \let#1=\empty
+  \plstx@parseRHS@loop#2|\plstx@parseRHS@stop\plstx@parseRHS@loop{#1}%
+}
+\def\plstx@parseRHS@loop#1|#2\plstx@parseRHS@loop#3{%
+  \SnocTo{#1}{#3}%
+  \ifx#2\plstx@parseRHS@stop
+    \let\plstx@parseRHS@kont=\relax
+  \else
+     \def\plstx@parseRHS@kont{%
+       \plstx@parseRHS@loop#2\plstx@parseRHS@loop{#3}%
+     }%
+  \fi
+  \plstx@parseRHS@kont
+}
+\newcommand\plstx@additem[1]{%
+  \SnocTo{#1}{\plstx@items}%
+}
+\def\plstx@dispatch#1{%
+  \ifx#1\end
+    \let\plstx@dispatch@kont\end
+  \else\ifx#1\endplstx
+    \let\plstx@dispatch@kont\endplstx
+  \else\ifx#1\intertext
+    \let\plstx@dispatch@kont\plstx@intertext
+  \else\ifx#1[%
+    \let\plstx@dispatch@kont\plstx@vskip
+  \else\ifx#1\set
+    \let\plstx@dispatch@kont\plstx@set@later
+  \else\ifx#1*%
+    \let\plstx@dispatch@kont\plstx@other
+  \else
+    \def\plstx@dispatch@kont{\plstx@parseprod#1}%
+  \fi\fi\fi\fi\fi\fi
+  \plstx@dispatch@kont
+}
+\def\plstx@parseprod#1:#2::=#3\\{%
+  \plstx@additem{\plstx@production{#1}{#2}{\plstx@isoneof}{\plstx@continue}{#3}}%
+  \plstx@dispatch%
+}
+\def\plstx@other#1:#2[#3]#4\\{%
+  \let\plstx@other@isoneof\plstx@isoneof
+  \let\plstx@other@continue\plstx@continue
+  \def\plstx@other@todo##1{%
+    \def\plstx@other@isoneof{##1}%
+    \def\plstx@other@continue{##1}%
+    \def\plstx@other@todo####1{%
+      \def\plstx@other@continue{####1}%
+    }%
+  }%
+  \@for\plstx@each:=#3\do{%
+    \expandafter\plstx@other@todo\expandafter{\plstx@each}%
+  }%
+  \def\plstx@other@addthis##1##2{%
+    \plstx@additem{\plstx@production{#1}{#2}{##1}{##2}{#4}}%
+  }%
+  \expandafter\expandafter\expandafter\plstx@other@addthis
+  \expandafter\expandafter
+    \expandafter{\expandafter\plstx@other@isoneof\expandafter}%
+    \expandafter{\plstx@other@continue}%
+  \let\plstx@other@isoneof\@undefined
+  \let\plstx@other@continue\@undefined
+  \let\plstx@other@todo\@undefined
+  \let\plstx@other@addthis\@undefined
+  \plstx@dispatch
+}
+\def\plstx@intertext#1{%
+  \plstx@additem{\plstx@intertext{#1}}%
+  \plstx@dispatch%
+}
+\def\plstx@vskip#1]{\plstx@additem{\plstx@later{\vskip#1}}\plstx@dispatch}
+\def\plstx@set@later#1{\plstx@additem{\plstx@set{#1}}\plstx@dispatch}
+\newsavebox\plstx@box@a
+\newsavebox\plstx@box@b
+\newsavebox\plstx@box@c
+\newlength\plstx@maxnt
+\newlength\plstx@maxisoneof
+\newlength\plstx@availwd
+\newenvironment{plstx}[1][]
+  {%
+    \begingroup
+    \catcode`\|=12\relax
+    \plstx@set{#1}%
+    \let\plstx@items\empty
+    \plstx@dispatch
+  }
+  {%
+    \ifx\plstx@items\empty
+      \PackageWarning{plstx}{grammar must have at least one production}%
+    \else
+      \def\plstx@listitem@noop##1{##1\let\listitem\plstx@listitem@noop}%
+      \plstx@listitem@noop\relax%
+      \setlength{\plstx@maxnt}{0pt}%
+      \setlength{\plstx@maxisoneof}{0pt}%
+      \def\plstx@production##1##2##3##4##5{%
+        \setlength
+          {\global\plstx@maxnt}
+          {\maxof{\plstx@maxnt}{\widthof{\plstx@nonterm@style{##2}}}}%
+        \setlength
+          {\global\plstx@maxisoneof}
+          {\maxof{\plstx@maxisoneof}
+                 {\maxof{\widthof{${##3}$}}
+                        {\widthof{${##4}$}}}}%
+      }%
+      \def\plstx@intertext##1{}%
+      \def\plstx@later##1{}%
+      {\plstx@items}%
+      \def\plstx@production##1##2##3##4##5{%
+        \setlength{\plstx@availwd}{\linewidth}%
+        \sbox\plstx@box@a{\plstx@label@style{##1}}%
+        \ifdim\wd\plstx@box@a>0pt
+          \sbox\plstx@box@a{\plstx@labelskip\usebox\plstx@box@a}%
+        \fi
+        \sbox\plstx@box@a{\usebox\plstx@box@a\plstx@margin@right}%
+        \addtolength{\plstx@availwd}{-\wd\plstx@box@a}%
+        \sbox\plstx@box@b{%
+          \plstx@margin@left
+          \makebox[\plstx@maxnt]
+            {\plstx@align@nonterm{\plstx@nonterm@style{##2}}}%
+          \plstx@gutter@left
+          \makebox[\plstx@maxisoneof]{\plstx@align@isoneof{${##3}$}}%
+          \plstx@gutter@right
+        }%
+        \plstx@parseRHS\plstx@rhsOut{##5}%
+        \LopTo\plstx@rhsOut\plstx@rhsFirst
+        \sbox\plstx@box@b
+          {\usebox\plstx@box@b
+           \plstx@rhs@style{\plstx@rhsFirst}}%
+        \addtolength{\plstx@availwd}{-\wd\plstx@box@b}%
+        \@forList\plstx@each:=\plstx@rhsOut\do{%
+          \sbox\plstx@box@c
+            {\plstx@orskip${\plstx@or}$\plstx@orskip
+             \plstx@rhs@style{\plstx@each}}%
+          \plstx@one@per@line
+            {\iftrue}
+            {\ifdim\wd\plstx@box@c>\plstx@availwd}%
+            \item\makebox[\linewidth]
+              {\strut\usebox\plstx@box@b\hfill\usebox\plstx@box@a}
+            \setlength{\plstx@availwd}{\linewidth}%
+            \sbox\plstx@box@a{\plstx@margin@right}%
+            \sbox\plstx@box@b{%
+              \plstx@margin@left
+              \makebox[\plstx@maxnt]{}%
+              \plstx@gutter@left
+              \makebox[\plstx@maxisoneof]{\plstx@align@continue{${##4}$}}%
+              \plstx@gutter@right
+              \plstx@rhs@style{\plstx@each}%
+            }%
+            \addtolength{\plstx@availwd}{-\wd\plstx@box@b}%
+          \else
+            \addtolength{\plstx@availwd}{-\wd\plstx@box@c}%
+            \sbox\plstx@box@b{\usebox\plstx@box@b\usebox\plstx@box@c}%
+          \fi
+        }% end \do
+        \ifdim\wd\plstx@box@b>0pt
+          \item\makebox[\linewidth]
+            {\strut\usebox\plstx@box@b\hfill\usebox\plstx@box@a}
+        \fi
+      }%
+      \def\plstx@intertext##1{%
+        \item\strut\ignorespaces##1%
+      }%
+      \def\plstx@later##1{##1}%
+      \trivlist{\plstx@items}\endtrivlist
+    \fi
+    \endgroup
+  }
+\endinput
+%%
+%% End of file `plstx.sty'.
