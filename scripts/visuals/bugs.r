@@ -101,18 +101,11 @@ location_stats <- bugs %>%
   rename(key = error_loc, value = n)
 stats <- stats %>% bind_rows(location_stats)
 
-
-id_list <- bugs %>% select(bug_id) %>% 
-  mutate(bug_id = paste0("\\stepcounter{bugcounter}\\label{", bug_id, "}")) %>%
-  # concatenate with "\n"
-  summarize(bug_id = paste(bug_id, collapse = "\n")) %>%
-  pull() %>%
-  write(file.path("./build/visuals/bug_ids.tex"))
-
 formatted_bugs <- bugs %>%
   mutate(crate_name = ifelse(is.na(root_crate_name), crate_name, root_crate_name)) %>%
   mutate(version = ifelse(is.na(root_crate_version), version, root_crate_version)) %>%
   select(-root_crate_name, -root_crate_version) %>%
+  mutate(bug_id_exp = paste0("\\refstepcounter{bugcounter}\\label{", bug_id, "}")) %>%
   mutate(bug_id = paste0("\\refstepcounter{bugcounter}\\label{", bug_id, "}\\ref{", bug_id, "}")) %>%
   mutate(
     issue = parse_links(issue, "issues", gh_id_parse_fn),
@@ -120,9 +113,18 @@ formatted_bugs <- bugs %>%
     commit = parse_links(commit, "commit", commit_hash_parse_fn),
   ) %>%
   mutate(annotated_error_type = ifelse(annotated_error_type == error_type, "-", annotated_error_type)) %>%
-  select(bug_id, crate_name, version, error_type, annotated_error_type, error_loc, fix_loc, issue, pull_request, commit) %>%
+  select(bug_id, crate_name, version, error_type, annotated_error_type, error_loc, fix_loc, issue, pull_request, commit, bug_id_exp) %>%
   arrange(error_type, annotated_error_type, commit) %>%
   mutate(version = ifelse(version == "0.1.16+minimap2.2.26", "0.1.16\\tablefootnote{+minimap2.2.26}", version))
+
+
+formatted_bugs %>% select(bug_id_exp) %>% 
+  summarize(bug_id_exp = paste(bug_id_exp, collapse = "\n")) %>%
+  pull() %>%
+  write(file.path("./build/visuals/bug_ids.tex"))
+
+formatted_bugs <- formatted_bugs %>%
+  select(-bug_id_exp)
 
 colnames(formatted_bugs) <- c("ID", "Crate", "Version", "Error Category", "Error Type", "Error", "Fix", "Issue(s)", "Pull Request(s)", "Commit(s)")
 
