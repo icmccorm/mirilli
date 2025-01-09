@@ -14,3 +14,4 @@ cmake
 git
 ninja-build
 vim
+postgresql
