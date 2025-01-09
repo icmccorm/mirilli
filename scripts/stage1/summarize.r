@@ -3,8 +3,12 @@ suppressPackageStartupMessages({
     library(readr)
 })
 options(dplyr.summarise.inform = FALSE)
-
-stage1_input_dir <- file.path("./dataset/stage1")
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+dataset_dir <- ifelse(dataset_dir == "", "dataset", dataset_dir)
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
+stage1_input_dir <- file.path(dataset_dir, "stage1")
 stage1_output_dir <- file.path("./build/stage1")
 if (!dir.exists(stage1_output_dir)) {
     dir.create(stage1_output_dir)
@@ -63,3 +67,14 @@ num_tests_and_bytecode <- has_tests_and_bytecode %>% nrow()
 stats <- stats %>% add_row(key = "num_crates_had_tests_and_bytecode", value = num_tests_and_bytecode)
 
 stats <- stats %>% write.csv(stats_file, row.names = FALSE, quote = FALSE)
+
+population <- read_csv(file.path(dataset_dir, "population.csv"), show_col_types = FALSE) %>%
+select(crate_name, version)
+
+early <- read_csv(file.path(stage1_output_dir, "early_abis.csv"), show_col_types = FALSE) %>% 
+    filter(category %in% c("foreign_functions")) %>%
+    select(crate_name) %>% 
+    unique() %>%
+    inner_join(population, by=("crate_name")) %>%
+    select(crate_name, version) %>% 
+    write_csv(file.path(stage1_output_dir, "had_ffi.csv"))

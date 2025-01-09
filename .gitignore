@@ -31,3 +31,6 @@ extracted
 login.sh
 .Rhistory
 dataset
+renv/activate.R
+llvm.sh
+crates-db

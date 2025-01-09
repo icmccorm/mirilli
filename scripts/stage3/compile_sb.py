@@ -1,7 +1,7 @@
 import re
-import parse_shared
+import compile_shared
 from enum import Enum
-from parse_shared import Operation
+from compile_shared import Operation
 RW = f"({Operation.read.value}|{Operation.write.value})"
 
 
@@ -32,17 +32,17 @@ class SBInvalidation:
 
 SB_STATE = f"({SBState.Unique.value}|{SBState.SharedReadOnly.value}|{SBState.SharedReadWrite.value})"
 STACK_ERROR_WEAK = re.compile(
-    f"not granting access to tag {parse_shared.TAG} because that would remove \[{SB_STATE} for {parse_shared.TAG}\] which is (?:strongly|weakly) protected"
+    f"not granting access to tag {compile_shared.TAG} because that would remove \[{SB_STATE} for {compile_shared.TAG}\] which is (?:strongly|weakly) protected"
 )
 STACK_ERROR_DEALLOCATING = re.compile(
-    f"{Operation.dealloc.value}ating while item \[{SB_STATE} for {parse_shared.TAG}\] is (?:strongly|weakly) protected by call"
+    f"{Operation.dealloc.value}ating while item \[{SB_STATE} for {compile_shared.TAG}\] is (?:strongly|weakly) protected by call"
 )
 STACK_ACTION = re.compile(
-    f"(?:attempting a {RW} access using {parse_shared.TAG_NC}|trying to retag from {parse_shared.TAG_NC} for {SB_STATE} permission) at {parse_shared.ALLOCATION}, but that tag (?:only grants {SB_STATE}|does not exist)?"
+    f"(?:attempting a {RW} access using {compile_shared.TAG_NC}|trying to retag from {compile_shared.TAG_NC} for {SB_STATE} permission) at {compile_shared.ALLOCATION}, but that tag (?:only grants {SB_STATE}|does not exist)?"
 )
-CREATION_STACK = re.compile(f"{parse_shared.TAG} was created by a {SB_STATE} retag")
+CREATION_STACK = re.compile(f"{compile_shared.TAG} was created by a {SB_STATE} retag")
 DESTRUCTION_STACK = re.compile(
-    f"{parse_shared.TAG} was later invalidated at offsets {parse_shared.OFFSETS} by a (?:{SB_STATE}( function-entry)? retag( \(of a reference/box)?|{RW} access)"
+    f"{compile_shared.TAG} was later invalidated at offsets {compile_shared.OFFSETS} by a (?:{SB_STATE}( function-entry)? retag( \(of a reference/box)?|{RW} access)"
 )
 
 
@@ -156,7 +156,7 @@ class SBError:
     def summarize(self):
         error_type = None
         if self.protected:
-            error_type = SBErrorType.Framing
+            error_type = SBErrorType.Protected
         elif self.limit is not None:
             if self.limit == SBState.SharedReadOnly and self.action is not None:
                 error_type = SBErrorType.Insufficient
@@ -183,4 +183,4 @@ class SBErrorType(Enum):
     ExpiredByUniqueRetag = "Expired-UniqueRetag"
     ExpiredByRead = "Expired-Read"
     ExpiredByWrite = "Expired-Write"
-    Framing = "Framing"
+    Protected = "Protected"

@@ -3,7 +3,7 @@
 ./src/late/target/
 ./rllvm-as/target/
 archives
-mirilli-rust
+rust
 mirilli-tex
 rllvm-as
 **/*/__pycache__

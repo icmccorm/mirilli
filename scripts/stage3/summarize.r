@@ -5,6 +5,11 @@ stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
   dir.create(stage3_root)
 }
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
+
 stats_file <- file.path(stage3_root, "./stage3.stats.csv")
 
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
@@ -94,10 +99,10 @@ zeroed_meta %>%
   summarize(n = sum(present)) %>%
   write_csv(file.path(stage3_root, "metadata.csv"))
 
-zeroed_raw <- compile_errors("./build/stage3/zeroed", "./dataset/stage3/zeroed") %>%
+zeroed_raw <- compile_errors("./build/stage3/zeroed", file.path(dataset_dir, "stage3/zeroed")) %>%
   inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
-uninit_raw <- compile_errors("./build/stage3/uninit", "./dataset/stage3/uninit") %>%
+uninit_raw <- compile_errors("./build/stage3/uninit", file.path(dataset_dir, "stage3/uninit")) %>%
   inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%
@@ -116,6 +121,14 @@ error_to_examine <- function(error_type, signal_no, assertion_failure) {
   error_type == "Test Failed" & ((is.na(signal_no) & assertion_failure) | signal_no != 9)
 }
 
+uninit <- uninit_raw %>%
+  merge_passes_and_timeouts() %>%
+  select(-memory_mode)
+
+zeroed <- zeroed_raw %>%
+  merge_passes_and_timeouts() %>%
+  select(-memory_mode)
+
 failures <- all_errors %>%
   filter(!errored_exit_code(native_exit_code)) %>%
   filter(
@@ -133,14 +146,6 @@ failures <- all_errors %>%
 deduplication <- add_row(deduplication, state = "After", count = failures %>% nrow(), type = "Failures")
 
 stats <- stats %>% add_row(key = "num_failures", value = failures %>% nrow())
-
-uninit <- uninit_raw %>%
-  merge_passes_and_timeouts() %>%
-  select(-memory_mode)
-
-zeroed <- zeroed_raw %>%
-  merge_passes_and_timeouts() %>%
-  select(-memory_mode)
 
 deduplicate_with_logging <- function(df, mode) {
   raw_errors <- df %>%
