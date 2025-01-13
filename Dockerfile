@@ -57,6 +57,7 @@ RUN service postgresql start
 RUN createdb DATABASE_NAME
 RUN psql DATABASE_NAME < schema.sql
 RUN psql DATABASE_URL < import.sql
+RUN psql -d crates -f ../../scripts/population.sql
 
 FROM db-init AS final
 WORKDIR /usr/src/mirilli

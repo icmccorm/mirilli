@@ -1,7 +1,7 @@
 # Artifact - A Study of Undefined Behavior Across Foreign Function Boundaries in Rust Libraries
 
 ## Purpose
-We are applying for all three badges. Our dataset, tool, and compilation scripts are all publicly **Available** on Zenodo. By following this script, you will confirm that our tool and data processing scripts are **Functional** and **Reusable** by reproducing the statistics in our paper and replicating our entire data collection process for one of the bugs we discovered. This bug still remains in the newest version of the library (published in December, 2024), so by following our evaluation, you will demonstrate that our tool is still functional and capable of finding bugs in libraries published since our evaluation.
+We are applying for all three badges. Our dataset, tool, and compilation scripts are all publicly **Available** on Zenodo. By following this script, you will confirm that our tool and data processing scripts are **Functional** and **Reusable** by reproducing the statistics in our paper and replicating our entire data collection process for one of the bugs we discovered. This bug still remains in the newest version of the library, which was published in December, 2024. By following these steps, you will demonstrate that our tool is still functional and capable of finding bugs in libraries published since our evaluation.
 
 ## Provenance
 All materials relevant to this project are published on [Zenodo](https://doi.org/10.5281/zenodo.12727039) within an x86 Docker Image and in raw, uncompiled source.
@@ -9,17 +9,17 @@ All materials relevant to this project are published on [Zenodo](https://doi.org
 A preprint of our paper is available at on [arXiv](https://arxiv.org/abs/2404.11671).
 
 ## Data
-The artifact published on Zenodo contains four files:
+The artifact contains four files:
 
 * `tool.raw.tar.gz` - (XXX MB) - the raw source code for our tool and data compliation scripts.
 
 * `data.raw.tar.gz` - (XXX MB) - the contents of the [crates.io](https://crates.io) database on 9/20/2023 and the raw output from our data collection steps described in Section 3 of our paper. 
 
-* `appendix.pdf` - (XXX MB) - the Appendix to our paper. 
+* `appendix.pdf` - (XXX MB) - the Appendix of our paper. 
 
 * `docker-image.tar.gz` - (XXX GB) - a Docker image containing the contents of the previous files and a working build of our tool.
 
-You will only need `appendix.pdf` and `docker-image.zip` for the evaluation; all other files can be ignored.
+You will only need `appendix.pdf` and `docker-image.tar.gz` for the evaluation.
 
 ### Data - Contents
 Here we provide a brief overview of the contents of our docker image (excluding configuration files, `.renv` files, `.gitignore`, `Dockerfile`, `makefile`, etc.)
@@ -37,7 +37,6 @@ Here we provide a brief overview of the contents of our docker image (excluding 
 └── src                 // Source for early and late linting passes, which detected FFI bindings.
 ```
 Our data collection took place over three stages using a variety of file formats and intermediate processing steps. We created comprehensive documentation for our dataset. For brevity, instead of including all 10 pages of documentation here, we provide it within `dataset/DATASET.md`. As part of evaluating the reusability of our tool, we will ask you to confirm that this documentation exists and answer a question about one part it. Here, though, we provide a brief summary its contents.
-
 ```
 ├── README.md           // Detailed documentation for the contents of each data collection step
 ├── bugs.csv            // A list of every bug we found and reported in our evaluation
@@ -58,24 +57,36 @@ To complete our evaluation, your system must meet the following requirements:
 * 16 GB of RAM
 * 100 GB of free space
 
-We have set the resource requirements to be more than is strictly necessary to ensure that you will not encounter any issues while evaluating this artifact.
+We have set the resource requirements to be more than strictly necessary to ensure that you will not encounter any issues while evaluating the artifact.
 
 To complete our evaluation, you will need:
 1. A preprint of our paper
 2. the Appendix
-3. Our docker image. 
+3. Our Docker image - `docker-image.tar.gz`
 
 Follow these instructions to ensure that you have access to these components. 
 
-First, download the files `docker-image.zip` and `appendix.pdf` from [Zenodo](https://doi.org/10.5281/zenodo.12727039), and download our paper from [arXiv](https://arxiv.org/abs/2404.11671). 
+First, download the files `docker-image.tar.gz` and `appendix.pdf` from [Zenodo](https://doi.org/10.5281/zenodo.12727039), and download our paper from [arXiv](https://arxiv.org/abs/2404.11671). 
 
-Next, import our Docker image.
+---
+**Only for M-Series Mac Users, skip otherwise**
+
+If you are using a Mac with an M-series processor, make sure that you have Rosetta enabled and installed by executing the following command: 
+
 ```
-docker import docker-image.zip mirilli
+softwareupdate --install-rosetta --agree-to-license
+```
+Then, if you are using Docker Desktop, navigate to "Settings > General > Virtual Machine Options". Make sure that "Use Apple Virtualization Framework" is selected, and that you have checked "Use Rosetta for x86_64/amd64 emulation on Apple Silicon"
+
+---
+
+Now, you can import our Docker image. This command should take ~15 minutes to complete.
+```
+docker import docker-image.tar.gz mirilli
 ```
 To confirm that the image is functional, launch a new container and attach a shell. 
 ```
-docker run mirilli -it /bin/bash
+docker run --platform linux/amd64 -it mirilli /bin/bash
 ```
 Confirm that you have access to our custom Rust toolchain, `mirilli`, by executing the following command.
 ```
@@ -83,7 +94,7 @@ rustup toolchain list
 ```
 You should see the following output.
 ```
-mirilli
+mirilli (default)
 ```
 If all of these steps have been completed successfully, then you are ready to begin evaluating the artifact.
 
@@ -95,7 +106,7 @@ Complete each of the following steps to evaluate our artifact. This assumes that
 * **Step 2** - *Validate Results in Paper* (30 human-minutes + 5 compute-minutes)
 * **Step 3** - *Demonstrate Functionality & Reusability* (30 human minutes + 1 compute minute)
 
-Starting here, the entire evaluation can be completed in under 90 minutes.
+The entire evaluation can be completed in under 90 minutes starting from this point.
 
 ## Check the Appendix (10 human-minutes)
 
@@ -111,16 +122,15 @@ Later on in Section IV, we reference specific issues from two separate Rust crat
 > 
 
 
-
 ## Validate Results in Paper (1 human-hour + 5 compute minutes)
 In this step, you will 
 
 ## Tool Demonstration (15 human minutes + 5 compute minutes)
 
-In this step, we will demonstrate that our tool is functional and reusable by walking through each
+Here, you will demonstrate that our tool is functional and reusable by walking through each
 step of our data collection and bug-finding processes. 
 
 To respect your time, instead of replicating the entire dataset, you will use a single crate, [`bzip2`](https://github.com/trifectatechfoundation/bzip2-rs), where we found a cross-language
-aliasing violation. At the time of our data collection, the latest version of this crate was 0.4.4, and it was maintained by [Alex Crichton](https://github.com/alexcrichton). Ownership has since been transferred to the Trifecta Tech Foundation, which updated it to version 0.5.0 in December of 2024. This version eliminated several bugs and added a new Rust backend, but our bug still remains in the C backend. You will evaluate the functionality and reusability of our tool by walking through each stage of data collection for this library and replicating the aliasing bug in this library. This step-by-step walkthrough is intended to be used as a guide for anyone wishing to replicate our results in the future. 
+aliasing violation. At the time of our data collection, the latest version of this crate was 0.4.4, and it was maintained by [Alex Crichton](https://github.com/alexcrichton). Ownership has since been transferred to the [Trifecta Tech Foundation](https://trifectatech.org/), which updated it to version 0.5.0 in December of 2024. This version eliminated several bugs and added a new Rust backend, but our bug still remains in the C backend. You will evaluate the functionality and reusability of our tool by walking through each stage of data collection for this library and replicating the aliasing bug in this library. This step-by-step walkthrough is intended to be used as a guide for anyone wishing to replicate our results in the future. 
 
 ### Stage 1 - 
