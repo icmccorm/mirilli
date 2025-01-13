@@ -53,6 +53,7 @@ RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 
 FROM rllvm-compile AS db-init
 WORKDIR /usr/src/mirilli/dataset/crates-db
+RUN su -c "service postgresql start; psql -f ./scripts/init.sql" postgres
 RUN service postgresql start
 RUN createdb DATABASE_NAME
 RUN psql DATABASE_NAME < schema.sql
@@ -61,3 +62,5 @@ RUN psql -d crates -f ../../scripts/population.sql
 
 FROM db-init AS final
 WORKDIR /usr/src/mirilli
+
+ENTRYPOINT ["service postgresql start; /bin/bash"]
