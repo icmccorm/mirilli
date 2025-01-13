@@ -1,5 +1,6 @@
 FROM rocker/verse:4.3.1 AS setup
 WORKDIR /usr/src/mirilli
+
 COPY . .
 RUN apt-get update -y && apt-get upgrade -y && apt-get install $(cat pkglist) -y
 RUN curl -O https://apt.llvm.org/llvm.sh
@@ -52,15 +53,8 @@ RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 
 FROM rllvm-compile AS db-init
-WORKDIR /usr/src/mirilli/dataset/crates-db
-RUN su -c "service postgresql start; psql -f ./scripts/init.sql" postgres
-RUN service postgresql start
-RUN createdb DATABASE_NAME
-RUN psql DATABASE_NAME < schema.sql
-RUN psql DATABASE_URL < import.sql
-RUN psql -d crates -f ../../scripts/population.sql
+WORKDIR /usr/src/mirilli/
+RUN ./scripts/initdb.sh
 
 FROM db-init AS final
 WORKDIR /usr/src/mirilli
-
-ENTRYPOINT ["service postgresql start; /bin/bash"]
