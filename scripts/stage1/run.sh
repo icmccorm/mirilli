@@ -107,5 +107,5 @@ do
         rm -rf ./extracted
     done
     TRIES_REMAINING=3
-done <<< "$(tail -n +0 "$DIR/population.csv")"
+done <<< "$(tail -n +0 "$1/population.csv")"
 printf 'FINISHED! %s\n' "$name"
