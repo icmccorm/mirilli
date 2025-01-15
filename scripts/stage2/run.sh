@@ -29,6 +29,7 @@ touch $FAILED_DOWNLOAD_CSV
 touch $STATUS_MIRI_CSV
 touch $STATUS_RUSTC_CSV
 touch $VISITED_CSV
+touch $TESTS_CSV
 
 CRATE_COLNAMES="crate_name,version"
 STATUS_COLNAMES="$CRATE_COLNAMES,exit_code"
