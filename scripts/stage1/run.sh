@@ -1,21 +1,25 @@
 #!/bin/bash
 
-HELPTEXT="Usage: ./run.sh <path to dataset directory>
+HELPTEXT="
+Usage: ./run.sh <path to dataset directory>
 
-This script takes as input a path to a directory that must contain 
+This script takes as input a path to a directory that must contain
 the file "population.csv". This file must contain two unlabelled 
 columns with the name and version of each crate under test, in 
-that order.
+that order.\n
 
 It will overwrite and output the results of Stage 1 data collection
 to a new directory named "stage1" inside the directory specified by
 the input argument.
 
-Details on the format and contents of the output can be found in 
-"DATASET.md" within the section "Stage 1".
+The purpose of this step is to determine which crates contain unit
+tests and produce LLVM bitcode during compilation. We also analyze the
+source code of each crate to find foreign function bindings.
+Details on the format and contents of the output of this script
+can be found in "DATASET.md" within the section Stage 1. 
 "
 if [ "$#" -ne 1 ]; then
-    echo $HELPTEXT
+    echo "$HELPTEXT"
     exit 1
 fi
 if [ ! -f $1/population.csv ]; then
