@@ -70,8 +70,11 @@ do
                     OUTPUT_DIR="../$DIR/logs/$crate_name/"
                     mkdir -p "$OUTPUT_DIR"
                     cp ./rustc_list.txt "$OUTPUT_DIR/population.csv"
-                    while read -r test_name <&4; 
+                    while read -r test_name <&4;
                     do
+                        if [ -z "$test_name" ]; then
+                            continue
+                        fi
                         rm -f err
                         touch err
                         EXITCODE=1
