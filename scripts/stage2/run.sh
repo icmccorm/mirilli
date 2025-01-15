@@ -1,6 +1,19 @@
 #!/bin/bash
+
+HELPTEXT="
+Usage: ./run.sh <DIR> <stage2.csv>
+
+The purpose of this step is to execute each of the tests found in 
+Stage 1 find those that call foreign functions. Details on the
+format and contents of the output of this script can be found in 
+DATASET.md within the section Stage 3. The input to this step
+is the file stage2.csv, which is produced by compiling the
+results for Stage 1. 
+
+Results are stored in <DIR>/stage2. Existing results will be overwritten.
+"
 if [ "$#" -ne 2 ]; then
-    echo "Usage: ./run.sh <path to dataset directory> <path to candidate crate CSV file>"
+    echo "$HELPTEXT"
     exit 1
 fi
 if [ ! -f $2 ]; then

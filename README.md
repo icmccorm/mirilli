@@ -277,4 +277,34 @@ Execute the following command to compile the dataset for this stage.
 ```
 $ DATASET=demo make ./build/stage2
 ```
+You should see the following output:
+```
+Starting Stage 2...
+Finished Stage 2
+```
+To confirm that this stage is successful, execute the following command:
+```
+$ tree build/stage2/
+```
+You should see the following output (excluding the annotations)
+```
+├── stage2-ignored.csv      // tests that were manually `#[ignore]`-ed
+├── stage2.stats.csv        // in-text statistics
+├── stage3.csv              // tests that encountered FFI calls
+└── tests.csv               // all tests ran during this stage
+```
+
+
+The file `stage3.csv` will be used as input to Stage 3.
+
+
+# Stage 3
+In this data collection stage, we ran each of the tests that we found in Stage 2 with MiriLLI. 
+We had to complete this stage twice; once for each memory mode (described in Section III). 
+
+The script for this stage is `./scripts/stage3/run.sh`. Execute it without arguments to see its description.
+
+The third argument, `-z`, is optional. If provided, then MiriLLI is executed in the "zeroed" memory mode, which
+zero-initializes all LLVM-allocated memory by default. 
+
 

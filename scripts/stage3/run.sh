@@ -1,5 +1,22 @@
 #!/bin/bash
-HELPTEXT="Usage: ./run.sh <path to dataset directory> <path to candidate crate CSV file> <"-z" (optional)>"
+HELPTEXT="
+
+Usage: ./run.sh <DIR> <stage3.csv> <"-z" (optional)>
+
+The purpose of this step is to execute each of the tests discovered
+in Stage 2 with MiriLLI to find cross-language bugs. Details on the
+format and contents of the output of this script can be found in 
+DATASET.md within the section Stage 3. This takes as input the
+CSV file stage3.csv, which is produced as part of the output from
+compiling the results of Stage 2.
+
+The third argument is optional, and must be "-z" if provided. This
+will enable the "Zeroed" mode in MiriLLI, which zero-initializes all
+LLVM-allocated memory by default. If this is enabled, then results will
+be stored in the directory <DIR>/stage3/zeroed. Otherwise, results will
+be stored in <DIR>/stage3/uninit. Existing results will be overwritten.
+"
+
 
 if [ "$#" -lt 2 ]; then
     echo $HELPTEXT
@@ -17,6 +34,18 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
 export CC="clang-16 $DEFAULT_FLAGS"
 export CXX="clang++-16 $DEFAULT_FLAGS"
+
+CURRENT_CRATE=""
+TIMEOUT=10m
+TIMEOUT_MIRI=5m
+MEMORY_MODE=""
+if [ "$3" == "-z" ]; then
+    MEMORY_MODE="-Zmiri-llvm-memory-zeroed"
+    STAGE3_DIR="$STAGE3_DIR/zeroed"
+else
+    STAGE3_DIR="$STAGE3_DIR/uninit"
+fi
+
 rm -rf $STAGE3_DIR
 rm -rf ./extracted
 mkdir -p $STAGE3_DIR
@@ -28,13 +57,6 @@ touch $STAGE3_DIR/visited.csv
 touch $STAGE3_DIR/status_stack.csv
 touch $STAGE3_DIR/status_tree.csv
 touch $STAGE3_DIR/status_native.csv
-CURRENT_CRATE=""
-TIMEOUT=10m
-TIMEOUT_MIRI=5m
-MEMORY_MODE=""
-if [ "$3" == "-z" ]; then
-    MEMORY_MODE="-Zmiri-llvm-memory-zeroed"
-fi
 
 rustup default mirilli
 
