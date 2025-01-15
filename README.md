@@ -153,11 +153,13 @@ Fully replicating our dataset would take several days and more than a thousand d
 Instead, you will use a single crate---`bzip2`---where we found a cross-language aliasing violation. 
 At the time of our data collection, the latest version of this crate was 0.4.4, and it was maintained by [Alex Crichton](https://github.com/alexcrichton). Ownership has since been transferred to the [Trifecta Tech Foundation](https://trifectatech.org/), which updated it to version 0.5.0 in December of 2024. This version eliminated several bugs and added a new Rust backend, but our bug still remains in the C backend. You will evaluate the functionality and reusability of our tool by walking through each stage of data collection for this library and replicating the aliasing bug. This step-by-step walkthrough is intended to be used as a guide for replicating our evaluation in the future.
 
-The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. In this case, we are only testing one crate: `bzip2` at version 0.5.0. Collecting and parsing data requires creating a directory to hold intermediate results. This directory must contain a file `population.csv` with two unlabelled columns holding the name and version of each crate that needs to be tested. For this demonstration, we have created one for you: `demo`.
+The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. In this case, we are only testing one crate: `bzip2` at version 0.5.0. 
+
+Collecting and parsing data requires creating a directory to hold intermediate results. This directory must contain a file `population.csv` with two unlabelled columns holding the name and version of each crate that needs to be tested. For this demonstration, we have created one for you: `demo`.
 
 Execute the following command to view an example of the file `population.csv`, which contains our sample crate.
 ```
-cat demo/population.csv
+$ cat demo/population.csv
 ```
 Note that in the actual dataset (`./dataset/population.csv`), this file contains each of the ~120,000 valid crates that were published at the time of writing. We parallelized this data collection process by splitting this CSV file into N partitions, with each partition executed on a separate machine.
 
@@ -166,7 +168,7 @@ In this data collection stage, we compiled every public Rust crate to find the s
 
 The script for executing this stage is `./scripts/stage1/run.sh`. Execute the following command to view its purpose and requirements:
 ```
-./scripts/stage1/run.sh
+$ ./scripts/stage1/run.sh
 ```
 Execute the following command to collect data for `bzip2`.
 ```
@@ -237,11 +239,11 @@ foreign functions.
 The script for executing this stage is `./scripts/stage2/run.sh`. Execute the following command to view its purpose and requirements:
 
 ```
-./scripts/stage2/run.sh
+$ ./scripts/stage2/run.sh
 ```
 To complete data collection for this stage, execute the following command. 
 ```
-> ./scripts/stage2/run.sh demo ./build/stage1/stage2.csv
+$ ./scripts/stage2/run.sh demo ./build/stage1/stage2.csv
 ```
 This will compile and execute every test case for `bzip2` in an unmodified version of Miri, recording the test output and parsing it to determine if Miri encountered a foreign call. When running the script, you should have seen output like so:
 ```
@@ -251,5 +253,9 @@ Exit code is 1
 Miri found FFI call for read::tests::smoke3
 ...
 FINISHED!
+```
+Then, execute the following command to compile the dataset for this stage.
+```
+$ DATASET=demo make ./build/stage2
 ```
 

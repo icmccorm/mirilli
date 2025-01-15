@@ -13,7 +13,7 @@ export CC="clang-18 $DEFAULT_FLAGS"
 export CXX="clang++-18 $DEFAULT_FLAGS"
 export PATH="$HOME/.cargo/bin:$PATH"
 
-DIR="$1"
+DIR="$1/stage2"
 rm -rf $DIR
 rm -rf ./extracted
 STATUS_RUSTC_CSV="$DIR/status_rustc_comp.csv"

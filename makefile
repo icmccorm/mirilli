@@ -1,3 +1,5 @@
+dylint: 
+	
 push:
 	@./scripts/misc/list_instances.sh instances.csv
 	@./scripts/misc/push.sh ./instances.csv
