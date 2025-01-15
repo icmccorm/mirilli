@@ -1,16 +1,12 @@
 #!/bin/bash
 
 HELPTEXT="
-Usage: ./run.sh <path to dataset directory>
+Usage: ./run.sh <DIR>
 
-This script takes as input a path to a directory that must contain
-the file "population.csv". This file must contain two unlabelled 
-columns with the name and version of each crate under test, in 
-that order.\n
-
-It will overwrite and output the results of Stage 1 data collection
-to a new directory named "stage1" inside the directory specified by
-the input argument.
+The directory <DIR> must contain the file "population.csv". This file
+must contain two unlabelled columns with the name and version of each
+crate under test, in that order. Results are stored in <DIR>/stage1. 
+Existing results will be overwritten.
 
 The purpose of this step is to determine which crates contain unit
 tests and produce LLVM bitcode during compilation. We also analyze the
@@ -111,5 +107,5 @@ do
         rm -rf ./extracted
     done
     TRIES_REMAINING=3
-done <<< "$(tail -n +0 "$1")"
+done <<< "$(tail -n +0 "$DIR/population.csv")"
 printf 'FINISHED! %s\n' "$name"
