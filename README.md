@@ -150,8 +150,7 @@ In this step, you will
 Here, you will demonstrate that our tool is functional and reusable by walking through each
 step of our data collection and bug-finding processes. 
 Fully replicating our dataset would take several days and more than a thousand dollars in compute. 
-Instead, you will use a single crate---`bzip2`---where we found a cross-language aliasing violation. 
-At the time of our data collection, the latest version of this crate was 0.4.4, and it was maintained by [Alex Crichton](https://github.com/alexcrichton). Ownership has since been transferred to the [Trifecta Tech Foundation](https://trifectatech.org/), which updated it to version 0.5.0 in December of 2024. This version eliminated several bugs and added a new Rust backend, but our bug still remains in the C backend. You will evaluate the functionality and reusability of our tool by walking through each stage of data collection for this library and replicating the aliasing bug. This step-by-step walkthrough is intended to be used as a guide for replicating our evaluation in the future.
+Instead, you will only compile a subset of the crates that we found. 
 
 The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. In this case, we are only testing one crate: `bzip2` at version 0.5.0. 
 
@@ -316,5 +315,19 @@ $ ./scripts/stage3/run.sh demo build/stage2/stage3.csv -z
 Execute the following command to view the output.
 
 ```
-tree demo/zeroed
+$ tree demo/stage3 -L 1
+```
+
+You should see two directories; one for each memory mode:
+```
+demo/stage3/
+├── uninit
+└── zeroed
+```
+
+Execute the following command for each directory:
+
+```
+$ tree demo/stage3/uninit
+
 ```
