@@ -17,17 +17,20 @@ ENV CXX="clang++-18 -g -O0 --save-temps=obj"
 ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
 ENV LLVM_SYS_181_PREFIX="/usr/src/mirilli/mirilli-rust/build/host/llvm/"
 ENV DATASET="./dataset"
+RUN rustup install nightly
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
-RUN cargo install cargo-dylint@2.6.0 dylint-link@2.6.0 --locked
 RUN rustup component add miri
 RUN rustup component add rust-src
-RUN rustup install nightly
-RUN cargo install cargo-download
 RUN git submodule update --init ./mirilli-rust
 RUN git submodule update --init ./rllvm-as
 
-FROM setup AS setup-renv
+FROM setup as setup-dylint
+RUN cargo install cargo-dylint@2.6.0 dylint-link@2.6.0 --locked
+RUN (cd src/early && cargo build)
+RUN (cd src/late && cargo build)
+
+FROM setup-dylint AS setup-renv
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "renv::restore()"
 
