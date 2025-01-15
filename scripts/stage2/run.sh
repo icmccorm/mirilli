@@ -20,6 +20,8 @@ STATUS_RUSTC_CSV="$DIR/status_rustc_comp.csv"
 STATUS_MIRI_CSV="$DIR/status_miri_comp.csv"
 FAILED_DOWNLOAD_CSV="$DIR/status_download.csv"
 VISITED_CSV="$DIR/visited.csv"
+TESTS_CSV="$DIR/tests.csv"
+
 mkdir -p $DIR
 mkdir -p $DIR/info/
 mkdir -p $DIR/logs/
@@ -34,6 +36,7 @@ echo "$CRATE_COLNAMES" > $VISITED_CSV
 echo "$STATUS_COLNAMES" > $STATUS_MIRI_CSV
 echo "$STATUS_COLNAMES" > $STATUS_RUSTC_CSV
 echo "$STATUS_COLNAMES" > $FAILED_DOWNLOAD_CSV
+echo "exit_code,had_ffi,test_name,crate_name" > $TESTS_CSV
 
 TIMEOUT=10m
 TIMEOUT_MIRI=5m
@@ -63,9 +66,7 @@ do
                 MIRI_EXIT_CODE=$?
                 echo "$crate_name,$version,$RUSTC_FAILED" >> "../$DIR/status_miri_comp.csv"
                 if [ "$MIRI_EXIT_CODE" -eq "0" ]; then
-                    OUTPUT_FILE="../$DIR/info/$crate_name.csv"
                     OUTPUT_DIR="../$DIR/logs/$crate_name/"
-                    echo "Logging tests to $OUTPUT_FILE"
                     mkdir -p "$OUTPUT_DIR"
                     cp ./rustc_list.txt "$OUTPUT_DIR/population.csv"
                     while read -r test_name <&4; 
@@ -107,7 +108,7 @@ do
                                 EXITCODE="-1"
                             fi
                         fi
-                        echo "$EXITCODE,$HAD_FFI,\"$test_name\"" >> "$OUTPUT_FILE"
+                        echo "$EXITCODE,$HAD_FFI,\"$test_name\",$crate_name" >> "$TESTS_CSV"
                         rm -f err 
                     done 4< ./rustc_list.txt
                 fi

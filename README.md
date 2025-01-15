@@ -254,7 +254,27 @@ Miri found FFI call for read::tests::smoke3
 ...
 FINISHED!
 ```
-Then, execute the following command to compile the dataset for this stage.
+
+This will create the directory `demo/stage2`. Execute the following command to print its contents.
+```
+$ tree demo/stage2 | tail -n 1
+```
+If this step succeeded, you should see the following output, with a `*.err.log` and a `*.out.log` file containing the standard error and output from running each test case in Miri.
+```
+demo/stage2
+├── info
+│   └── bzip2.csv
+├── logs
+│   └── bzip2
+│       ├── bufread::tests::bug_61.err.log
+│       ├── bufread::tests::bug_61.out.log
+        ...
+├── status_download.csv
+├── status_miri_comp.csv
+├── status_rustc_comp.csv
+└── visited.csv
+```
+Execute the following command to compile the dataset for this stage.
 ```
 $ DATASET=demo make ./build/stage2
 ```
