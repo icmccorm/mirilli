@@ -24,10 +24,11 @@ You will only need `appendix.pdf` and `docker-image.tar.gz` for the evaluation.
 ### Data - Contents
 Here we provide a brief overview of the contents of our docker image (excluding configuration files, `.renv` files, `.gitignore`, `Dockerfile`, `makefile`, etc.)
 ```
-├── README.md
+├── README.md           // This evaluations cript
+├── DATASET.md          // Documentation for our dataset and data compilation scripts.
+├── USAGE.md            // Documentation on how to use and extend MiriLLI
 ├── dataset             // The dataset
     ├── crates-db       // The data dump from crates.io
-    ├── DATASET.md      // High-level detail for each stage of data collection
     ├── ...             
 ├── appendix.pdf        // The appendix
 ├── appendix            // LaTeX source for the appendix
@@ -94,6 +95,9 @@ rustup toolchain list
 ```
 You should see the following output.
 ```
+stable-x86_64-unknown-linux-gnu
+nightly-2023-09-25-x86_64-unknown-linux-gnu
+nightly-x86_64-unknown-linux-gnu
 mirilli (default)
 ```
 If all of these steps have been completed successfully, then you are ready to begin evaluating the artifact.
@@ -104,33 +108,148 @@ Complete each of the following steps to evaluate our artifact. This assumes that
 ### Overview
 * **Step 1** - *Check the Appendix* (10 human-minutes)
 * **Step 2** - *Validate Results in Paper* (30 human-minutes + 5 compute-minutes)
-* **Step 3** - *Demonstrate Functionality & Reusability* (30 human minutes + 1 compute minute)
+* **Step 3** - *Review Documentation* (10 human-minutes)
+* **Step 4** - *Demonstrate Functionality & Reusability* (30 human minutes + 5 compute minutes)
 
-The entire evaluation can be completed in under 90 minutes starting from this point.
+The entire evaluation can be completed in under 90 minutes starting from this point. Each step can be completed independent of the other steps.
 
 ## Check the Appendix (10 human-minutes)
 
-In this step, you will examine our Appendix to confirm that each of the sections we reference in our paper are present. We mention the Appendix twice in our paper, so completing this section involves two steps.
+In this step, you will examine our Appendix to confirm that each of the sections we reference in our paper are present.
+
+In Section III.B of our paper, we state the following:
+
+> 
+
+**Task:**
 
 At the end of the introduction to Section IV of our paper (Results) and immediately prior to Section IV.A, we state the following:
 
 > We refer to each bug using a unique numerical ID corresponding to tables in Section 1 of the Appendix.
 
-Open the Appendix document and navigate to Section 1, Table 2. Check to confirm that for every Bug ID, we include at least one item in one of the columns "Issues", "Pull(s)", and "Commits". 
+**Task:** Open the Appendix document and navigate to Section 1, Table 2. Check to confirm that for every Bug ID, we include at least one link in at least one of the columns "Issues", "Pull(s)", or "Commits". 
 
-Later on in Section IV, we reference specific issues from two separate Rust crates: bzip2, and flate2. 
+Later on in Section IV, we reference specific issues from two separate Rust crates: `bzip2`, and `flate2`. 
 > 
 
+**Task:**
+
+You have now completed this step of our evaluation.
 
 ## Validate Results in Paper (1 human-hour + 5 compute minutes)
 In this step, you will 
+
+## Review Documentation
+
+### Review Documentation - Implementation
+
+### Review Documentation - Dataset
 
 ## Tool Demonstration (15 human minutes + 5 compute minutes)
 
 Here, you will demonstrate that our tool is functional and reusable by walking through each
 step of our data collection and bug-finding processes. 
+Fully replicating our dataset would take several days and more than a thousand dollars in compute. 
+Instead, you will use a single crate---`bzip2`---where we found a cross-language aliasing violation. 
+At the time of our data collection, the latest version of this crate was 0.4.4, and it was maintained by [Alex Crichton](https://github.com/alexcrichton). Ownership has since been transferred to the [Trifecta Tech Foundation](https://trifectatech.org/), which updated it to version 0.5.0 in December of 2024. This version eliminated several bugs and added a new Rust backend, but our bug still remains in the C backend. You will evaluate the functionality and reusability of our tool by walking through each stage of data collection for this library and replicating the aliasing bug. This step-by-step walkthrough is intended to be used as a guide for replicating our evaluation in the future.
 
-To respect your time, instead of replicating the entire dataset, you will use a single crate, [`bzip2`](https://github.com/trifectatechfoundation/bzip2-rs), where we found a cross-language
-aliasing violation. At the time of our data collection, the latest version of this crate was 0.4.4, and it was maintained by [Alex Crichton](https://github.com/alexcrichton). Ownership has since been transferred to the [Trifecta Tech Foundation](https://trifectatech.org/), which updated it to version 0.5.0 in December of 2024. This version eliminated several bugs and added a new Rust backend, but our bug still remains in the C backend. You will evaluate the functionality and reusability of our tool by walking through each stage of data collection for this library and replicating the aliasing bug in this library. This step-by-step walkthrough is intended to be used as a guide for anyone wishing to replicate our results in the future. 
+The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. In this case, we are only testing one crate: `bzip2` at version 0.5.0. Collecting and parsing data requires creating a directory to hold intermediate results. This directory must contain a file `population.csv` with two unlabelled columns holding the name and version of each crate that needs to be tested. For this demonstration, we have created one for you: `demo`.
 
-### Stage 1 - 
+Execute the following command to view an example of the file `population.csv`, which contains our sample crate.
+```
+cat demo/population.csv
+```
+Note that in the actual dataset (`./dataset/population.csv`), this file contains each of the ~120,000 valid crates that were published at the time of writing. We parallelized this data collection process by splitting this CSV file into N partitions, with each partition executed on a separate machine.
+
+### Stage 1
+In this data collection stage, we compiled every public Rust crate to find the subset with test cases and LLVM bitcode produced by default during the build process.  
+
+The script for executing this stage is `./scripts/stage1/run.sh`. Execute the following command to view its purpose and requirements:
+```
+./scripts/stage1/run.sh
+```
+Execute the following command to collect data for `bzip2`.
+```
+$ ./scripts/stage1/run.sh demo
+```
+This will create the directory `demo/stage1`. Execute the following command to print its contents.
+```
+$ tree demo/stage1 | tail -n 1
+```
+If this step succeeded, you should see the following output (minus the annotations):
+```
+4 directories, 9 files
+```
+Execute the following command to view the number of unit tests for `bzip2`.
+```
+$ tail -n 1 demo/stage1/tests/bzip2.txt
+```
+You should see that there are 16 test cases for this crate.
+```
+16 tests, 0 benchmarks
+```
+Next, execute the following command to view the bytecode files that were produced when building this crate. 
+```
+$ cat demo/stage1/tests/bzip2.txt
+```
+You should see a path similar to the following:
+```
+./extracted/target/debug/build/bzip2-sys-f3e23fc145ec47c2/out/lib/crctable.bc
+```
+Now it's time to compile this data into a list of test cases that we will provide as input to Stage #2 of data collection.
+
+Execute the following command:
+```
+$ DATASET=demo make build/stage1
+```
+You should see the following output:
+```
+Starting Stage 1...
+Processing early lint results...
+Processing late lint results...
+Processing test results...
+Finished Stage 1
+```
+
+Execute the following command to confirm that this stage was successful.
+```
+$ tree build/stage1 | tail -n 1
+```
+You should see the following output:
+```
+0 directories, 11 files
+```
+Here, we're concerned with the file `stage2.csv`, which contains the list of crates that had unit tests and produced bytecode during their build process. Run the following command to validate that it contains the crate we tested.
+```
+> cat build/stage1/stage2.csv
+```
+You should see the following output:
+```
+bzip2,0.4.4
+```
+This file will be used as input to Stage 2.
+
+### Stage 2
+
+In this data collection stage, we ran every test for crates where we found bytecode in an unmodified version of Miri to find tests that called 
+foreign functions. 
+
+The script for executing this stage is `./scripts/stage2/run.sh`. Execute the following command to view its purpose and requirements:
+
+```
+./scripts/stage2/run.sh
+```
+To complete data collection for this stage, execute the following command. 
+```
+> ./scripts/stage2/run.sh demo ./build/stage1/stage2.csv
+```
+This will compile and execute every test case for `bzip2` in an unmodified version of Miri, recording the test output and parsing it to determine if Miri encountered a foreign call. When running the script, you should have seen output like so:
+```
+...
+Running read::tests::smoke3...
+Exit code is 1
+Miri found FFI call for read::tests::smoke3
+...
+FINISHED!
+```
+

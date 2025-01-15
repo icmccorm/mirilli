@@ -5,6 +5,12 @@ stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
   dir.create(stage3_root)
 }
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+dataset_dir <- ifelse(dataset_dir == "", "dataset", dataset_dir)
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
+
 stats_file <- file.path(stage3_root, "./stage3.stats.csv")
 
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
@@ -94,10 +100,10 @@ zeroed_meta %>%
   summarize(n = sum(present)) %>%
   write_csv(file.path(stage3_root, "metadata.csv"))
 
-zeroed_raw <- compile_errors("./build/stage3/zeroed", "./dataset/stage3/zeroed") %>%
+zeroed_raw <- compile_errors("./build/stage3/zeroed", file.path(dataset_dir, "stage3/zeroed")) %>%
   inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
-uninit_raw <- compile_errors("./build/stage3/uninit", "./dataset/stage3/uninit") %>%
+uninit_raw <- compile_errors("./build/stage3/uninit", file.path(dataset_dir, "stage3/uninit")) %>%
   inner_join(tests_engaged, by = c("crate_name", "test_name"))
 
 all_errors <- bind_rows(zeroed_raw, uninit_raw) %>%

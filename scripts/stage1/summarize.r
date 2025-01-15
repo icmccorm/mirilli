@@ -3,8 +3,12 @@ suppressPackageStartupMessages({
     library(readr)
 })
 options(dplyr.summarise.inform = FALSE)
-
-stage1_input_dir <- file.path("./dataset/stage1")
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+dataset_dir <- ifelse(dataset_dir == "", "dataset", dataset_dir)
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
+stage1_input_dir <- file.path(dataset_dir, "stage1")
 stage1_output_dir <- file.path("./build/stage1")
 if (!dir.exists(stage1_output_dir)) {
     dir.create(stage1_output_dir)

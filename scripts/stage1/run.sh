@@ -1,26 +1,58 @@
 #!/bin/bash
+
+HELPTEXT="Usage: ./run.sh <path to dataset directory>
+
+This script takes as input a path to a directory that must contain 
+the file "population.csv". This file must contain two unlabelled 
+columns with the name and version of each crate under test, in 
+that order.
+
+It will overwrite and output the results of Stage 1 data collection
+to a new directory named "stage1" inside the directory specified by
+the input argument.
+
+Details on the format and contents of the output can be found in 
+"DATASET.md" within the section "Stage 1".
+"
+if [ "$#" -ne 1 ]; then
+    echo $HELPTEXT
+    exit 1
+fi
+if [ ! -f $1/population.csv ]; then
+    echo "Unable to locate $1/population.csv!"
+fi
+
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
 export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
-export CC="clang-16 $DEFAULT_FLAGS"
-export CXX="clang++-16 $DEFAULT_FLAGS"
+export CC="clang-18 $DEFAULT_FLAGS"
+export CXX="clang++-18 $DEFAULT_FLAGS"
 export NIGHTLY="nightly-2023-09-25"
 TIMEOUT=5m
 rustup --version
 rustc --version
 cargo --version
-make clean && make all
-rm -rf ./data/results
-mkdir -p ./data/results
-mkdir -p ./dataset/early
-mkdir -p ./dataset/late
-mkdir -p ./dataset/tests
-mkdir -p ./dataset/bytecode
-touch ./dataset/status_comp.csv
-touch ./dataset/status_lint.csv
-touch ./dataset/failed_download.csv
-touch ./dataset/has_bytecode.csv
+
+DIR=$1/stage1
+rm -rf "$DIR"
+mkdir -p "$DIR"
+mkdir -p "$DIR/early"
+mkdir -p "$DIR/late"
+mkdir -p "$DIR/tests"
+mkdir -p "$DIR/bytecode"
+touch "$DIR/status_comp.csv"
+touch "$DIR/status_lint.csv"
+touch "$DIR/status_download.csv"
+touch "$DIR/has_bytecode.csv"
 rustup override set "$NIGHTLY"
+
+CRATE_COLNAMES="crate_name,version"
+STATUS_COLNAMES="$CRATE_COLNAMES,exit_code"
+echo "$CRATE_COLNAMES" > "$DIR/visited.csv"
+echo "$CRATE_COLNAMES" > "$DIR/has_bytecode.csv"
+echo "$STATUS_COLNAMES" > "$DIR/status_comp.csv"
+echo "$STATUS_COLNAMES" > "$DIR/status_lint.csv"
+echo "$STATUS_COLNAMES" > "$DIR/status_download.csv"
 TRIES_REMAINING=3
 while IFS=, read -r name version; 
 do
@@ -38,35 +70,34 @@ do
             OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list)
             COMP_EXIT_CODE=$?
             cd ..
-            echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_comp.csv"
+            echo "$name,$version,$COMP_EXIT_CODE" >> $DIR/status_comp.csv
             if [ -n "$OUTPUT" ]; then
-                echo "$OUTPUT" > data/results/tests/"$name".txt
+                echo "$OUTPUT" > $DIR/tests/"$name".txt
             fi
             OUTPUT=""
             OUTPUT=$(find ./extracted -type f -name '*.bc' -print -quit)
             if [ -n "$OUTPUT" ]; then
-                echo "Writing visit to data/results/has_bytecode.csv"
-                echo "$name,$version" >> "data/results/has_bytecode.csv"
-                echo "$OUTPUT" > data/results/bytecode/"$name".csv
+                echo "Writing visit to $DIR/has_bytecode.csv"
+                echo "$name,$version" >> $DIR/has_bytecode.csv
+                echo "$OUTPUT" > $DIR/bytecode/"$name".csv
             fi
-
             COMP_EXIT_CODE=1
             cd extracted || exit
             (timeout $TIMEOUT cargo dylint --all 1> /dev/null)
             COMP_EXIT_CODE=$?
             cd ..
-            echo "$name,$version,$COMP_EXIT_CODE" >> "data/results/status_lint.csv"
+            echo "$name,$version,$COMP_EXIT_CODE" >> "$DIR/status_lint.csv"
 
-            echo "Writing visit to data/results/visited.csv"
-            echo "$name,$version" >> "data/results/visited.csv"
-            echo "Copying analysis output to data/results/early/$name.json"
-            [ ! -f ./extracted/ffickle_early.json ] || mv ./extracted/ffickle_early.json "data/results/early/$name.json"
-            echo "Copying analysis output to data/results/late/$name.json"
-            [ ! -f ./extracted/ffickle_late.json ] || mv ./extracted/ffickle_late.json "data/results/late/$name.json"
+            echo "Writing visit to $DIR/visited.csv"
+            echo "$name,$version" >> "$DIR/visited.csv"
+            echo "Copying analysis output to $DIR/early/$name.json"
+            [ ! -f ./extracted/ffickle_early.json ] || mv ./extracted/ffickle_early.json "$DIR/early/$name.json"
+            echo "Copying analysis output to $DIR/late/$name.json"
+            [ ! -f ./extracted/ffickle_late.json ] || mv ./extracted/ffickle_late.json "$DIR/late/$name.json"
         else
             echo "FAILED (exit $EXITCODE)"
             if [ "$TRIES_REMAINING" -eq "0" ]; then
-                echo "$name,$version,$EXITCODE" >> "data/results/failed_download.csv"
+                echo "$name,$version,$EXITCODE" >> "$DIR/status_download.csv"
             else
                 echo "PAUSE..."
                 sleep 10

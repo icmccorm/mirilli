@@ -31,7 +31,7 @@ exclude_crates <- read_csv(file.path("./dataset/exclude.csv"), show_col_types = 
 
 # STAGE 1
 print_stage(1)
-stage1_failed_download <- read_csv(file.path("./dataset/stage1/failed_download.csv"), show_col_types = FALSE)
+stage1_failed_download <- read_csv(file.path("./dataset/stage1/status_download.csv"), show_col_types = FALSE)
 stage1_visited <- read_csv(file.path("./dataset/stage1/visited.csv"), show_col_types = FALSE)
 missed_stage1 <- all_crates %>%
   anti_join(stage1_visited, by = c("crate_name", "version")) %>%
@@ -48,7 +48,7 @@ if (missed_stage1_count > 1) {
 # STAGE 2
 print_stage(2)
 all_crates_stage2 <- read_csv(file.path("./build/stage1/stage2.csv"), show_col_types = FALSE)
-stage2_failed_download <- read_csv(file.path("./dataset/stage2/failed_download.csv"), show_col_types = FALSE)
+stage2_failed_download <- read_csv(file.path("./dataset/stage2/status_download.csv"), show_col_types = FALSE)
 stage2_visited <- read_csv(file.path("./dataset/stage2/visited.csv"), show_col_types = FALSE)
 missed_stage2 <- all_crates_stage2 %>%
   anti_join(stage2_visited, by = c("crate_name", "version")) %>%

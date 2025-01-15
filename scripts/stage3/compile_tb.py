@@ -1,7 +1,7 @@
 import re
-import parse_shared
+import compile_shared
 from enum import Enum
-from parse_shared import Operation
+from compile_shared import Operation
 
 TB_COLUMNS = ["action", "kind"]
 TB_ACTION = f"({Operation.read.value}|{Operation.write.value}|{Operation.retag.value}|{Operation.dealloc.value})(?:ation)?(?: access)?"
@@ -33,15 +33,15 @@ class TBState(Enum):
 
 TB_STATE = f"({TBState.Frozen.value}|{TBState.Disabled.value}|{TBState.Active.value}|{TBState.Reserved.value})"
 
-TB_ERROR = re.compile(f"{TB_ACTION} through {parse_shared.TAG} is forbidden")
+TB_ERROR = re.compile(f"{TB_ACTION} through {compile_shared.TAG} is forbidden")
 RELATION_TREE = re.compile(
-    f"the accessed tag {parse_shared.TAG} is a child of the {TB_REFERRENT} tag {parse_shared.TAG}"
+    f"the accessed tag {compile_shared.TAG} is a child of the {TB_REFERRENT} tag {compile_shared.TAG}"
 )
 CREATION_TREE = re.compile(
-    f"\s*the {TB_REFERRENT} tag {parse_shared.TAG} was created here(?:, in the initial state {TB_STATE})*\s*"
+    f"\s*the {TB_REFERRENT} tag {compile_shared.TAG} was created here(?:, in the initial state {TB_STATE})*\s*"
 )
 DESTRUCTION_TREE = re.compile(
-    f"\s*the {TB_REFERRENT} tag {parse_shared.TAG} later transitioned to {TB_STATE} due to a (?:{TB_HIERARCHY} {TB_ACTION}|reborrow \(acting as a {TB_HIERARCHY} {TB_ACTION}\)) at offsets {parse_shared.OFFSETS}\s*"
+    f"\s*the {TB_REFERRENT} tag {compile_shared.TAG} later transitioned to {TB_STATE} due to a (?:{TB_HIERARCHY} {TB_ACTION}|reborrow \(acting as a {TB_HIERARCHY} {TB_ACTION}\)) at offsets {compile_shared.OFFSETS}\s*"
 )
 
 

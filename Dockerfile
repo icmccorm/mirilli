@@ -19,6 +19,7 @@ ENV LLVM_SYS_181_PREFIX="/usr/src/mirilli/mirilli-rust/build/host/llvm/"
 ENV DATASET="./dataset"
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
+RUN cargo install cargo-dylint@2.6.0 dylint-link@2.6.0 --locked
 RUN rustup component add miri
 RUN rustup component add rust-src
 RUN rustup install nightly
