@@ -1,7 +1,11 @@
 #!/bin/bash
-HELPTEXT="Usage: ./extract.sh <path to stage1 results> <path to directory containing ZIP files>"
+HELPTEXT="
+Usage: ./extract.sh <path to stage1 results> <path to directory containing ZIP files>
+
+
+"
 if [ "$#" -ne 2 ]; then
-    echo $HELPTEXT
+    echo "$HELPTEXT"
     exit 1
 fi
 RESULT_DIR="$1/stage1"

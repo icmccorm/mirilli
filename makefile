@@ -1,13 +1,3 @@
-all:
-	@(cd src/early && cargo build)
-	@(cd src/late && cargo build)
-	@(cargo dylint list)
-
-clean-cache:
-	@(cargo install cargo-cache 1> /dev/null)
-	@(cargo cache -a 1> /dev/null)
-	@(./scripts/clean.sh)
-
 push:
 	@./scripts/misc/list_instances.sh instances.csv
 	@./scripts/misc/push.sh ./instances.csv

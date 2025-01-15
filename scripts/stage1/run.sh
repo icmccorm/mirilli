@@ -5,7 +5,10 @@ Usage: ./run.sh <DIR>
 
 The directory <DIR> must contain the file "population.csv". This file
 must contain two unlabelled columns with the name and version of each
-crate under test, in that order. Results are stored in <DIR>/stage1. 
+crate under test, in that order. For example, to collect data for the
+crate 
+
+Results are stored in <DIR>/stage1. 
 Existing results will be overwritten.
 
 The purpose of this step is to determine which crates contain unit
@@ -58,7 +61,7 @@ while IFS=, read -r name version;
 do
     while [ "$TRIES_REMAINING" -gt "0" ]; do
         EXITCODE=1
-        (./scripts/misc/cargo-download.sh "$name" "$version")
+        (./scripts/cargo-download.sh "$name" "$version")
         EXITCODE=$?
         TRIES_REMAINING=$(( TRIES_REMAINING - 1 ))
         if [ "$EXITCODE" -eq "0" ]; then 
