@@ -262,8 +262,6 @@ $ tree demo/stage2 | tail -n 1
 If this step succeeded, you should see the following output, with a `*.err.log` and a `*.out.log` file containing the standard error and output from running each test case in Miri.
 ```
 demo/stage2
-├── info
-│   └── bzip2.csv
 ├── logs
 │   └── bzip2
 │       ├── bufread::tests::bug_61.err.log
@@ -272,6 +270,7 @@ demo/stage2
 ├── status_download.csv
 ├── status_miri_comp.csv
 ├── status_rustc_comp.csv
+├── tests.csv
 └── visited.csv
 ```
 Execute the following command to compile the dataset for this stage.

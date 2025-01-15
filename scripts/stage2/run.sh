@@ -109,7 +109,7 @@ do
                                 EXITCODE="-1"
                             fi
                         fi
-                        echo "$EXITCODE,$HAD_FFI,\"$test_name\",$crate_name" >> "$TESTS_CSV"
+                        echo "$EXITCODE,$HAD_FFI,\"$test_name\",$crate_name" >> "../$TESTS_CSV"
                         rm -f err 
                     done 4< ./rustc_list.txt
                 fi
