@@ -299,12 +299,16 @@ The file `stage3.csv` will be used as input to Stage 3.
 
 
 # Stage 3
-In this data collection stage, we ran each of the tests that we found in Stage 2 with MiriLLI. 
-We had to complete this stage twice; once for each memory mode (described in Section III). 
+In this stage, we used MiriLLI to execute each of the tests that we found in Stage 2.
+We had to complete this stage twice; once for each memory mode (as described in Section III). 
 
 The script for this stage is `./scripts/stage3/run.sh`. Execute it without arguments to see its description.
 
 The third argument, `-z`, is optional. If provided, then MiriLLI is executed in the "zeroed" memory mode, which
 zero-initializes all LLVM-allocated memory by default. 
 
+Execute the following commands to run the tests for `bzip2` in MiriLLI.
+```
+
+```
 
