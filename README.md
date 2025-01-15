@@ -309,6 +309,12 @@ zero-initializes all LLVM-allocated memory by default.
 
 Execute the following commands to run the tests for `bzip2` in MiriLLI.
 ```
-
+$ ./scripts/stage3/run.sh demo build/stage2/stage3.csv
+$ ./scripts/stage3/run.sh demo build/stage2/stage3.csv -z
 ```
 
+Execute the following command to view the output.
+
+```
+tree demo/zeroed
+```

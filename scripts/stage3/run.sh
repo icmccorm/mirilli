@@ -1,6 +1,5 @@
 #!/bin/bash
 HELPTEXT="
-
 Usage: ./run.sh <DIR> <stage3.csv> <"-z" (optional)>
 
 The purpose of this step is to execute each of the tests discovered
@@ -58,7 +57,7 @@ touch $STAGE3_DIR/status_stack.csv
 touch $STAGE3_DIR/status_tree.csv
 touch $STAGE3_DIR/status_native.csv
 
-rustup default mirilli
+rustup override set mirilli
 
 while IFS=, read -r test_name crate_name version <&3;
 do
