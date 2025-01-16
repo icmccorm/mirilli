@@ -1,5 +1,7 @@
+crate_name,version
 bad64,0.6.0
 bchlib,0.2.1
+blitsort-sys,0.1.0
 bzip2,0.4.4
 clickhouse-driver-lz4,0.1.0
 crypto_pimitives,0.1.1
@@ -21,11 +23,10 @@ quickjs_regex,0.2.3
 secp256k1,0.28.0
 sgp4-rs,0.4.0
 special-fun,0.2.0
+spng,0.2.0-alpha.3
 spritz_cipher,0.1.0
 tectonic_engine_bibtex,0.2.1
 tinyspline-sys,0.2.0
 x42ltc-sys,0.0.5
 xxhrs,2.0.0
 zmq,0.10.0
-spng,0.2.0-alpha.3
-blitsort-sys,0.1.0

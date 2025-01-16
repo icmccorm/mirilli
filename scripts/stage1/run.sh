@@ -8,9 +8,7 @@ tests and produce LLVM bitcode during compilation. We also analyze the
 source code of each crate to find foreign function bindings.
 
 The directory <DIR> must contain the file "population.csv". This file
-must contain two unlabelled columns with the name and version of each
-crate under test, in that order. For example, to collect data for the
-crate.
+must contain two labelled columns "crate_name" and "version" in that order.
 
 Results are stored in <DIR>/stage1. Existing results will be overwritten.
 
@@ -111,5 +109,5 @@ do
         rm -rf ./extracted
     done
     TRIES_REMAINING=3
-done <<< "$(tail -n +0 "$1/population.csv")"
+done <<< "$(tail -n +1 "$1/population.csv")"
 printf 'FINISHED! %s\n' "$name"
