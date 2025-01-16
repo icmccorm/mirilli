@@ -156,7 +156,7 @@ class SBError:
     def summarize(self):
         error_type = None
         if self.protected:
-            error_type = SBErrorType.Framing
+            error_type = SBErrorType.Protected
         elif self.limit is not None:
             if self.limit == SBState.SharedReadOnly and self.action is not None:
                 error_type = SBErrorType.Insufficient
@@ -183,4 +183,4 @@ class SBErrorType(Enum):
     ExpiredByUniqueRetag = "Expired-UniqueRetag"
     ExpiredByRead = "Expired-Read"
     ExpiredByWrite = "Expired-Write"
-    Framing = "Framing"
+    Protected = "Protected"

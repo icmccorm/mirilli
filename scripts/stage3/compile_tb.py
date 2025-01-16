@@ -117,7 +117,7 @@ class TBError:
                 self.conflicting_tag_transition.kind == TBRole.protected
                 or self.conflicting_tag_transition.kind == TBRole.strongly_protected
             ):
-                error_type = TBErrorType.Framing.value
+                error_type = TBErrorType.Protected.value
             if (
                 self.action_type == Operation.write
                 or self.action_type == Operation.dealloc
@@ -155,7 +155,7 @@ class TBErrorIndirectionType(Enum):
 class TBErrorType(Enum):
     Expired = "Expired"
     Insufficient = "Insufficient"
-    Framing = "Framing"
+    Protected = "Protected"
 
 
 def foreign_write(tb_action):

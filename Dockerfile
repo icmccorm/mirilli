@@ -26,7 +26,7 @@ RUN rustup component add rust-src
 RUN git submodule update --init ./mirilli-rust
 RUN git submodule update --init ./rllvm-as
 
-FROM setup as setup-dylint
+FROM setup AS setup-dylint
 RUN cargo install cargo-dylint@2.6.0 dylint-link@2.6.0 --locked
 RUN (cd src/early && cargo build)
 RUN (cd src/late && cargo build)

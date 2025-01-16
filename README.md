@@ -117,34 +117,25 @@ The entire evaluation can be completed in under 90 minutes starting from this po
 
 In this step, you will examine our Appendix to confirm that each of the sections we reference in our paper are present.
 
-In Section III.B of our paper, we state the following:
+In Section III.B.a of our paper, we state the following:
 
-> 
+> We provide a formal model of our value conversion functions in Section 2 of the Appendix.
 
-**Task:**
+**Task:** Open the Appendix and confirm that we provide this model by navigating to any of the subsections withiun Section 2.
 
 At the end of the introduction to Section IV of our paper (Results) and immediately prior to Section IV.A, we state the following:
 
 > We refer to each bug using a unique numerical ID corresponding to tables in Section 1 of the Appendix.
 
-**Task:** Open the Appendix document and navigate to Section 1, Table 2. Check to confirm that for every Bug ID, we include at least one link in at least one of the columns "Issues", "Pull(s)", or "Commits". 
-
-Later on in Section IV, we reference specific issues from two separate Rust crates: `bzip2`, and `flate2`. 
-> 
-
-**Task:**
+**Task:** Open the Appendix and navigate to Section 1, Table 2. Check to confirm that:
+* There are 47 Bug IDs
+* For every Bug ID, we include at least one link in at least one of the columns "Issues", "Pull(s)", or "Commits". 
+* Choose any link at random from one of these columns and confirm that it is valid. 
 
 You have now completed this step of our evaluation.
 
 ## Validate Results in Paper (1 human-hour + 5 compute minutes)
-In this step, you will 
-
-## Review Documentation
-
-### Review Documentation - Implementation
-
-### Review Documentation - Dataset
-
+The complete dataset is provided as part of our Docker image within the directory `dataset`. This c
 ## Tool Demonstration (15 human minutes + 5 compute minutes)
 
 Here, you will demonstrate that our tool is functional and reusable by walking through each
@@ -152,25 +143,25 @@ step of our data collection and bug-finding processes.
 Fully replicating our dataset would take several days and more than a thousand dollars in compute. 
 Instead, you will only compile a subset of the crates that we found. 
 
-The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. To respect your time, we are only testing three crates:
+The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. 
 
-|      Crate     | Version |       Bug Type       | Bug Category |
-|:--------------:|:-------:|:--------------------:|:------------:|
-| tinyspline-sys |  0.2.0  |      Memory Leak     |  Allocation  |
-|      bzip2     |  0.5.0  |  Aliasing Violation  |   Ownership  |
-|       dec      |  0.4.8  | Uninitialized Memory |    Typing    |
+Our data collection process has three stages.
 
-Each of these crates has at least one bug from each of the three categories we describe in Section IV of our paper; Allocation, Ownership, and Typing.
+* Stage 1 - Find crates with unit tests that produce LLVM bitcode
+* Stage 2 - Find tests from these crates that call foreign functions
+* Stage 3 - Execute these tests in our custom dynamic analysis tool
+
+Fully replicating each of these steps for every published crate would take several days and hundreds of dollars in compute. Instead, you will replicate these Stages for the 37 crates where we found bugs. 
 
 Collecting and parsing data requires creating a directory to hold intermediate results. This directory must contain a file `population.csv` with two unlabelled columns holding the name and version of each crate that needs to be tested. For this demonstration, we have created one for you: `demo`.
 
-Execute the following command to view an example of the file `population.csv`, which contains our sample crate. Confirm that it contains the name and version of each of the crates shown in the table above.
+Execute the following command to view an example of the file `population.csv`, which contains our sample of 37 crates.
 ```
 $ cat demo/population.csv
 ```
 Note that in the actual dataset (`./dataset/population.csv`), this file contains each of the ~120,000 valid crates that were published at the time of writing. We parallelized this data collection process by splitting this CSV file into N partitions, with each partition executed on a separate machine.
 
-### Stage 1
+### Stage 1 - ()
 In this stage, we compiled every public Rust crate to find ones with test cases that produced LLVM bitcode.
 The script for executing this stage is `./scripts/stage1/run.sh`. Execute the following command to view its purpose and requirements:
 ```
@@ -188,25 +179,7 @@ If this step succeeded, you should see the following output (minus the annotatio
 ```
 4 directories, 9 files
 ```
-Execute the following command to view the number of unit tests for `bzip2`.
-```
-$ tail -n 1 demo/stage1/tests/bzip2.txt
-```
-You should see that there are 16 test cases for this crate.
-```
-16 tests, 0 benchmarks
-```
-Next, execute the following command to view the bytecode files that were produced when building this crate. 
-```
-$ cat demo/stage1/tests/bzip2.txt
-```
-You should see a path similar to the following:
-```
-./extracted/target/debug/build/bzip2-sys-f3e23fc145ec47c2/out/lib/crctable.bc
-```
-Now it's time to compile this data into a list of test cases that we will provide as input to Stage #2 of data collection.
-
-Execute the following command:
+Compile the Stage 1 results using the following command:
 ```
 $ DATASET=demo make build/stage1
 ```
@@ -218,7 +191,6 @@ Processing late lint results...
 Processing test results...
 Finished Stage 1
 ```
-
 Execute the following command to confirm that this stage was successful.
 ```
 $ tree build/stage1 | tail -n 1
@@ -239,11 +211,9 @@ This file will be used as input to Stage 2.
 
 ### Stage 2
 
-In this data collection stage, we ran every test for crates where we found bytecode in an unmodified version of Miri to find tests that called 
-foreign functions. 
+In this data collection stage, we ran every test for crates where we found bytecode in an unmodified version of Miri to find tests that called foreign functions. 
 
 The script for executing this stage is `./scripts/stage2/run.sh`. Execute the following command to view its purpose and requirements:
-
 ```
 $ ./scripts/stage2/run.sh
 ```
@@ -251,7 +221,7 @@ To complete data collection for this stage, execute the following command.
 ```
 $ ./scripts/stage2/run.sh demo ./build/stage1/stage2.csv
 ```
-This will compile and execute every test case for `bzip2` in an unmodified version of Miri, recording the test output and parsing it to determine if Miri encountered a foreign call. When running the script, you should have seen output like so:
+This will compile and execute every test case found in the first stage. When running the script, you should have seen output like so:
 ```
 ...
 Running read::tests::smoke3...
@@ -260,19 +230,14 @@ Miri found FFI call for read::tests::smoke3
 ...
 FINISHED!
 ```
-
 This will create the directory `demo/stage2`. Execute the following command to print its contents.
 ```
-$ tree demo/stage2 | tail -n 1
+$ tree demo/stage2 -L 1
 ```
-If this step succeeded, you should see the following output, with a `*.err.log` and a `*.out.log` file containing the standard error and output from running each test case in Miri.
+If this step succeeded, you should see the following output:
 ```
 demo/stage2
 ├── logs
-│   └── bzip2
-│       ├── bufread::tests::bug_61.err.log
-│       ├── bufread::tests::bug_61.out.log
-        ...
 ├── status_download.csv
 ├── status_miri_comp.csv
 ├── status_rustc_comp.csv
@@ -299,7 +264,6 @@ You should see the following output (excluding the annotations)
 ├── stage3.csv              // tests that encountered FFI calls
 └── tests.csv               // all tests ran during this stage
 ```
-
 
 The file `stage3.csv` will be used as input to Stage 3.
 
@@ -329,7 +293,8 @@ You should see two directories; one for each memory mode:
 demo/stage3/
 ├── uninit
 └── zeroed
-``
+```
+
 Execute the following command for each directory:
 ```
 $ tree demo/stage3/uninit
