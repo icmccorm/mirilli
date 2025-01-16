@@ -1,3 +1,4 @@
+crate_name,version
 bad64,0.6.0
 bchlib,0.2.1
 bzip2,0.4.4
@@ -6,10 +7,8 @@ crypto_pimitives,0.1.1
 dec,0.4.8
 dec-number-sys,0.0.25
 everrs,0.2.1
-flate2,1.0.27
 fluidlite,0.2.1
 klu-rs,0.4.0
-lcms2,6.0.0
 libcmark-sys,0.1.0
 libhydrogen,0.4.1
 librsync,0.2.3
@@ -21,17 +20,15 @@ mozjpeg,0.10.1
 ms5837,0.2.1
 mseed,0.5.0
 quickjs_regex,0.2.3
-rsofa,0.4.5
 secp256k1,0.28.0
 sgp4-rs,0.4.0
 special-fun,0.2.0
-speex-safe,0.6.0
 spritz_cipher,0.1.0
 tectonic_engine_bibtex,0.2.1
 tinyspline-sys,0.2.0
+twmap,0.10.0
 x42ltc-sys,0.0.5
 xxhrs,2.0.0
-ytnef,0.2.0
 zmq,0.10.0
 spng,0.2.0-alpha.2
 blitsort-sys,0.1.0
