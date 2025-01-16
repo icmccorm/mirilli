@@ -106,10 +106,10 @@ If all of these steps have been completed successfully, then you are ready to be
 Complete each of the following steps to evaluate our artifact. This assumes that you have successfully completed each of the steps shown in the previous section (**Setup**). Except for Step #1, all steps must be completed inside a Docker container launched from our image.
 
 ### Overview
-* **Step 1** - *Check the Appendix* (10 human-minutes)
-* **Step 2** - *Validate Results in Paper* (30 human-minutes + 5 compute-minutes)
+* **Step 1** - *Check the Appendix* (5 human-minutes)
+* **Step 2** - *Validate Results in Paper* (1 human hour human-minutes + 5 compute-minutes)
 * **Step 3** - *Review Documentation* (10 human-minutes)
-* **Step 4** - *Demonstrate Functionality & Reusability* (30 human minutes + 5 compute minutes)
+* **Step 4** - *Demonstrate Evaluation Steps* (30 human minutes + 5 compute minutes)
 
 The entire evaluation can be completed in under 90 minutes starting from this point. Each step can be completed independent of the other steps.
 
@@ -135,7 +135,16 @@ At the end of the introduction to Section IV of our paper (Results) and immediat
 You have now completed this step of our evaluation.
 
 ## Validate Results in Paper (1 human-hour + 5 compute minutes)
-The complete dataset is provided as part of our Docker image within the directory `dataset`.
+The complete dataset is provided as part of our Docker image within the directory `dataset`. It is documented in the file `DATASET.md`.
+In this stage, you will compile the dataset, examine its output, and compare it against several of the statistics shown in the paper to confirm that 
+they can be replicated using our tool. This and each subsequent step requires our Docker image.
+
+After launching a container, execute the following command to build out dataset. 
+```
+make build
+```
+This will compile its contents from the `dataset` folder into the `build` folder. 
+
 ## Tool Demonstration (15 human minutes + 5 compute minutes)
 
 We evaluated our tool in three stages. 
@@ -145,10 +154,9 @@ We evaluated our tool in three stages.
 * Stage 3 - Execute these tests in our custom dynamic analysis tool
 
 Fully replicating each of these steps for every published crate would take several days and hundreds of dollars in compute. 
-Instead, you will replicate these stages for 33 of the 37 crates where we found bugs. Four crates have been excluded, since three
-can no longer be built using our toolchain due to changes in upstream dependencies, and one depends on a library that is installed as
-part of this Docker image, so it no longer statically links by default. It can still be built with our tool, but that will require manual
-configuration.
+Additionally, several libraries have had upstream changes to dependencies that lack a `Cargo.lock` file, so they no longer can compile
+with our version of the Rust toolchain without manual intervention. Instead of running a full evaluation, you will replicate 
+these stages for 30 of the 37 crates where we found bugs. 
 
 The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. 
 
@@ -317,5 +325,3 @@ Execute the following command to summarize all three stages of data collection:
 ```
 DATASET=demo make summarize
 ```
-
-
