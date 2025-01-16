@@ -20,6 +20,7 @@ ENV DATASET="./dataset"
 RUN rustup install nightly
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
+RUN cargo install cargo-download
 RUN rustup component add miri
 RUN rustup component add rust-src
 RUN git submodule update --init ./mirilli-rust
