@@ -3,19 +3,18 @@
 HELPTEXT="
 Usage: ./run.sh <DIR>
 
-The directory <DIR> must contain the file "population.csv". This file
-must contain two unlabelled columns with the name and version of each
-crate under test, in that order. For example, to collect data for the
-crate 
-
-Results are stored in <DIR>/stage1. 
-Existing results will be overwritten.
-
 The purpose of this step is to determine which crates contain unit
 tests and produce LLVM bitcode during compilation. We also analyze the
 source code of each crate to find foreign function bindings.
-Details on the format and contents of the output of this script
-can be found in "DATASET.md" within the section Stage 1. 
+
+The directory <DIR> must contain the file "population.csv". This file
+must contain two unlabelled columns with the name and version of each
+crate under test, in that order. For example, to collect data for the
+crate.
+
+Results are stored in <DIR>/stage1. Existing results will be overwritten.
+
+Additional details are documented in DATASET.md
 "
 if [ "$#" -ne 1 ]; then
     echo "$HELPTEXT"

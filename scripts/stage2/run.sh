@@ -4,13 +4,13 @@ HELPTEXT="
 Usage: ./run.sh <DIR> <stage2.csv>
 
 The purpose of this step is to execute each of the tests found in 
-Stage 1 find those that call foreign functions. Details on the
-format and contents of the output of this script can be found in 
-DATASET.md within the section Stage 3. The input to this step
-is the file stage2.csv, which is produced by compiling the
-results for Stage 1. 
+Stage 1 find tests that call foreign functions.
 
 Results are stored in <DIR>/stage2. Existing results will be overwritten.
+The input to this step is the file stage2.csv, which is produced by 
+compiling the results for Stage 1. 
+
+Additional details are documented in DATASET.md
 "
 if [ "$#" -ne 2 ]; then
     echo "$HELPTEXT"

@@ -152,19 +152,26 @@ step of our data collection and bug-finding processes.
 Fully replicating our dataset would take several days and more than a thousand dollars in compute. 
 Instead, you will only compile a subset of the crates that we found. 
 
-The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. In this case, we are only testing one crate: `bzip2` at version 0.5.0. 
+The details of specific output files are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. The first step to our evaluation is to choose a sample of crates to test. To respect your time, we are only testing three crates:
+
+|      Crate     | Version |       Bug Type       | Bug Category |
+|:--------------:|:-------:|:--------------------:|:------------:|
+| tinyspline-sys |  0.2.0  |      Memory Leak     |  Allocation  |
+|      bzip2     |  0.5.0  |  Aliasing Violation  |   Ownership  |
+|       dec      |  0.4.8  | Uninitialized Memory |    Typing    |
+
+Each of these crates has at least one bug from each of the three categories we describe in Section IV of our paper; Allocation, Ownership, and Typing.
 
 Collecting and parsing data requires creating a directory to hold intermediate results. This directory must contain a file `population.csv` with two unlabelled columns holding the name and version of each crate that needs to be tested. For this demonstration, we have created one for you: `demo`.
 
-Execute the following command to view an example of the file `population.csv`, which contains our sample crate.
+Execute the following command to view an example of the file `population.csv`, which contains our sample crate. Confirm that it contains the name and version of each of the crates shown in the table above.
 ```
 $ cat demo/population.csv
 ```
 Note that in the actual dataset (`./dataset/population.csv`), this file contains each of the ~120,000 valid crates that were published at the time of writing. We parallelized this data collection process by splitting this CSV file into N partitions, with each partition executed on a separate machine.
 
 ### Stage 1
-In this data collection stage, we compiled every public Rust crate to find the subset with test cases and LLVM bitcode produced by default during the build process.  
-
+In this stage, we compiled every public Rust crate to find ones with test cases that produced LLVM bitcode.
 The script for executing this stage is `./scripts/stage1/run.sh`. Execute the following command to view its purpose and requirements:
 ```
 $ ./scripts/stage1/run.sh
@@ -296,7 +303,6 @@ You should see the following output (excluding the annotations)
 
 The file `stage3.csv` will be used as input to Stage 3.
 
-
 # Stage 3
 In this stage, we used MiriLLI to execute each of the tests that we found in Stage 2.
 We had to complete this stage twice; once for each memory mode (as described in Section III). 
@@ -306,7 +312,7 @@ The script for this stage is `./scripts/stage3/run.sh`. Execute it without argum
 The third argument, `-z`, is optional. If provided, then MiriLLI is executed in the "zeroed" memory mode, which
 zero-initializes all LLVM-allocated memory by default. 
 
-Execute the following commands to run the tests for `bzip2` in MiriLLI.
+Execute the following commands to run the tests we collected in MiriLLI.
 ```
 $ ./scripts/stage3/run.sh demo build/stage2/stage3.csv
 $ ./scripts/stage3/run.sh demo build/stage2/stage3.csv -z
@@ -323,10 +329,8 @@ You should see two directories; one for each memory mode:
 demo/stage3/
 ├── uninit
 └── zeroed
-```
-
+``
 Execute the following command for each directory:
-
 ```
 $ tree demo/stage3/uninit
 

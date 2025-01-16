@@ -2,20 +2,20 @@
 HELPTEXT="
 Usage: ./run.sh <DIR> <stage3.csv> <"-z" (optional)>
 
-The purpose of this step is to execute each of the tests discovered
-in Stage 2 with MiriLLI to find cross-language bugs. Details on the
-format and contents of the output of this script can be found in 
-DATASET.md within the section Stage 3. This takes as input the
-CSV file stage3.csv, which is produced as part of the output from
-compiling the results of Stage 2.
+The purpose of this script is to execute each of the tests discovered
+in Stage 2 with MiriLLI to find cross-language bugs.
+
+This takes as input the CSV file "stage3.csv," which is produced as 
+by compiling the output from Stage 2.
 
 The third argument is optional, and must be "-z" if provided. This
 will enable the "Zeroed" mode in MiriLLI, which zero-initializes all
 LLVM-allocated memory by default. If this is enabled, then results will
 be stored in the directory <DIR>/stage3/zeroed. Otherwise, results will
 be stored in <DIR>/stage3/uninit. Existing results will be overwritten.
-"
 
+Additional details are documented in DATASET.md
+"
 
 if [ "$#" -lt 2 ]; then
     echo "$HELPTEXT"
@@ -58,6 +58,7 @@ touch $STAGE3_DIR/status_tree.csv
 touch $STAGE3_DIR/status_native.csv
 
 rustup override set mirilli
+cargo miri clean && cargo miri setup
 
 while IFS=, read -r test_name crate_name version <&3;
 do
