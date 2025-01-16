@@ -59,8 +59,10 @@ TRIES_REMAINING=3
 while IFS=, read -r name version; 
 do
     while [ "$TRIES_REMAINING" -gt "0" ]; do
+
+        echo $name $version
         EXITCODE=1
-        (./scripts/cargo-download.sh "$name" "$version")
+        (cargo-download "$name==$version" -x -o extracted)
         EXITCODE=$?
         TRIES_REMAINING=$(( TRIES_REMAINING - 1 ))
         if [ "$EXITCODE" -eq "0" ]; then 
