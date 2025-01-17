@@ -13,7 +13,7 @@ def read_flags(FLAGS_CSV_PATH):
         return flags
 
 
-FLAGS_CSV_PATH = "./dataset/stage3/flags.csv"
+FLAGS_CSV_PATH = "./scripts/flags.csv"
 FLAGS = read_flags(FLAGS_CSV_PATH)
 
 
