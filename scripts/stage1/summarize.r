@@ -71,7 +71,7 @@ stats <- stats %>% write.csv(stats_file, row.names = FALSE, quote = FALSE)
 population <- read_csv(file.path(dataset_dir, "population.csv"), show_col_types = FALSE) %>%
 select(crate_name, version)
 
-early <- read_csv(file.path(stage1_output_dir, "early_abis.csv")) %>% 
+early <- read_csv(file.path(stage1_output_dir, "early_abis.csv"), show_col_types = FALSE) %>% 
     filter(category %in% c("foreign_functions")) %>%
     select(crate_name) %>% 
     unique() %>%
