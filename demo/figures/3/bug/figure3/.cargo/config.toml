@@ -1,0 +1,2 @@
+[env]
+CC="clang --save-temps=obj"
