@@ -1,0 +1,17 @@
+LLVMEngaged
+LLVMIntToPtr
+LLVMPtrToInt
+FromAddrCastRust
+FromAddrCastLLVM
+LLVMOnResolve
+LLVMMultithreading
+SizeBasedTypeInference
+LLVMReadUninit
+LLVMInvokedConstructor
+LLVMInvokedDestructor
+Expansion
+ExposedPointerFromRustAtBoundary
+CastPointerFromLLVMAtBoundary
+AggregateAsBytes
+ScalarPairInSingleArg
+ValueMatchWithPadding
