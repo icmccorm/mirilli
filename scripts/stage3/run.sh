@@ -49,13 +49,26 @@ rm -rf $STAGE3_DIR
 rm -rf ./extracted
 mkdir -p $STAGE3_DIR
 mkdir -p $STAGE3_DIR/crates
+
+
+touch $STAGE3_DIR/visited.csv
 touch $STAGE3_DIR/status_download.csv
 touch $STAGE3_DIR/status_native_comp.csv
 touch $STAGE3_DIR/status_miri_comp.csv
-touch $STAGE3_DIR/visited.csv
 touch $STAGE3_DIR/status_stack.csv
 touch $STAGE3_DIR/status_tree.csv
 touch $STAGE3_DIR/status_native.csv
+
+CRATE_COLNAMES="crate_name,version"
+STATUS_COLNAMES="$CRATE_COLNAMES,exit_code"
+
+echo "$CRATE_COLNAMES" >  $STAGE3_DIR/visited.csv
+echo "$STATUS_COLNAMES" > $STAGE3_DIR/status_miri_comp.csv
+echo "$STATUS_COLNAMES" > $STAGE3_DIR/status_native_comp.csv
+echo "$STATUS_COLNAMES" > $STAGE3_DIR/status_download.csv
+echo "$STATUS_COLNAMES" > $STAGE3_DIR/status_native.csv
+echo "$STATUS_COLNAMES" > $STAGE3_DIR/status_stack.csv
+echo "$STATUS_COLNAMES" > $STAGE3_DIR/status_tree.csv
 
 rustup override set mirilli
 SETUP=0
