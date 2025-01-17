@@ -158,7 +158,7 @@ prepare_errors <- function(build_dir, status_dir, type) {
   return(errors)
 }
 
-all <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE) %>%
+all <- read_csv(file.path(dataset_dir, "population.csv"), show_col_types = FALSE) %>%
   select(crate_name, version)
 
 compile_errors <- function(build_dir, status_dir) {
