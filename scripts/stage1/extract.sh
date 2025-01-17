@@ -17,6 +17,8 @@ mkdir "$RESULT_DIR/early/"
 mkdir "$RESULT_DIR/late/"
 mkdir "$RESULT_DIR/tests/"
 mkdir "$RESULT_DIR/bytecode/"
+
+
 touch "$RESULT_DIR/status_download.csv"
 touch "$RESULT_DIR/visited.csv"
 touch "$RESULT_DIR/has_bytecode.csv"
@@ -37,11 +39,11 @@ for file in "$2"/*.zip; do
     for file in "$ROOT"/late/*; do cp "$file" "$RESULT_DIR/"; done
     for file in "$ROOT"/tests/*; do cp "$file" "$RESULT_DIR/"; done
     for file in "$ROOT"/bytecode/*; do cp "$file" "$RESULT_DIR/"; done
-    cat "$ROOT"/status_comp.csv >> "$RESULT_DIR/status_comp.csv"
-    cat "$ROOT"/status_lint.csv >> "$RESULT_DIR/status_lint.csv"
-    cat "$ROOT"/status_download.csv >> "$RESULT_DIR/status_download.csv"
-    cat "$ROOT"/visited.csv >> "$RESULT_DIR/visited.csv"
-    cat "$ROOT"/has_bytecode.csv >> "$RESULT_DIR/has_bytecode.csv"
+    tail -n +1 "$ROOT"/status_comp.csv >> "$RESULT_DIR/status_comp.csv"
+    tail -n +1 "$ROOT"/status_lint.csv >> "$RESULT_DIR/status_lint.csv"
+    tail -n +1 "$ROOT"/status_download.csv >> "$RESULT_DIR/status_download.csv"
+    tail -n +1 "$ROOT"/visited.csv >> "$RESULT_DIR/visited.csv"
+    tail -n +1 "$ROOT"/has_bytecode.csv >> "$RESULT_DIR/has_bytecode.csv"
     rm -rf ./temp
 done
 

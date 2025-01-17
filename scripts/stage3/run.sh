@@ -58,7 +58,7 @@ touch $STAGE3_DIR/status_tree.csv
 touch $STAGE3_DIR/status_native.csv
 
 rustup override set mirilli
-cargo miri clean && cargo miri setup
+SETUP=0
 
 while IFS=, read -r test_name crate_name version <&3;
 do
@@ -95,7 +95,11 @@ do
         CURRENT_CRATE="$crate_name"
         mkdir -p $STAGE3_DIR/crates/"$crate_name"/
         cd ./extracted || exit
-
+        if [ "$SETUP" -eq 0 ]; then
+            cargo miri clean 
+            cargo miri setup
+            SETUP=1
+        fi
         echo "Compiling rustc test binary..."
         RUSTC_COMP_EXITCODE=1
         OUTPUT=$(timeout $TIMEOUT cargo test --tests -- --list 2> err)
@@ -141,22 +145,18 @@ do
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
                 MFLAGS="$MEMORY_MODE -Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-extern-bc-file=./$crate_name.sum.bc"
                 echo "Executing Miri in Stacked Borrows mode..."
-                dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_STACK_EXITCODE=1
                 OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_STACK_EXITCODE=$?
-                dmesg -T | egrep -i 'killed process' > ./after_log.txt
 
                 echo "Exit: $MIRI_STACK_EXITCODE"
                 echo "$MIRI_STACK_EXITCODE,$crate_name,\"$test_name\"" >> ../$STAGE3_DIR/status_stack.csv
                 mkdir -p "../$STAGE3_DIR/crates/$crate_name/stack"
                 cp err "../$STAGE3_DIR/crates/$crate_name/stack/$test_name.err.log"
-                comm -1 -3 ./prev_log.txt ./after_log.txt > "../$STAGE3_DIR/crates/$crate_name/stack/$test_name.sys.log"
                 echo "$OUTPUT" > "../$STAGE3_DIR/crates/$crate_name/stack/$test_name.out.log"
                 
                 rm err
-                rm ./prev_log.txt
-                rm ./after_log.txt
+
 
                 if [ -f "./llvm_flags.csv" ]; then
                     mv ./llvm_flags.csv "$test_name".flags.csv
@@ -167,22 +167,17 @@ do
                     cp "$test_name".convert.csv ../$STAGE3_DIR/crates/"$crate_name"/stack/
                 fi
                 echo "Executing Miri in Tree Borrows mode..."
-                dmesg -T | egrep -i 'killed process' > ./prev_log.txt
                 MIRI_TREE_EXITCODE=1
                 OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS -Zmiri-tree-borrows -Zmiri-unique-is-unique" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
                 MIRI_TREE_EXITCODE=$?
-                dmesg -T | egrep -i 'killed process' > ./after_log.txt
 
                 echo "Exit: $MIRI_TREE_EXITCODE"
                 echo "$MIRI_TREE_EXITCODE,$crate_name,\"$test_name\"" >> ../$STAGE3_DIR/status_tree.csv
                 mkdir -p "../$STAGE3_DIR/crates/$crate_name/tree"
                 cp err "../$STAGE3_DIR/crates/$crate_name/tree/$test_name.err.log"
                 echo "$OUTPUT" > "../$STAGE3_DIR/crates/$crate_name/tree/$test_name.out.log"
-                comm -1 -3 ./prev_log.txt ./after_log.txt > "../$STAGE3_DIR/crates/$crate_name/tree/$test_name.sys.log"
 
                 rm err
-                rm ./prev_log.txt
-                rm ./after_log.txt
 
                 if [ -f "./llvm_flags.csv" ]; then
                     mv "./llvm_flags.csv" "$test_name".flags.csv

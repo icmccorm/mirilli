@@ -67,3 +67,14 @@ num_tests_and_bytecode <- has_tests_and_bytecode %>% nrow()
 stats <- stats %>% add_row(key = "num_crates_had_tests_and_bytecode", value = num_tests_and_bytecode)
 
 stats <- stats %>% write.csv(stats_file, row.names = FALSE, quote = FALSE)
+
+population <- read_csv(file.path(dataset_dir, "population.csv"), show_col_types = FALSE) %>%
+select(crate_name, version)
+
+early <- read_csv(file.path(stage1_output_dir, "early_abis.csv")) %>% 
+    filter(category %in% c("foreign_functions")) %>%
+    select(crate_name) %>% 
+    unique() %>%
+    inner_join(population, by=("crate_name")) %>%
+    select(crate_name, version) %>% 
+    write_csv(file.path(stage1_output_dir, "had_ffi.csv"))

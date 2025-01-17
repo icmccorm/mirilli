@@ -90,6 +90,8 @@ bugs <- read_csv(file.path("./dataset/bugs.csv"), show_col_types = FALSE) %>%
     kind_tree
   )
 
+
+bugs %>% filter(bug_category == "Typing")  %>% filter(error_type == "Uninitialized Memory")
 #%bugs %>% filter(bug_category == "Ownership") %>% 
 #  group_by(kind_tree) %>%
 #  summarize(n = n()) %>%
@@ -206,12 +208,18 @@ gt_ten_thousand <- popularity %>%
   filter(avg_daily_downloads > 10000) %>%
   nrow()
 
+
+popularity %>% filter(crate_name == "flate2")
 lt_hundred <- popularity %>%
   filter(avg_daily_downloads < 100) %>%
+  select(crate_name) %>%
+  unique() %>%
   nrow()
 
 lt_ten <- popularity %>%
   filter(avg_daily_downloads < 10) %>%
+  select(crate_name) %>%
+  unique() %>%
   nrow()
 
 yrs_since_update <- round(mean(popularity$days_since_last_update) / 365, 1)
