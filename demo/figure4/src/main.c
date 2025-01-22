@@ -24,7 +24,7 @@ void compress(Stream *s)
     int data = ((Stream *)s->state->stream)->data;
 }
 
-void drop(Stream *s)
+void drop_stream(Stream *s)
 {
     free(s->state);
 }

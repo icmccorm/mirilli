@@ -1,11 +1,10 @@
 use crate::ffi::*;
 
-pub struct Compression {
+struct Compression {
     pub stream: *mut Stream,
 }
 
 impl Compression {
-  
     fn new() -> Self {
         let stream = Box::new(Stream::default());
         let stream = Box::into_raw(stream);
@@ -18,6 +17,15 @@ impl Compression {
             (*self.stream).data = 0;
             compress(self.stream)
         }
+    }
+}
+
+impl Drop for Compression {
+    fn drop(&mut self) {
+        unsafe { 
+            drop_stream(self.stream); 
+            drop(Box::from_raw(self.stream));
+        }   
     }
 }
 

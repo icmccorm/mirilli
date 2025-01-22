@@ -17,6 +17,9 @@ extern "C" {
 extern "C" {
     pub fn compress(stream: *mut Stream);
 }
+extern "C" {
+    pub fn drop_stream(stream: *mut Stream);
+}
 
 impl Default for Stream {
     fn default() -> Self {
