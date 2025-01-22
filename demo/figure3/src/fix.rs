@@ -20,7 +20,7 @@ fn open(a: &mut Alloc) -> i32 {
     a.buffer = cache;
     let b = &mut *a;
     unsafe {
-        ffi::open(b.buffer);
+        ffi::open_f(b.buffer);
         *b.cache.get()
     }
 }
