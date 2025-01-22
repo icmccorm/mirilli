@@ -14,7 +14,8 @@ typedef struct
 void init(Stream *s)
 {
     s->state = malloc(sizeof(State));
-    s->state->stream = s;
+    //We excluded the cast to `Stream *` in the original presentation for brevity.
+    s->state->stream = (struct Stream *) s;
 }
 
 void compress(Stream *s)

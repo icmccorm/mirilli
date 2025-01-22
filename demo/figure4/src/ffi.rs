@@ -11,10 +11,10 @@ pub struct Stream {
     pub child: *mut State,
 }
 
-unsafe extern "C" {
+extern "C" {
     pub fn init(stream: *mut Stream);
 }
-unsafe extern "C" {
+extern "C" {
     pub fn compress(stream: *mut Stream);
 }
 
