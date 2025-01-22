@@ -1,0 +1,1 @@
+void open(int *buffer);

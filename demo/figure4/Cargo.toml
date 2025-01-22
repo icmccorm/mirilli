@@ -1,0 +1,8 @@
+[package]
+name = "figure4"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+cc = "1.2.5"
+bindgen = "0.71.0"
