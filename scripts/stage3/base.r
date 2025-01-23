@@ -146,7 +146,6 @@ prepare_errors <- function(build_dir, status_dir, type) {
     deduplicate_error_text()
 
   exit_codes <- read_csv(file.path(status_dir, paste0("status_", type, ".csv")), show_col_types = FALSE)
-
   errors <- errors %>%
     full_join(exit_codes, by = c("crate_name", "test_name")) %>%
     mutate(error_type = if_else(timed_out(exit_code), TIMEOUT_ERR_TXT, error_type)) %>%
