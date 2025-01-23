@@ -1,10 +1,10 @@
 import os
 import sys
 import re
-import parse_tb
-import parse_shared
-import parse_sb
-from parse_shared import Operation
+import compile_tb
+import compile_shared
+import compile_sb
+from compile_shared import Operation
 
 def read_flags(FLAGS_CSV_PATH):
     with open(FLAGS_CSV_PATH, "r") as f:
@@ -13,16 +13,16 @@ def read_flags(FLAGS_CSV_PATH):
         return flags
 
 
-FLAGS_CSV_PATH = "./dataset/stage3/flags.csv"
+FLAGS_CSV_PATH = "./scripts/flags.csv"
 FLAGS = read_flags(FLAGS_CSV_PATH)
 
 
 def check_for_uninit(text):
-    return parse_shared.RE_MEM_UNINIT.search(text) is not None
+    return compile_shared.RE_MEM_UNINIT.search(text) is not None
 
 
 def check_for_maybeuninit(text):
-    return parse_shared.RE_MAYBEUNINIT.search(text) is not None
+    return compile_shared.RE_MAYBEUNINIT.search(text) is not None
 
 
 def quote(string):
@@ -225,9 +225,9 @@ def extract_error_info(is_tree_borrows, text):
     error_subtype = None
     if error_type == "Borrowing Violation":
         if not is_tree_borrows:
-            error_subtype = parse_sb.stack_error(help_text)
+            error_subtype = compile_sb.stack_error(help_text)
         else:
-            error_subtype = parse_tb.tb_error(help_text)
+            error_subtype = compile_tb.tb_error(help_text)
     error_type = error_type_override if error_type_override is not None else error_type
     return (
         [error_type, quote(error_text), quote(error_location), exit_signal_number],
@@ -255,10 +255,10 @@ def extract_error_info(is_tree_borrows, text):
     ],
 )
 tree_summary = open_csv(
-    output_dir, "tree_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS
+    output_dir, "tree_summary.csv", ["crate_name", "test_name"] + compile_shared.COLUMNS
 )
 stack_summary = open_csv(
-    output_dir, "stack_summary.csv", ["crate_name", "test_name"] + parse_shared.COLUMNS
+    output_dir, "stack_summary.csv", ["crate_name", "test_name"] + compile_shared.COLUMNS
 )
 
 print(f"Processing errors from '{os.path.basename(base)}' mode...")

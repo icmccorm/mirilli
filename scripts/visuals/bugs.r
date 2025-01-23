@@ -13,6 +13,12 @@ suppressPackageStartupMessages({
 loadfonts(quiet = TRUE)
 options(dplyr.summarise.inform = FALSE)
 
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+dataset_dir <- ifelse(dataset_dir == "", "dataset", dataset_dir)
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
+
 stats_file <- file.path("./build/visuals/bugs.stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
@@ -55,7 +61,7 @@ memory <- c("Memory Leaked", "Cross-Language Free", "Dangling Int Pointer")
 typing <- c("Using Uninitialized Memory", "Unaligned Reference", "Invalid Enum Tag", "Incorrect FFI Binding")
 
 
-bugs <- read_csv(file.path("./dataset/bugs.csv"), show_col_types = FALSE) %>%
+bugs <- read_csv(file.path(dataset_dir, "bugs.csv"), show_col_types = FALSE) %>%
   select(bug_id, crate_name, version, root_crate_name, root_crate_version, test_name, annotated_error_type, fix_loc, issue, pull_request, commit, bug_type_override, memory_mode, error_loc_override, error_type_override) %>%
   left_join(all_errors, by = c("crate_name", "version", "test_name", "memory_mode")) %>%
   mutate(
@@ -90,6 +96,8 @@ bugs <- read_csv(file.path("./dataset/bugs.csv"), show_col_types = FALSE) %>%
     kind_tree
   )
 
+
+bugs %>% filter(bug_category == "Typing")  %>% filter(error_type == "Uninitialized Memory")
 #%bugs %>% filter(bug_category == "Ownership") %>% 
 #  group_by(kind_tree) %>%
 #  summarize(n = n()) %>%
@@ -208,12 +216,18 @@ gt_ten_thousand <- popularity %>%
   filter(avg_daily_downloads > 10000) %>%
   nrow()
 
+
+popularity %>% filter(crate_name == "flate2")
 lt_hundred <- popularity %>%
   filter(avg_daily_downloads < 100) %>%
+  select(crate_name) %>%
+  unique() %>%
   nrow()
 
 lt_ten <- popularity %>%
   filter(avg_daily_downloads < 10) %>%
+  select(crate_name) %>%
+  unique() %>%
   nrow()
 
 yrs_since_update <- round(mean(popularity$days_since_last_update) / 365, 1)

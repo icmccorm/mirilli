@@ -10,6 +10,11 @@ stage3_root <- file.path("./build/stage3/")
 if (!dir.exists(stage3_root)) {
   dir.create(stage3_root)
 }
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+dataset_dir <- ifelse(dataset_dir == "", "dataset", dataset_dir)
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
 
 STACK_OVERFLOW_TXT <- "Stack Overflow"
 UNSUPP_ERR_TXT <- "Unsupported Operation"
@@ -141,7 +146,6 @@ prepare_errors <- function(build_dir, status_dir, type) {
     deduplicate_error_text()
 
   exit_codes <- read_csv(file.path(status_dir, paste0("status_", type, ".csv")), show_col_types = FALSE)
-
   errors <- errors %>%
     full_join(exit_codes, by = c("crate_name", "test_name")) %>%
     mutate(error_type = if_else(timed_out(exit_code), TIMEOUT_ERR_TXT, error_type)) %>%
@@ -153,7 +157,7 @@ prepare_errors <- function(build_dir, status_dir, type) {
   return(errors)
 }
 
-all <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE) %>%
+all <- read_csv(file.path(dataset_dir, "population.csv"), show_col_types = FALSE) %>%
   select(crate_name, version)
 
 compile_errors <- function(build_dir, status_dir) {

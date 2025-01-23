@@ -1,0 +1,4 @@
+crate_name,version
+bzip2,0.4.4
+dec,0.4.8
+librsync,0.2.3

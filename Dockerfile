@@ -1,5 +1,6 @@
 FROM rocker/verse:4.3.1 AS setup
 WORKDIR /usr/src/mirilli
+
 COPY . .
 RUN apt-get update -y && apt-get upgrade -y && apt-get install $(cat pkglist) -y
 RUN curl -O https://apt.llvm.org/llvm.sh
@@ -15,19 +16,26 @@ ENV CC="clang-18 -g -O0 --save-temps=obj"
 ENV CXX="clang++-18 -g -O0 --save-temps=obj"
 ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
 ENV LLVM_SYS_181_PREFIX="/usr/src/mirilli/mirilli-rust/build/host/llvm/"
+ENV DATASET="./dataset"
+RUN rustup install nightly
 RUN rustup install ${NIGHTLY}
 RUN rustup default ${NIGHTLY}
+RUN cargo install cargo-download
 RUN rustup component add miri
 RUN rustup component add rust-src
-RUN rustup install nightly
 RUN git submodule update --init ./mirilli-rust
 RUN git submodule update --init ./rllvm-as
 
-FROM setup AS setup-renv
+FROM setup AS setup-dylint
+RUN cargo install cargo-dylint@2.6.0 dylint-link@2.6.0 --locked
+RUN (cd src/early && cargo build)
+RUN (cd src/late && cargo build)
+
+FROM setup-dylint AS setup-renv
 RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "renv::restore()"
 
-FROM setup-renv as rust-compile
+FROM setup-renv AS rust-compile
 WORKDIR /usr/src/mirilli/mirilli-rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
@@ -37,18 +45,21 @@ RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py build && ./x.py install
 RUN rustup toolchain link mirilli /usr/src/mirilli/mirilli-rust/build/host/stage2/
 RUN rustup default mirilli
 
-FROM rust-compile as miri-compile
+FROM rust-compile AS miri-compile
 WORKDIR /usr/src/mirilli/mirilli-rust
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py build miri
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py install miri
 RUN cargo miri setup
 
-FROM miri-compile as rllvm-compile
+FROM miri-compile AS rllvm-compile
 WORKDIR /usr/src/mirilli/rllvm-as
 RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 
-FROM rllvm-compile as final
+FROM rllvm-compile AS db-init
+WORKDIR /usr/src/mirilli/
+RUN ./scripts/initdb.sh
+
+FROM db-init AS final
 WORKDIR /usr/src/mirilli
-RUN cargo install cargo-download

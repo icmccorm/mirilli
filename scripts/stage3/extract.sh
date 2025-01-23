@@ -1,7 +1,6 @@
 #!/bin/bash
-# if there aren't two arguments, exit with usage
 if [ "$#" -ne 2 ]; then
-    echo "Usage: ./extract.sh <path to stage3 results> <path to output directory>"
+    echo "Usage: ./extract.sh <path to output directory> <path to stage3 results>"
     exit 1
 fi
 RESULT_DIR=$2
@@ -10,16 +9,16 @@ if [ -d "$RESULT_DIR" ]; then
 fi
 mkdir "$RESULT_DIR"
 touch "$RESULT_DIR"/visited.csv
-touch "$RESULT_DIR"/failed_download.csv
+touch "$RESULT_DIR"/status_download.csv
 touch "$RESULT_DIR"/status_native_comp.csv
 touch "$RESULT_DIR"/status_miri_comp.csv
 touch "$RESULT_DIR"/status_stack.csv
 touch "$RESULT_DIR"/status_tree.csv
 touch "$RESULT_DIR"/status_native.csv
-for FILE in "$1"/*.zip; do
+for FILE in "$2"/*.zip; do
     echo "Unzipping $FILE..."
     unzip -q "$FILE"
-    ROOT="./home/ec2-user/results/stage3"  
+    ROOT="./stage3"  
     for CRATE_DIR in "$ROOT"/crates/*; do
         echo "Visiting $CRATE_DIR..."
         CRATE_NAME=$(basename "$CRATE_DIR")
@@ -40,7 +39,7 @@ for FILE in "$1"/*.zip; do
             cp -rf $ROOT/crates/"$CRATE_NAME"/llvm_bc.csv $RESULT_DIR/crates/"$CRATE_NAME"/llvm_bc.csv
         fi
     done
-    cat $ROOT/failed_download.csv >> "$RESULT_DIR/failed_download.csv"
+    cat $ROOT/status_download.csv >> "$RESULT_DIR/status_download.csv"
     cat $ROOT/status_native_comp.csv >> "$RESULT_DIR/status_native_comp.csv"
     cat $ROOT/status_miri_comp.csv >> "$RESULT_DIR/status_miri_comp.csv"
     cat $ROOT/status_stack.csv >> "$RESULT_DIR/status_stack.csv"

@@ -2,21 +2,26 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(readr)
 })
-
 stage2_root <- file.path("./build/stage2")
 if (!dir.exists(stage2_root)) {
     dir.create(stage2_root)
 }
+dataset_dir <- Sys.getenv("DATASET", "dataset")
+dataset_dir <- ifelse(dataset_dir == "", "dataset", dataset_dir)
+if (!dir.exists(dataset_dir)) {
+    stop("Directory not found: ", dataset_dir)
+}
+
 stats_file <- file.path(stage2_root, "./stage2.stats.csv")
 stats <- data.frame(key = character(), value = numeric(), stringsAsFactors = FALSE)
 
 tests <- read_csv(
-    file.path("./dataset/stage2/tests.csv"),
+    file.path(dataset_dir, "stage2/tests.csv"),
     show_col_types = FALSE,
 ) %>%
     filter(test_name != "")
 
-population <- read_csv(file.path("./dataset/population.csv"), show_col_types = FALSE) %>%
+population <- read_csv(file.path(dataset_dir, "population.csv"), show_col_types = FALSE) %>%
 select(crate_name, version)
 
 test_count_overall <- tests %>%
