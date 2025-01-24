@@ -82,7 +82,7 @@ valid_error_type <- function(type, trace) {
     LLI_ERR_TXT,
     SCALAR_MISMATCH_TEXT,
     TIMEOUT_ERR_TXT,
-    TIMEOUT_PASS_ERR_TXT,
+    TIMEOUT_PASS_ERR_TXT
   ))
 }
 passed <- function(exit_code) {
