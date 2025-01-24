@@ -25,8 +25,8 @@ fi
 export PATH="$HOME/.cargo/bin:$PATH"
 export DYLINT_LIBRARY_PATH="$PWD/src/early/target/debug/:$PWD/src/late/target/debug/"
 export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
-export CC="clang-18 $DEFAULT_FLAGS"
-export CXX="clang++-18 $DEFAULT_FLAGS"
+export CC="clang-16 $DEFAULT_FLAGS"
+export CXX="clang++-16 $DEFAULT_FLAGS"
 export NIGHTLY="nightly-2023-09-25"
 TIMEOUT=5m
 rustup --version

@@ -22,8 +22,8 @@ if [ ! -f $2 ]; then
 fi
 
 export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
-export CC="clang-18 $DEFAULT_FLAGS"
-export CXX="clang++-18 $DEFAULT_FLAGS"
+export CC="clang-16 $DEFAULT_FLAGS"
+export CXX="clang++-16 $DEFAULT_FLAGS"
 export PATH="$HOME/.cargo/bin:$PATH"
 
 DIR="$1/stage2"

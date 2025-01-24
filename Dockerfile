@@ -5,15 +5,15 @@ COPY . .
 RUN apt-get update -y && apt-get upgrade -y && apt-get install $(cat pkglist) -y
 RUN curl -O https://apt.llvm.org/llvm.sh
 RUN chmod +x llvm.sh
-RUN ./llvm.sh 18 all
+RUN ./llvm.sh 16 all
 RUN curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh \
     && chmod +x /tmp/rustup-init.sh \
     && sh /tmp/rustup-init.sh -y \
     && rm -rf /tmp/rustup-init.sh
 ENV PATH="/root/.cargo/bin:${PATH}"
 ENV NIGHTLY="nightly-2023-09-25"
-ENV CC="clang-18 -g -O0 --save-temps=obj"
-ENV CXX="clang++-18 -g -O0 --save-temps=obj"
+ENV CC="clang-16 -g -O0 --save-temps=obj"
+ENV CXX="clang++-16 -g -O0 --save-temps=obj"
 ENV PATH="/usr/src/mirilli/rllvm-as/target/release:${PATH}"
 ENV LLVM_SYS_181_PREFIX="/usr/src/mirilli/mirilli-rust/build/host/llvm/"
 ENV DATASET="./dataset"

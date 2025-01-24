@@ -31,8 +31,8 @@ STAGE3_DIR=$DIR/stage3
 
 export PATH="$HOME/.cargo/bin:$PATH"
 export DEFAULT_FLAGS="-g -O0 --save-temps=obj"
-export CC="clang-18 $DEFAULT_FLAGS"
-export CXX="clang++-18 $DEFAULT_FLAGS"
+export CC="clang-16 $DEFAULT_FLAGS"
+export CXX="clang++-16 $DEFAULT_FLAGS"
 
 CURRENT_CRATE=""
 TIMEOUT=10m
