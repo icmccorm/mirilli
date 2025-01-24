@@ -1,7 +1,7 @@
 test_ordered_decimal128,dec,0.4.8
 test_overloading,dec,0.4.8
 test_decimal128_set_exponent,dec,0.4.8
-cephes_double::shichi,special-fun,0.2.0
+cephes_double::sici,special-fun,0.2.0
 c_check::compare_arduino,spritz_cipher,0.1.0
 tests::test_build_hasher,xxhrs,2.0.0
 test::test_decompression,clickhouse-driver-lz4,0.1.0
