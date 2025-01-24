@@ -83,9 +83,7 @@ valid_error_type <- function(type, trace) {
     SCALAR_MISMATCH_TEXT,
     TIMEOUT_ERR_TXT,
     TIMEOUT_PASS_ERR_TXT,
-    UB_MAYBEUNINIT,
-    UB_MEM_UNINIT
-  )) | (type %in% c(UB_MAYBEUNINIT, UB_MEM_UNINIT) & error_in_dependency(trace))
+  ))
 }
 passed <- function(exit_code) {
   exit_code == 0
