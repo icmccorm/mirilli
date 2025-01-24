@@ -1,8 +1,3 @@
-[submodule "rust"]
-	path = mirilli-rust
-	url = https://github.com/BorrowSanitizer/rust.git
-	branch = mirilli
-	shallow = true
 [submodule "rllvm-as"]
 	path = rllvm-as
 	url = https://github.com/icmccorm/rllvm-as
