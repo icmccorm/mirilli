@@ -3,7 +3,7 @@ tests::test_decode,bchlib,0.2.1
 bufread::tests::bug_61,bzip2,0.4.4
 test::test_decompression,clickhouse-driver-lz4,0.1.0
 aesni_test::aesni_192_key_expansion_test,crypto_pimitives,0.1.1
-test_ordered_decimal128,dec,0.4.8
+test_decimal128_special_value_coefficient,dec,0.4.8
 test_overloading,dec,0.4.8
 test_decnum_try_from_f32,dec,0.4.8
 test_decimal128_set_exponent,dec,0.4.8
