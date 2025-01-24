@@ -147,4 +147,4 @@ do
     IFS=,
     echo "$crate_name,$version" >> $VISITED_CSV
 done 3< "$2"
-printf 'FINISHED! %s\n' "$crate_name"
+printf 'FINISHED!\n'

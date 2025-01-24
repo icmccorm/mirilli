@@ -156,7 +156,7 @@ do
                 cp err ../$STAGE3_DIR/crates/$crate_name/miri.comp.log
             fi
             if [ "$MIRI_COMP_EXITCODE" -eq 0 ]; then
-                MFLAGS="$MEMORY_MODE -Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-extern-bc-file=./$crate_name.sum.bc"
+                MFLAGS="$MEMORY_MODE -Zmiri-descriptive-ub -Zmiri-backtrace=full -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation -Zmiri-extern-bc-file=./$crate_name.sum.bc -Zmiri-llvm-log"
                 echo "Executing Miri in Stacked Borrows mode..."
                 MIRI_STACK_EXITCODE=1
                 OUTPUT=$(RUST_BACKTRACE=1 MIRI_BACKTRACE=1 MIRIFLAGS="$MFLAGS" timeout $TIMEOUT_MIRI cargo miri test -q "$test_name" -- --exact 2> err)
@@ -169,7 +169,6 @@ do
                 echo "$OUTPUT" > "../$STAGE3_DIR/crates/$crate_name/stack/$test_name.out.log"
                 
                 rm err
-
 
                 if [ -f "./llvm_flags.csv" ]; then
                     mv ./llvm_flags.csv "$test_name".flags.csv
@@ -207,3 +206,5 @@ do
         CURRENT_CRATE=""
     fi
 done 3<"$2"
+
+printf 'FINISHED!\n'

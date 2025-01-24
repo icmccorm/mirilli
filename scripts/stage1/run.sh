@@ -110,4 +110,5 @@ do
     done
     TRIES_REMAINING=3
 done <<< "$(tail -n +2 "$1/population.csv")"
-printf 'FINISHED! %s\n' "$name"
+
+printf 'FINISHED!\n'
