@@ -1,3 +1,6 @@
 [submodule "rllvm-as"]
 	path = rllvm-as
 	url = https://github.com/icmccorm/rllvm-as
+[submodule "rust"]
+	path = rust
+	url = https://github.com/BorrowSanitizer/rust.git
