@@ -197,10 +197,11 @@ popularity <- bugs %>%
   mutate(crate_name = ifelse(!is.na(root_crate_name), root_crate_name, crate_name)) %>%
   mutate(version = ifelse(!is.na(root_crate_version), root_crate_version, version)) %>%
   mutate(id = paste0("\\ref{", bug_id, "}")) %>%
-  select(crate_name, version, id) %>%
+  select(crate_name, version, test_name, id) %>%
   inner_join(all, by = c("crate_name", "version")) %>%
   select(
     crate_name,
+    test_name,
     version,
     avg_daily_downloads,
     downloads,
@@ -220,13 +221,13 @@ gt_ten_thousand <- popularity %>%
 popularity %>% filter(crate_name == "flate2")
 lt_hundred <- popularity %>%
   filter(avg_daily_downloads < 100) %>%
-  select(crate_name) %>%
+  select(test_name, crate_name) %>%
   unique() %>%
   nrow()
 
 lt_ten <- popularity %>%
   filter(avg_daily_downloads < 10) %>%
-  select(crate_name) %>%
+  select(test_name, crate_name) %>%
   unique() %>%
   nrow()
 

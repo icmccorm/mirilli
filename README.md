@@ -487,11 +487,12 @@ The script for this stage is `./scripts/stage3/run.sh`. Execute it without argum
 # ./scripts/stage3/run.sh
 ```
 The third argument, `-z`, is optional. If provided, then MiriLLI is executed in the "zeroed" memory mode, which
-zero-initializes all LLVM-allocated memory by default. To speed things up, we will only test the default mode.
+zero-initializes all LLVM-allocated memory by default. We will only test the zeroed mode, since this is required
+for replicating a subset of our bugs.
 
-Execute the following command to run the tests in uninit mode. **This will take 20-30 minutes to complete**
+Execute the following command to run the tests in zeroed mode. **This will take 20-30 minutes to complete**
 ```
-# ./scripts/stage3/run.sh demo/large demo/large/stage3.csv
+# ./scripts/stage3/run.sh demo/large demo/large/stage3.csv -z
 ```
 Execute the following command to view the output of this stage.
 ```
@@ -499,7 +500,7 @@ Execute the following command to view the output of this stage.
 ```
 You should see the following output:
 ```
-demo/large/stage3/uninit
+demo/large/stage3/zeroed
 ├── crates
 ├── status_download.csv
 ├── status_miri_comp.csv
@@ -510,9 +511,9 @@ demo/large/stage3/uninit
 └── visited.csv
 ```
 
-Copy the output from this execution to a "zeroed" directory, as if we had run that evaluation mode.
+Copy the output from this execution to an "uninit" directory, as if we had run that evaluation mode.
 ```
-# cp -r demo/large/stage3/uninit demo/large/stage3/zeroed 
+# cp -r demo/large/stage3/zeroed demo/large/stage3/uninit 
 ```
 Now, compile the Stage 3 results with the following command:
 ```
@@ -527,7 +528,7 @@ Finished Stage 3
 ```
 Confirm that this stage was successful by executing the following command:
 ```
-tree ./build/stage3 -L 1
+# tree ./build/stage3 -L 1
 ```
 You should see the following output:
 ```
@@ -544,15 +545,14 @@ You should see the following output:
 ```
 To confirm that you have successfully reproduced our results, execute the following command:
 ```
-wc -l ./build/stage3/errors_unique.csv
+# wc -l ./build/stage3/errors_unique.csv
 ```
 You should see the following output, indicating that there were 30 unique errors (with one additional line for the CSV header).
 ```
-
+31
 ```
 View the file for a sample of the results:
 ```
-
 ```
 From this point onward, we manually investigated the results in the files `errors_unique.csv` and `diff_errors[uninit/zeroed].csv`, recreating errors locally
 using MiriLLI and reporting them to maintainers. 
