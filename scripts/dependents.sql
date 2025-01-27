@@ -4,7 +4,7 @@ CREATE TEMPORARY TABLE had_ffi (
     version VARCHAR
 );
 COPY had_ffi(crate_name, version)
-FROM '/Users/icmccorm/git/mirilli-artifact/build/stage1/had_ffi.csv'
+FROM '/usr/src/mirilli/build/stage1/had_ffi.csv'
 DELIMITER ','
 CSV HEADER;
 
