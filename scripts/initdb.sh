@@ -7,5 +7,5 @@ if [ -d "dataset" ]; then
   createdb crates
   psql crates < schema.sql
   psql crates < import.sql
-  psql -d crates -f ./scripts/population.sql
+  psql -d crates -f ../../scripts/population.sql
 fi
