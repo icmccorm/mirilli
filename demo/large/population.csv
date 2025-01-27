@@ -16,9 +16,7 @@ littlefs2,0.4.0
 lsmlite-rs,0.1.0
 minimap2-sys,0.1.16+minimap2.2.26
 minimp3_ex-sys,0.1.1
-mozjpeg,0.10.1
 ms5837,0.2.1
-mseed,0.5.0
 quickjs_regex,0.2.3
 secp256k1,0.28.0
 sgp4-rs,0.4.0
