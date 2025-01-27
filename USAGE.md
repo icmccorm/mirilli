@@ -1,19 +1,5 @@
 # MiriLLI - Usage
-This is a basic tutorial on how to use MiriLLI and a guide to our implementation, which will be useful if you want to extend or update this tool in the future. 
-
-## Installation
-We recommend using MiriLLI by building our Docker image. With Docker installed, execute the following command to build our image:
-```
-docker build . -t mirilli
-```
-Then, to launch a shell within the image, execute:
-```
-docker run mirilli -it /bin/bash
-```
-Alternatively, you can build MiriLLI from source. The Rust Compiler Development Guide provides [comprehensive documentation](https://rustc-dev-guide.rust-lang.org/building/how-to-build-and-run.html) on how to build the Rust compiler. 
-
-## Extensions
-Aside from additional FFI support, MiriLLI is near-identical to an unmodified version of Miri. If you have never used Miri before, please review its original README file before using MiriLLI. This can be found within our fork of the Rust compiler in the directory [`src/tools/miri`](./rust/src/tools/miri). Alternatively, you can consult [the latest version](https://github.com/rust-lang/miri) of the README upstream.
+Aside from FFI support, MiriLLI is nearly-identical to an unmodified version of Miri. If you have never used Miri before, please review its original README file before using MiriLLI. This can be found within our fork of the Rust compiler in the directory [`src/tools/miri`](./rust/src/tools/miri). Alternatively, you can consult [the latest version](https://github.com/rust-lang/miri) of the README upstream.
 
 MiriLLI needs access to the LLVM bitcode of foreign libraries to be able to call foreign functions. Clang will produce LLVM bitcode files during compilation if you pass it the flag `--save-temps=obj`. In our Docker image, we override the global C and C++ compilers to use these flags by default. This ensures that bitcode files will be produced and stored in the target directory when building a crate that statically links against C or C++ code. Alternatively, you can compile a foreign library separately, assemble its files into a single module with `llvm-as`, and place it in the directory where you invoke Miri. MiriLLI recursively searches for all bitcode files in the directory where it is invoked, so running it is the same as running an unmodified version of Miri (e.g. `cargo miri test`).
 
@@ -26,6 +12,8 @@ We implemented several configuration flags that change the behavior of MiriLLI. 
 * `-Zmiri-llvm-enable-alignment-check-all` - checks all memory accesses in LLVM for alignment.
 
 * `-Zmiri-llvm-enable-alignment-check-rust` - checks only memory accesses to Rust-allocated memory for alignment in LLVM.
+
+* `-Zmiri-llvm-log` - Logs several evaluation-specific flags to the file `llvm_flags.csv`. 
 
 ## Implementation
 As a prerequisite, please review Section III of our paper, which provides a high-level overview MiriLLI's architecture.
@@ -41,7 +29,7 @@ We used forks of these crates to implement the interface between Miri and LLI:
 
 Most of the code for our extension to Miri is located in the directory [`src/shims/llvm`](https://github.com/BorrowSanitizer/rust/blob/f225333ae33cc5b750d92e34dafc1bda504cf8a3/src/tools/miri/src/shims/llvm/), which has the following contents:
 ```
-├── convert     // Functions for converting between value representations for Rust and LLVM.
+├── convert     // Functions for converting between the value representations used by Rust and LLVM.
 ├── values      // Value representations for Rust, and LLVM.
 ├── threads     // The state of a cross-language thread
 ├── hooks       // Functions that are used to replace LLI's core operations for accessing memory, handling threads, etc.
@@ -83,7 +71,7 @@ We implemented LLI using [Ouroboros](https://github.com/someguynamedjosh/ourobor
 pub static LLVM_INTERPRETER: ReentrantMutex<RefCell<Option<LLI>>> =
     ReentrantMutex::new(RefCell::new(None));
 ```
-We acquire this mutex to access the ``LLI` object whenever we need to interact with a foreign library. For example, before initializing Miri in [src/eval.rs](./rust/src/tools/miri/src/eval.rs), we call `LLI::run_constructors` to call all global constructors for the LLVM module. In the same file, we call `LLI::run_destructors` before terminating Miri. We need this to be a `ReentrantMutex` for the case when a Rust function calls a foreign function, which calls a Rust function, which calls a foreign function. In this case, the lock for `LLI` is acquired to handle the first call, but then we need to access it again up the callstack. Since Miri is single-threaded, we can soundly re-enter the mutex here. 
+We acquire this mutex to access the `LLI` object whenever we need to interact with a foreign library. For example, before initializing Miri in [src/eval.rs](./rust/src/tools/miri/src/eval.rs), we call `LLI::run_constructors` to call all global constructors for the LLVM module. In the same file, we call `LLI::run_destructors` before terminating Miri. We need this to be a `ReentrantMutex` for the case when a Rust function calls a foreign function, which calls a Rust function, which calls a foreign function. In this case, the lock for `LLI` is acquired to handle the first call, but then we need to access it again up the callstack. Since Miri is single-threaded, we can soundly re-enter the mutex here. 
 
 We wait to initialize the [`ExecutionEngine`](./rust/src/inkwell/src/execution_engine.rs) component of `LLI` when Miri encounters a foreign function. At that point, we call `LLI::initialize_engine` (this only happens the first time a foreign function is encountered). In addition to creating a new instance of `ExecutionEngine` within the `LLI` object, this function also provides LLI with hooks (function pointers) to a variety of operations:
 ```

@@ -13,6 +13,10 @@ The artifact contains six files:
 
 * `README.md` - This README file.
 
+* `USAGE.md` - A guide on how to use and extend MiriLLI
+
+* `DATASET.md` - Documentation on the contents of our dataset.
+
 * `tool.raw.tar.gz` - the raw source code for our tool and data compliation scripts.
 
 * `data.raw.tar.gz` - the contents of the [crates.io](https://crates.io) database on 9/20/2023 and the raw output from our data collection steps described in Section 3 of our paper. 
@@ -23,7 +27,7 @@ The artifact contains six files:
 
 * `docker-image.tar.gz` - a Docker image containing the contents of the previous files and a working build of our tool.
 
-You will only need `appendix.pdf`, `preprint.pdf`, and `docker-image.tar.gz` for the evaluation.
+You will need `appendix.pdf`, `preprint.pdf`, `DATASET.md`, `USAGE.md`, and `docker-image.tar.gz` for the evaluation.
 
 ### Data - Contents
 Here we provide a brief overview of the contents of our docker image (excluding configuration files, `.renv` files, `.gitignore`, `Dockerfile`, `makefile`, etc.)
@@ -61,7 +65,6 @@ To complete our evaluation, your system must meet the following requirements:
 * [Docker](https://www.docker.com/) installed.
 * 16 GB of RAM
 * 100 GB of free space
-* >= 4 CPU cores
 
 We have set the resource requirements to be more than strictly necessary to ensure that you will not encounter any issues while evaluating the artifact.
 
@@ -111,14 +114,14 @@ If all of these steps have been completed successfully, then you are ready to be
 Complete each of the following steps to evaluate our artifact. This assumes that you have successfully completed each of the steps shown in the previous section (**Setup**). Except for Step #1, all steps must be completed inside a Docker container launched from our image.
 
 ### Overview
-* **Step 1** - *Check the Appendix* (10 human-minutes)
-* **Step 2** - *Validate Results and Examples in Paper* (1 human hour + 15 compute-minutes)
-* **Step 3** - *Replicate Data Collection Steps* (30 human minutes + 30 compute minutes) OR (30 human minutes + 4 compute hours)
-* **Step 4** - *How to reuse beyond the paper* (10 human-minutes, 5 compute minutes)
+* **Part 1** - *Check the Appendix* (10 human-minutes)
+* **Part 2** - *Validate Results and Examples in the Paper* (1 human hour + 15 compute-minutes)
+* **Part 3** - *Replicate Data Collection Steps* (30 human minutes + 30 compute minutes) OR (30 human minutes + 4 compute hours)
+* **Part 4** - *How to Reuse Beyond the Paper* (10 human-minutes, 5 compute minutes)
 
 As part of several steps, we will prompt you to input console commands and check that their output matches what is shown in this document. Commands are prefixed with a "#".
 
-## Check the Appendix (10 human-minutes)
+## Part 1 - Check the Appendix (10 human-minutes)
 
 In this step, you will examine our Appendix to confirm that each of the sections we reference in our paper are present.
 
@@ -133,13 +136,12 @@ At the end of the introduction to Section IV of our paper (Results) and immediat
 > We refer to each bug using a unique numerical ID corresponding to tables in Section 1 of the Appendix.
 
 **Task:** Open the Appendix and navigate to Section 1, Table 2. Check to confirm that:
-* There are 47 Bug IDs
+* There are 46 Bug IDs
 * For every Bug ID, we include at least one link in at least one of the columns "Issues", "Pull(s)", or "Commits". 
-* Choose any link at random from one of these columns and confirm that it is valid. 
 
 You have now completed this step of our evaluation.
 
-## Validate Results in Paper (1 human hour + 15 compute minutes)
+## Part 2 - Validate Results and Examples in the Paper (1 human hour + 15 compute minutes)
 The complete dataset is provided as part of our Docker image within the directory `dataset`. It is documented in the file `DATASET.md`.
 In this stage, you will compile the dataset, examine its output, and compare it against several of the statistics shown in the paper to confirm that 
 they can be replicated using our tool. This and each subsequent step requires our Docker image.
@@ -168,13 +170,13 @@ You should see the following output.
 ```
 To complete this step, you will be using the files `build/stats_long.csv` and `build/visuals/bug_counts_table.csv`.
 
-### Task - Inline Statistics - (20 human minutes, 5 compute minutes)
+### Part 2.1 - Inline Statistics - (20 human minutes, 5 compute minutes)
 To validate this section, you will need to have a copy of the paper, this README, and the contents of the file `build/stats_long.csv`. This file contains two columns: `key` and `value`. Each value is a statistic, and each 
 key is an identifier that links to both a table in DATASET.md and the CSV file `dataset/stat_key_descriptions.csv`. Each of these files describe the meaning of each statistic. 
 
 Here, you will reproduce a subset of our inline statistics to confirm that they can be replicated from our dataset. 
 
-**Task:** Navigate to Section III.A of the paper ("Sampling") on page 6. Skim this section and find each of the quotes in the column "Quotes" of the table shown below. When you find a quote, look in the table for its corresponding "Key". Then, find the key within `build/stats_long.csv` and confirm that the number shown on that line matches the statistic shown in the text.
+Navigate to Section III.A of the paper ("Sampling") on page 6. Skim this section and find each of the quotes in the column "Quotes" of the table shown below. When you find a quote, look in the table for its corresponding "Key". Then, find the key within `build/stats_long.csv` and confirm that the number shown on that line matches the statistic shown in the text.
 
 | Quote                                                   | Key |
 |---------------------------------------------------------|---|
@@ -207,7 +209,7 @@ dataset. For convenience, here are each of the statistics from that paragraph:
 | mean of 11.0 dependents                        |
 | standard deviation of 171.8 dependents         |
 
-You can reproduce them by executing the following command. **This will take up to 5 minutes to execute.**:
+You can reproduce them by executing the following command. **This will take ~5 minutes to execute.**:
 ```
 # psql -d crates -f scripts/dependents.sql
 ```
@@ -222,7 +224,7 @@ Mean Dependent: 11.0
 St.Dev Dependent: 171.8
 ```
 
-### Task - Section IV, Table I - (10 human minutes)
+### Part 2.2  - Section IV, Table I - (10 human minutes)
 Navigate to Table 1, which is at the top of Page #7.
 This table was generated manually from the CSV file `build/visuals/bug_counts_table.csv`. 
 The layout of this file is a 1:1 match for the table.
@@ -232,11 +234,11 @@ View its contents by executing the following command:
 ```
 Compare the numbers with the counts shown in the table to confirm that they match. 
 
-### Task - Figure 3 - (10 human minutes, 5 compute minutes)
+### Part 2.3 - Figure 3 - (10 human minutes, 5 compute minutes)
 We provide a working version of this minimal example in the directory `demo/figures/3`.
 To replicate the bug, navigate to this directory:
 ```
-# cd demo/figure3/
+# cd /usr/src/mirilli/demo/figure3/
 ```
 You can view the Rust source code for version of this example with the bug by executing the following command:
 ```
@@ -244,9 +246,9 @@ You can view the Rust source code for version of this example with the bug by ex
 ```
 And the C source code with this command: 
 ```
-# cat src/test.c
+# cat src/main.c
 ```
-View each file to confirm that—together—these files match the example shown in Figure 3 with the lines highlighted in red still present.
+View each file to confirm that—together—these files match the example shown in Figure 3 (with the exception of `open_f` instead of `open`) with the lines highlighted in red still present.
 
 Then, execute this example in MiriLLI
 ```
@@ -267,17 +269,19 @@ Now, view the version of the example that contains the fix by executing the foll
 ```
 # cat src/fix.rs
 ```
+Confirm that it matches the example shown in figure 3 with the lines highlighted in red replaced with the lines highlighted in green.
+
 Then, execute this example in MiriLLI
 ```
 # cargo miri run -- fix 
 ```
 This command should complete without an error.
 
-### Task - Figure 4 - (10 human minutes, 5 compute minutes)
+### Part 2.4 - Figure 4 - (10 human minutes, 5 compute minutes)
 We provide a working version of this minimal example in the directory `demo/figures/3`.
 To replicate the bug, navigate to this directory:
 ```
-# cd demo/figure4/
+# cd /usr/src/mirilli/demo/figure4/
 ```
 You can view the Rust source code for version of this example with the bug by executing the following command:
 ```
@@ -285,9 +289,9 @@ You can view the Rust source code for version of this example with the bug by ex
 ```
 And the C source code with this command: 
 ```
-# cat src/test.c
+# cat src/main.c
 ```
-View each file to confirm that—together—these files match the example shown in Figure 3 with the lines highlighted in red still present.
+View each file to confirm that—together—these files match the example shown in Figure 4 with the lines highlighted in red still present.
 
 Then, execute this example in MiriLLI
 ```
@@ -310,37 +314,47 @@ Now, view the version of the example that contains the fix by executing the foll
 ```
 # cat src/fix.rs
 ```
+Confirm that it matches the example shown in figure 4 with the lines highlighted in red replaced with the lines highlighted in green.
+
 Then, execute this example in MiriLLI
 ```
 # cargo miri run -- fix 
 ```
 This command should complete without an error.
 
-## Tool Demonstration
+## Part 3 - Replicate Data Collection Steps
 
 We evaluated our tool in three stages. 
 
-* Stage 1 - Find crates with unit tests that produce LLVM bitcode
-* Stage 2 - Find tests from these crates that call foreign functions
-* Stage 3 - Execute these tests in our custom dynamic analysis tool
+* **Stage 1** - Find crates with unit tests that produce LLVM bitcode
+* **Stage 2** - Find tests from these crates that call foreign functions
+* **Stage 3** - Execute these tests in our custom dynamic analysis tool
 
 The details of specific output files from each stage are documented in `DATASET.md`. Here, we focus on the describing the minimum requirements and necessary steps for finding bugs. 
 
 Fully replicating each of these steps for every published crate would take several days and hundreds of dollars in compute. To save you time, instead of running a full evaluation, you will replicate these stages for a subset of the crates where we found bugs. 
 
-For convenience, we provide a "large" and "small" subsets for replicating our steps. The "small" sample contains 3 of the 37 crates where we found bugs. We will use this sample to test our first and second stages of data collection. The "large" sample contains each of the triggering test cases from 30 of the 37 crates where we found bugs. We exclude 7 crates from this sample because 6 no longer compile with this version of the Rust toolchain due to upstream changes in dependencies, and one relies on a library that is installed as part of this docker image, so it no longer statically links by default. 
+For convenience, we provide a "large" and "small" subsets for replicating our steps. The "small" sample contains 3 of the 37 crates where we found bugs. We will use this sample to test our first and second stages of data collection. The "large" sample contains triggering test cases from 29 of the 37 crates where we found bugs. We exclude 8 crates from this sample because 7 no longer compile with this nightly version of the Rust toolchain, and one relies on a library that is installed as part of this docker image, so it no longer statically links by default. 
 
 Collecting and parsing data requires creating a directory to hold intermediate results. This directory must contain a file `population.csv` with the columns `crate_name` and `version`, in that order. Each of `demo/large` and `demo/small` contains this file. 
 
-Execute the following command to view an example of the file `population.csv`, which contains our sample of 3 crates.
+To begin, navigate to the root directory: 
 ```
-$ cat demo/small/population.csv
+# cd /usr/src/mirilli
+```
+Make sure that the `build` directory has been deleted.
+```
+# rm -rf ./build
+```
+Execute the following command to view an example of the file `population.csv` for our `small` sample, which contains 3 crates.
+```
+# cat demo/small/population.csv
 ```
 Note that in the actual dataset (`./dataset/population.csv`), this file contains each of the ~120,000 valid crates that were published at the time of writing. We parallelized this data collection process by splitting this CSV file into N partitions, with each partition executed on a separate machine.
 
-### Stage 1 - (5 human minutes, 5 compute minutes)
-
+### Part 3.1 - Stage 1 - (5 human minutes, 5 compute minutes)
 In this stage, we compiled every public Rust crate to find ones with test cases that produced LLVM bitcode.
+
 The script for executing this stage is `./scripts/stage1/run.sh`. Execute the following command to view its purpose and requirements:
 ```
 # ./scripts/stage1/run.sh
@@ -382,7 +396,7 @@ Finished Stage 1
 ```
 Execute the following command to confirm that this stage was successful.
 ```
-# tree build/stage1 | tail -n 1
+# tree build/stage1
 ```
 You should see the following output:
 ```
@@ -415,14 +429,14 @@ librsync,0.2.3
 This indicates that each of the 3 crates that we used as input to this step produced bytecode and had test cases that we can execute.
 This file will be used as input to Stage 2.
 
-### Stage 2 - (5 human minutes, 10 compute minutes)
+### Part 3.2 - Stage 2 - (5 human minutes, 10 compute minutes)
 In this data collection stage, we ran every test for crates where we found bytecode in an unmodified version of Miri to find tests that called foreign functions. 
 
 The script for executing this stage is `./scripts/stage2/run.sh`. Execute the following command to view its purpose and requirements:
 ```
 # ./scripts/stage2/run.sh
 ```
-To complete data collection for this stage, execute the following command. **This will take ~2-5 minutes to complete**
+To complete data collection for this stage, execute the following command. **This will take ~5 minutes to complete**
 ```
 # ./scripts/stage2/run.sh demo/small ./build/stage1/stage2.csv
 ```
@@ -475,12 +489,10 @@ build/stage2/
 
 0 directories, 4 files
 ```
+The file `stage3.csv` is typically used as input to Stage 3. It contains a list of each of the test cases that called foreign functions.
 
-The file `stage3.csv` is typically used as input to Stage 3.
-
-# Stage 3 - (10 human minutes, 30 compute minutes)
-In this stage, we used MiriLLI to execute each of the tests that we found in Stage 2.
-We had to complete this stage twice; once for each memory mode (as described in Section III). 
+### Part 3.3 - Stage 3 - (10 human minutes, 30 compute minutes)
+In this stage, we used MiriLLI to execute each of the tests that we found in Stage 2. We had to complete this stage twice; once for each memory mode (as described in Section III). 
 
 The script for this stage is `./scripts/stage3/run.sh`. Execute it without arguments to see its description.
 ```
@@ -490,13 +502,16 @@ The third argument, `-z`, is optional. If provided, then MiriLLI is executed in 
 zero-initializes all LLVM-allocated memory by default. We will only test the zeroed mode, since this is required
 for replicating a subset of our bugs.
 
+Instead of using data from the previous stage, we will use a subset of the test cases where we found bugs. This consists of 31 tests from 29 crates. 
+We updated the underlying Rust toolchain that MiriLLI depends on to version 1.81.0 after we completed our evaluation, and a few crates no longer compile with this version. A few tests triggered multiple bugs—after we fixed one, another appeared—so we only include them once here. The test case for Bug #19 is no longer replicable, but Bug #20 is still replicable, and it is of the same nature from the same underlying library. We expect that this is due to a bug in our implementation. We will update our artifact if we find the root cause of this issue. We have documented each of these limitations in `dataset/bugs.csv`, 
+
 Execute the following command to run the tests in zeroed mode. **This will take 20-30 minutes to complete**
 ```
 # ./scripts/stage3/run.sh demo/large demo/large/stage3.csv -z
 ```
 Execute the following command to view the output of this stage.
 ```
-# tree demo/large/stage3 -L 1
+# tree demo/large/stage3/zeroed -L 1
 ```
 You should see the following output:
 ```
@@ -549,36 +564,37 @@ To confirm that you have successfully reproduced our results, execute the follow
 ```
 You should see the following output, indicating that there were 30 unique errors (with one additional line for the CSV header).
 ```
-31
+31 ./build/stage3/errors_unique.csv
 ```
-View the file for a sample of the results:
+Execute the following command to see a sample of our results for the crate `dec`.
 ```
+grep "dec," ./build/stage3/errors_unique.csv
 ```
-From this point onward, we manually investigated the results in the files `errors_unique.csv` and `diff_errors[uninit/zeroed].csv`, recreating errors locally
-using MiriLLI and reporting them to maintainers. 
+You should see the following output:
+```
+dec,0.4.8,test_overloading,0,1,1,Using Uninitialized Memory...
+dec,0.4.8,test_decimal128_special_value_coefficient,0,1,1,Borrowing Violation...
+```
+From this point onward, we manually investigated the results in the files `errors_unique.csv` and `diff_errors[uninit/zeroed].csv`, recreating errors locally using MiriLLI and reporting them to maintainers. 
 
 You have now completed this stage of our evaluation.
 
-## How to reuse beyond paper (20 human-minutes, 5 compute minutes)
-The guide in the section above can be used to replicate our evaluation on any set of crates.
+## Part 4 - How to Reuse Beyond the Paper (20 human-minutes, 5 compute minutes)
+The guide in Part 4 can be used to replicate our evaluation on any set of crates.
 
-As of January 16th, 2025, only 31 of the 37 crates where we found bugs can still be compiled using our toolchain. This is due to upstream changes in dependencies that lack a Cargo.lock file, meaning that there is no record of the versions of these dependencies that worked with our toolchain at the time of our evaluation (January 2024). Fully replicating our results in practice or reusing our toolchain for future experiments may require updating our fork of the Rust toolchain to match the current latest version. We commit to ensuring that this toolchain remains functional internally at its current version, but future updates to MiriLLI or the Rust toolchain are beyond the scope of our research.
-
-The file USAGE.md contains a brief introduction to our toolchain, as well as steps for building our Docker image. It describes the configuration options that we added to Miri, which support the memory and initialization modes we describe in Section III.B of our paper. Since MiriLLI is a direct extention to Miri, it is otherwise identical to an unmodified version of Miri, so it can be used in the same settings (barring incompatibilities with our version of the Rust compiler). This file also provides a guide to extending and maintaining MiriLLI with links to relevant areas of our source code for each key component.
-
-**Task** Skim this document and find the names of the value representations used by Miri and LLI within the section "Implementation - Conversion."
+We provide two additional files that document our tool and dataset to help future evaluators replicate our results and extend our tool. As previously mentioned, we document the contents and structure of our dataset in detail within the file `DATASET.md`. The file `USAGE.md` provides a brief introduction to our toolchain, as well as steps for building our Docker image. It describes the configuration options that we added to Miri, which support the memory and initialization modes we describe in Section III.B of our paper. This file also provides a guide to extending and maintaining MiriLLI with links to relevant areas of our source code for each key component.
 
 Our toolchain can still be used on recently published crates. The crate `bzip2` was at version 0.4.4 when we conducted our evaluation, but it has since been updated to verion 0.5.0, and ownership of the library has changed. However, the bug that we detected is still present. You can replicate it here, now, by following these steps. 
 
 First, download the newest version of the library.
 ```
-# cargo-download bzip2==0.5.0 -x -o bzip2
+# cargo-download bzip2==0.5.0 -x -o bzip2 
 ```
 Then, enter the directory and test it. Ensure that the current toolchain is set to `mirilli`.
-
 ```
+# cd bzip2
 # rustup override set mirilli
-# cd bzip2 && cargo miri test
+# cargo miri test -- bufread::tests::bug_61
 ```
 You should see the following output for the test `bufread::tests::bug_61`, indicating a cross-language aliasing violation.
 ```
