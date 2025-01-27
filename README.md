@@ -17,9 +17,9 @@ The artifact contains six files:
 
 * `DATASET.md` - Documentation on the contents of our dataset.
 
-* `tool.raw.tar.gz` - the raw source code for our tool and data compliation scripts.
+* `src.tar.gz` - the raw source code for our tool and data compliation scripts.
 
-* `data.raw.tar.gz` - the contents of the [crates.io](https://crates.io) database on 9/20/2023 and the raw output from our data collection steps described in Section 3 of our paper. 
+* `data.tar.gz` - the contents of the [crates.io](https://crates.io) database on 9/20/2023 and the raw output from our data collection steps described in Section 3 of our paper. 
 
 * `appendix.pdf` - the Appendix of our paper. 
 
