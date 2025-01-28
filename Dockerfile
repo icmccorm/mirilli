@@ -40,15 +40,11 @@ WORKDIR /usr/src/mirilli/rust
 RUN git submodule update --init ./src/llvm-project
 RUN git submodule update --init ./src/inkwell
 RUN git submodule update --init ./src/llvm-sys
+RUN mkdir /usr/src/mirilli/rust-install
 ENV LLVM_SYS_181_PREFIX=/usr/src/mirilli/rust/build/host/llvm/
-RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py build && ./x.py install
-RUN rustup toolchain link mirilli /usr/src/mirilli/rust/build/host/stage2/
+RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py install --config config.toml
+RUN rustup toolchain link mirilli /usr/src/mirilli/rust-install
 RUN rustup default mirilli
-
-FROM rust-compile AS miri-compile
-WORKDIR /usr/src/mirilli/rust
-RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py build miri
-RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} ./x.py install miri
 RUN cargo miri setup
 
 FROM miri-compile AS rllvm-compile
@@ -59,4 +55,7 @@ RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 
 FROM rllvm-compile AS final
 WORKDIR /usr/src/mirilli/
-RUN rm -rf ./rust/build/tmp
+RUN rm -rf ./rust
+RUN rm -rf .git
+RUN rm -rf /usr/src/mirilli/rllvm-as/inkwell
+RUN rm -rf /usr/src/mirilli/rllvm-as/llvm-sys
