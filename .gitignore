@@ -33,3 +33,4 @@ login.sh
 dataset
 renv/activate.R
 llvm.sh
+crates-db

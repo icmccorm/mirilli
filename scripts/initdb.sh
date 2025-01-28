@@ -3,9 +3,9 @@ service postgresql start
 sudo -u postgres createuser --superuser root 
 # We only attempt to populate the database if it has already been downloaded.
 if [ -d "dataset" ]; then
-  cd dataset/crates-db
+  cd crates-db
   createdb crates
   psql crates < schema.sql
   psql crates < import.sql
-  psql -d crates -f ../../scripts/population.sql
+  psql -d crates -f ../scripts/population.sql
 fi

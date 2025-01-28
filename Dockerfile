@@ -57,9 +57,6 @@ RUN git submodule update --init ./inkwell
 RUN git submodule update --init ./llvm-sys
 RUN LLVM_SYS_181_PREFIX=${LLVM_SYS_181_PREFIX} cargo build --release
 
-FROM rllvm-compile AS db-init
+FROM rllvm-compile AS final
 WORKDIR /usr/src/mirilli/
-RUN ./scripts/initdb.sh
-
-FROM db-init AS final
-WORKDIR /usr/src/mirilli
+RUN rm -rf ./rust/build/tmp

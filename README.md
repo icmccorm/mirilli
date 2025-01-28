@@ -3,6 +3,8 @@
 ## Purpose
 We are applying for all three badges. Our dataset, tool, and compilation scripts are all publicly **Available** on Zenodo. By following this script, you will confirm that our tool and data processing scripts are **Functional** and **Reusable** by reproducing the statistics in our paper and replicating our entire data collection process for a subset of the bugs that we discovered.
 
+**Note**: Our abstract initially claimed that our Docker image would be compatible with M-Series macs, but this is no longer the case—an x86 machine is required. Rosetta emulation ended up being slow enough that Docker would freeze when running our image. 
+
 ## Provenance
 All materials relevant to this project are published on [Zenodo](https://doi.org/10.5281/zenodo.12727039) within an x86 Docker Image and in raw, uncompiled source.
 
@@ -19,13 +21,15 @@ The artifact contains six files:
 
 * `src.tar.gz` - the raw source code for our tool and data compliation scripts.
 
-* `data.tar.gz` - the contents of the [crates.io](https://crates.io) database on 9/20/2023 and the raw output from our data collection steps described in Section 3 of our paper. 
+* `data.tar.gz` -  the raw output from our data collection steps described in Section 3 of our paper. 
+
+* `crates.tar.gz` - the contents of the [crates.io](https://crates.io) database on 9/20/2023.
 
 * `appendix.pdf` - the Appendix of our paper. 
 
 * `preprint.pdf` - A preprint of our paper.
 
-* `docker-image.tar.gz` - a Docker image containing the contents of the previous files and a working build of our tool.
+* `x86-docker-image.tar.gz` - an x86 Docker image containing a working build of our tool.
 
 You will need `appendix.pdf`, `preprint.pdf`, `DATASET.md`, `USAGE.md`, and `docker-image.tar.gz` for the evaluation.
 
@@ -36,7 +40,6 @@ Here we provide a brief overview of the contents of our docker image (excluding 
 ├── DATASET.md          // Documentation for our dataset and data compilation scripts.
 ├── USAGE.md            // Documentation on how to use and extend MiriLLI
 ├── dataset             // The dataset
-    ├── crates-db       // The data dump from crates.io
     ├── ...             
 ├── appendix.pdf        // The appendix
 ├── appendix            // LaTeX source for the appendix
@@ -59,10 +62,9 @@ Our data collection took place over three stages using a variety of file formats
 ```
 
 ## Setup
-*This will take 60 minutes to complete.*
 
 To complete our evaluation, your system must meet the following requirements:
-* [Docker](https://www.docker.com/) installed.
+* An x86 System with [Docker](https://www.docker.com/) installed.
 * 16 GB of RAM
 * 100 GB of free space
 
@@ -71,31 +73,19 @@ We have set the resource requirements to be more than strictly necessary to ensu
 To complete our evaluation, you will need:
 1. A preprint of our paper
 2. the Appendix
-3. Our Docker image - `docker-image.tar.gz`
+3. Our Docker image - `x86-docker-image.tar.gz`
 
 Follow these instructions to ensure that you have access to these components. 
 
-First, download the files `docker-image.tar.gz` and `appendix.pdf` from [Zenodo](https://doi.org/10.5281/zenodo.12727039), and download our paper from [arXiv](https://arxiv.org/abs/2404.11671). 
+First, download the files `x86-docker-image.tar.gz` and `appendix.pdf` from [Zenodo](https://doi.org/10.5281/zenodo.12727039), and download our paper from [arXiv](https://arxiv.org/abs/2404.11671). 
 
----
-
-**Only for M-Series Mac Users, skip otherwise**
-
-If you are using a Mac with an M-series processor, make sure that you have Rosetta enabled and installed by executing the following command: 
+Now, you can import our Docker image. This command should take ~10 minutes to complete.
 ```
-# softwareupdate --install-rosetta --agree-to-license
-```
-Then, if you are using Docker Desktop, navigate to "Settings > General > Virtual Machine Options". Make sure that "Use Apple Virtualization Framework" is selected, and that you have checked "Use Rosetta for x86_64/amd64 emulation on Apple Silicon"
-
----
-
-Now, you can import our Docker image. This command should take ~15 minutes to complete.
-```
-# docker import docker-image.tar.gz mirilli
+# docker load -i docker-image.tar.gz
 ```
 To confirm that the image is functional, launch a new container and attach a shell. 
 ```
-# docker run --platform linux/amd64 -it mirilli /bin/bash
+# docker run -it mirilli /bin/bash
 ```
 Confirm that you have access to our custom Rust toolchain, `mirilli`, by executing the following command.
 ```
@@ -114,14 +104,14 @@ If all of these steps have been completed successfully, then you are ready to be
 Complete each of the following steps to evaluate our artifact. This assumes that you have successfully completed each of the steps shown in the previous section (**Setup**). Except for Step #1, all steps must be completed inside a Docker container launched from our image.
 
 ### Overview
-* **Part 1** - *Check the Appendix* (10 human-minutes)
+* **Part 1** - *Check the Appendix* (5 human-minutes)
 * **Part 2** - *Validate Results and Examples in the Paper* (1 human hour + 15 compute-minutes)
-* **Part 3** - *Replicate Data Collection Steps* (30 human minutes + 30 compute minutes) OR (30 human minutes + 4 compute hours)
+* **Part 3** - *Replicate Data Collection Steps* (30 human minutes + 30 compute minutes)
 * **Part 4** - *How to Reuse Beyond the Paper* (10 human-minutes, 5 compute minutes)
 
 As part of several steps, we will prompt you to input console commands and check that their output matches what is shown in this document. Commands are prefixed with a "#".
 
-## Part 1 - Check the Appendix (10 human-minutes)
+## Part 1 - Check the Appendix (5 human-minutes)
 
 In this step, you will examine our Appendix to confirm that each of the sections we reference in our paper are present.
 
@@ -146,7 +136,7 @@ The complete dataset is provided as part of our Docker image within the director
 In this stage, you will compile the dataset, examine its output, and compare it against several of the statistics shown in the paper to confirm that 
 they can be replicated using our tool. This and each subsequent step requires our Docker image.
 
-After launching a container, execute the following command to build our dataset. 
+After launching a container, execute the following command to build our dataset. **This command will take 3-5 minutes to complete**
 ```
 # make build
 ```
@@ -176,7 +166,7 @@ key is an identifier that links to both a table in DATASET.md and the CSV file `
 
 Here, you will reproduce a subset of our inline statistics to confirm that they can be replicated from our dataset. 
 
-Navigate to Section III.A of the paper ("Sampling") on page 6. Skim this section and find each of the quotes in the column "Quotes" of the table shown below. When you find a quote, look in the table for its corresponding "Key". Then, find the key within `build/stats_long.csv` and confirm that the number shown on that line matches the statistic shown in the text.
+Navigate to Section III.A of the paper ("Sampling") on page 6. Skim this section and find 1-3 of the quotes in the column "Quotes" of the table shown below. When you find a quote, look in the table for its corresponding "Key". Then, find the key within `build/stats_long.csv` and confirm that the number shown on that line matches the statistic shown in the text.
 
 | Quote                                                   | Key |
 |---------------------------------------------------------|---|
@@ -198,33 +188,9 @@ Navigate to Section III.A of the paper ("Sampling") on page 6. Skim this section
 All of the inline statistics in Section III and IV were taken from this file, with a few exceptions.
 At the end of Section III.A, we report on the percentage of crates with foreign function bindings. 
 We collected these statistics by querying the database directly, using the output from building our
-dataset. For convenience, here are each of the statistics from that paragraph:
+dataset. We have excluded this section from our replication to save time and reduce the size of our Docker image, which is already substantial to support building and testing each of these components. We provides these queries in `src/scripts/dependents.sql`.
 
-| Quote                                          |
-|------------------------------------------------|
-| 2,516 crates that declared a foreign function. |
-| 2.1% of all valid crates                       |
-| 12,564 (10.4%) of all valid crates             |
-| maximum number of dependents... was 6,411      |
-| mean of 11.0 dependents                        |
-| standard deviation of 171.8 dependents         |
-
-You can reproduce them by executing the following command. **This will take ~5 minutes to execute.**:
-```
-# psql -d crates -f scripts/dependents.sql
-```
-You should see the following output, matching statistics in the quotes shown in the order above.
-```
-Number of Crates: 2516
-Percent of All: 2.1
-Number of Dependent Crates: 12564
-Percent Dependent of All: 10.4
-Max Dependent: 6411
-Mean Dependent: 11.0
-St.Dev Dependent: 171.8
-```
-
-### Part 2.2  - Section IV, Table I - (10 human minutes)
+### Part 2.2  - Section IV, Table I - (5 human minutes)
 Navigate to Table 1, which is at the top of Page #7.
 This table was generated manually from the CSV file `build/visuals/bug_counts_table.csv`. 
 The layout of this file is a 1:1 match for the table.
@@ -234,7 +200,7 @@ View its contents by executing the following command:
 ```
 Compare the numbers with the counts shown in the table to confirm that they match. 
 
-### Part 2.3 - Figure 3 - (10 human minutes, 5 compute minutes)
+### Part 2.3 - Figure 3 - (10 human minutes, 1 compute minute)
 We provide a working version of this minimal example in the directory `demo/figures/3`.
 To replicate the bug, navigate to this directory:
 ```
@@ -277,7 +243,7 @@ Then, execute this example in MiriLLI
 ```
 This command should complete without an error.
 
-### Part 2.4 - Figure 4 - (10 human minutes, 5 compute minutes)
+### Part 2.4 - Figure 4 - (10 human minutes, 1 compute minute)
 We provide a working version of this minimal example in the directory `demo/figures/3`.
 To replicate the bug, navigate to this directory:
 ```
